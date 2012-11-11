@@ -154,10 +154,21 @@ qx.Class.define("aiagallery.module.dgallery.appinfo.Gui",
         },
         this);
       commentsGrid.add(this.butCancelComment, { row : 4, column : 2 });
+
+
+      // Initialize a tabview for both byAuthor and byTags
+      var tabView = new qx.ui.tabview.TabView();
+      tabView.setWidth(350);
+      tabView.setHeight(500);
+      tabView.setMaxHeight(1000);
+      tabView.setContentPadding(0, 0, 0, 0);
       
+
       // Create the by-this-author area
       vbox = new qx.ui.container.Composite(new qx.ui.layout.VBox());
       canvas.add(vbox, { row : 0, column : 1, rowSpan : 2 });
+      
+/*
 
       // Android-green line
       o = new qx.ui.container.Composite();
@@ -178,6 +189,10 @@ qx.Class.define("aiagallery.module.dgallery.appinfo.Gui",
           paddingBottom : 6
         });
       vbox.add(o);
+*/
+
+      var byAuthorTab = new qx.ui.tabview.Page("By this author", "aiagallery/test.png");
+      byAuthorTab.setLayout(new qx.ui.layout.VBox());
 
       // Add the list for other apps by this author
       this.byAuthor = new qx.ui.list.List();
@@ -221,12 +236,12 @@ qx.Class.define("aiagallery.module.dgallery.appinfo.Gui",
           }
         });
 
-      vbox.add(this.byAuthor, { flex : 1 });
+//      vbox.add(this.byAuthor, { flex : 1 });
+      byAuthorTab.add(this.byAuthor, {flex : 1});
+      tabView.add(byAuthorTab);
 
 
-
-//beta002 start: dummy!
-      // Create the by-this-author area
+/*      // Create the by-this-author area
       vbox = new qx.ui.container.Composite(new qx.ui.layout.VBox());
       canvas.add(vbox, { row : 0, column : 3, rowSpan : 2 });
 
@@ -249,7 +264,10 @@ qx.Class.define("aiagallery.module.dgallery.appinfo.Gui",
           paddingBottom : 6
         });
       vbox.add(o);
+*/
 
+      var byTagsTab = new qx.ui.tabview.Page("By tags", "aiagallery/test.png");
+      byTagsTab.setLayout(new qx.ui.layout.VBox());
 
       // Add the list for other apps by the tags
       this.byTags = new qx.ui.list.List();
@@ -294,24 +312,14 @@ qx.Class.define("aiagallery.module.dgallery.appinfo.Gui",
           }
         });
 
-      vbox.add(this.byTags, { flex : 1 });
+//      vbox.add(this.byTags, { flex : 1 });
+      byTagsTab.add(this.byTags, {flex : 1});
+      tabView.add(byTagsTab);
 
-/**
-      // Add the list for other apps by this author
-      this.listTags = new qx.ui.list.List();
-      var existingTags;
-      // Get the current list of tags
-      // existingTags = aiagallery.widget.mystuff.Detail.getTags();
-      vbox.add(this.listTags, { flex : 1 });
-**/
+      vbox.add(tabView);
+
     },
 //beta002 ends
-
-
-
-
-
-
 
 
 
@@ -390,6 +398,8 @@ qx.Class.define("aiagallery.module.dgallery.appinfo.Gui",
         // results list, then add the model to the list.
         model = qx.data.marshal.Json.createModel(result.byAuthor);
         this.byAuthor.setModel(model);
+        model = qx.data.marshal.Json.createModel(result.byTags);
+        this.byTags.setModel(model);
 
         // Display each of the comments
         result.comments.forEach(

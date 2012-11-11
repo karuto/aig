@@ -156,10 +156,13 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
       // Add a top spacer
       vbox.add(new qx.ui.core.Spacer(), { flex : 1 });
 
+      
+
       // Put in some random text
       text = 
         [
-          "<div style='text-align:center'>",
+          "<div style='padding:0 30px 0 0;'>",
+          "<div style='text-align:center;'>",
           "<h2>Welcome to<br>",
 //          "<span style='font-style:italic;'>",
           "App Inventor Community Gallery!",
@@ -192,8 +195,8 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
 /*
           beta002: add helper text
 */
-          "<div style='background-color:#dddddd;",
-          " font-size:larger;font-weight:bold; padding:6px;'><b>",
+          "<div",
+          "style='font-size:larger;font-weight:bold; padding:6px;'><b>",
           "Please note: ",
           "The App Inventor Community Gallery is currently in a ",
           "closed beta. To apply to be a tester, please complete ",
@@ -202,16 +205,22 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
           "this form",
           "</a>.<br/><br/>",
           "Already in? We need your feedback! Please join <a href='http://groups.google.com/group/app-inventor-gallery/topics' target='new'>the forum</a>, and post bugs, issues, and feature requests there.",
+          "</div>",
           "</div>"
         ].join("");
+      // Add background
+      var homepageBG = new qx.ui.decoration.Background();
+      homepageBG.setBackgroundImage("aiagallery/hpbg.png");
       o = new qx.ui.basic.Label(text);
       o.set(
         {
           rich         : true,
-          width        : 400
+          width        : 434,
+          height       : 512,
+          decorator    : homepageBG
         });
       vbox.add(o);
-      
+/**      
       // Add a top spacer
       vbox.add(new qx.ui.core.Spacer(), { flex : 1 });
    
@@ -243,10 +252,10 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
       
       //Start out hidden
       motdLabel.hide(); 
-      
+
       // Add a bottom spacer
       vbox.add(new qx.ui.core.Spacer(), { flex : 1 });
-      
+
       // Add a right spacer to center the welcome text and right-justify the
       // featured apps.
       o = new qx.ui.core.Spacer();
@@ -255,7 +264,7 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
           minWidth     : 20
         });
       hbox.add(o, { flex : 1 });
-
+**/
       // Featured Apps section
       var featuredAppsLayout = new qx.ui.layout.VBox();
       featuredAppsLayout.set(
@@ -412,8 +421,8 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
         var motd = response.data.result.Motd; 
         
         // Set the motd on the front page
-        this.motdText.setValue(motd); 
-
+/**        this.motdText.setValue(motd); 
+**/
         // Remove everything from the lists. They're about to be refilled.
         this.featuredAppsContainer.removeAll();
         this.newestAppsContainer.removeAll();

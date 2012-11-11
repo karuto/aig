@@ -157,9 +157,9 @@ qx.Class.define("aiagallery.widget.SearchResult",
           spacer       : { row : 3, column : 5 },
           uploadTime   : { row : 3, column : 6 },
           likeIt       : { row : 4, column : 4 },
-          flagIt       : { row : 4, column : 6 },
+          flagIt       : { row : 4, column : 6 }
           //beta002: dummy
-          tags      : { row : 5, column : 5 }
+          //tags      : { row : 5, column : 5 }
 	  
 
         };
@@ -168,7 +168,7 @@ qx.Class.define("aiagallery.widget.SearchResult",
       this.getChildControl("download");
       this.getChildControl("likeIt");
       this.getChildControl("flagIt");
-      this.getChildControl("tags"); //beta002 dummy
+      //this.getChildControl("tags"); //beta002 dummy
       break;
     }
 
@@ -234,7 +234,7 @@ qx.Class.define("aiagallery.widget.SearchResult",
     "changeDescription" : "qx.event.type.Data",
     
     /** beta002 dummy */
-    "changeTagList" : "qx.event.type.Data",
+    //"changeTagList" : "qx.event.type.Data",
 
     /** Fired when the creationTime property is changed */
     "changeCreationTime" : "qx.event.type.Data",
@@ -323,7 +323,7 @@ qx.Class.define("aiagallery.widget.SearchResult",
     },
 
 //beta002 start dummy
-
+/*
     tags :
     {
       apply     : "_applyTagList",
@@ -332,7 +332,7 @@ qx.Class.define("aiagallery.widget.SearchResult",
       event     : "changeTagList",
       transform : "_transformTagList"
     },
-
+*/
 //beta002 ends
     
     creationTime :
@@ -668,21 +668,21 @@ qx.Class.define("aiagallery.widget.SearchResult",
         break;
 
 //beta002 start: dummy
-      case "tags":
+/**      case "tags":
 /**	switch(this.format)
 	{
 	case "appInfo":
 	  break;
 	}
-**/        control = new qx.ui.basic.Label();
+        control = new qx.ui.basic.Label();
         control.set(
           {
             rich : true
           });
         this._add(control, this.gridConfig.tags);
         break;
+**/
 //beta002 ends
-
       case "creationTime":
         control = new qx.ui.basic.Label();
         control.set(
@@ -850,7 +850,7 @@ qx.Class.define("aiagallery.widget.SearchResult",
     },
 
 //beta002 starts, dummy    
-    // property apply function
+/**    // property apply function
     _applyTagList : function(value, old)
     {
       this.getChildControl("tagList").setValue(value);
@@ -862,6 +862,7 @@ qx.Class.define("aiagallery.widget.SearchResult",
       return("Your Tag List: " +
              this.getUserData("tags"));
     },
+**/
 //beta002 ends
     
     // property apply function

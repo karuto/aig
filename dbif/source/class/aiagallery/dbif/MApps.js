@@ -2826,6 +2826,8 @@ qx.Mixin.define("aiagallery.dbif.MApps",
             }
           ]
         };
+
+
       
       // Query for those apps
       ret.byAuthor = liberated.dbif.Entity.query("aiagallery.dbif.ObjAppData",
@@ -2841,6 +2843,34 @@ qx.Mixin.define("aiagallery.dbif.MApps",
           // Remove the owner field
           delete app.owner;
         });
+
+//Tagging stuff starts
+      // Find all active apps other than the current one, by this same author
+      criteria = 
+        {
+              type: "element",
+              field: "tags",
+              value: "tag1"
+         
+        };
+
+      // Query for those apps
+      ret.byTags = liberated.dbif.Entity.query("aiagallery.dbif.ObjAppData",
+                                                 criteria,
+                                                 null);
+
+      // Add the author's display name to each app
+      ret.byTags.forEach(
+        function(app)
+        {
+          app.displayName = owners[0].displayName || "<>";
+
+          // Remove the owner field
+          delete app.owner;
+        });
+//Tagging stuff ends
+
+
 
       // If we were asked to stringize the values...
       if (bStringize)
@@ -2924,6 +2954,13 @@ qx.Mixin.define("aiagallery.dbif.MApps",
           {
             aiagallery.dbif.MApps._requestedFields(app, requestedFields);
           });
+        // Send each of the apps by this author to the requestedFields
+        // function for stripping and remapping
+        ret.byTags.forEach(
+          function(app)
+          {
+            aiagallery.dbif.MApps._requestedFields(app, requestedFields);
+          });
       }
       
       // Do special App Engine processing to scale images
@@ -2940,6 +2977,12 @@ qx.Mixin.define("aiagallery.dbif.MApps",
 
         // Do the same for images for each app by this author, but 100px.
         ret.byAuthor.forEach(
+          function(app)
+          {
+            app.image1 += "=s100";
+          });
+        // Do the same for images for each app by this author, but 100px.
+        ret.byTags.forEach(
           function(app)
           {
             app.image1 += "=s100";
