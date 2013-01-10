@@ -42,6 +42,8 @@ qx.Class.define("aiagallery.module.dgallery.appinfo.Gui",
       var             commentsGrid;
       var             vbox;
       var             font;
+      var             vBoxComments;
+      var             commentBoxAndCountLayout;
 
       //
       // The overall layout if a grid, where the left portion has the
@@ -117,8 +119,9 @@ qx.Class.define("aiagallery.module.dgallery.appinfo.Gui",
       this.textNewComment = new qx.ui.form.TextArea();
       this.textNewComment.set(
         {
-          height    : 60,
-          maxLength : 1000
+          height        : 60,
+          maxLength     : aiagallery.dbif.Constants.FieldLength.Comment,
+          placeholder   : this.tr("Talk about this app")
         });
       this.textNewComment.addListener("input",
                                       this._onInputOrChange,
@@ -127,7 +130,21 @@ qx.Class.define("aiagallery.module.dgallery.appinfo.Gui",
                                       this._onInputOrChange, 
                                       this);
       fsm.addObject("textNewComment", this.textNewComment);
-      commentsGrid.add(this.textNewComment,
+
+      // Implement and add updating label to tell a user how many
+      // characters they have left
+      this.commentCountLabel = new qx.ui.basic.Label(this.tr("480 Characters Left"));
+
+      // Layout to hold count and text area
+      this.commentBoxAndCountLayout = new qx.ui.layout.VBox();
+      this.commentBoxAndCountLayout.setSpacing(5);      
+      vBoxComments = new qx.ui.container.Composite(this.commentBoxAndCountLayout);
+
+      // Add both count label and comment text area to this layout
+      vBoxComments.add(this.textNewComment);
+      vBoxComments.add(this.commentCountLabel);   
+
+      commentsGrid.add(vBoxComments,
                        { row : 3, column : 0, colSpan : 3 });
       
       // Add the Add button
@@ -155,6 +172,12 @@ qx.Class.define("aiagallery.module.dgallery.appinfo.Gui",
         this);
       commentsGrid.add(this.butCancelComment, { row : 4, column : 2 });
 
+      // Add a label to tell a user to log in
+      // will only be shown if a user is not logged in
+      this.logInToCommentLabel = 
+        new qx.ui.basic.Label(this.tr("Login to comment"));
+
+      commentsGrid.add(this.logInToCommentLabel, { row : 5, column : 0 });
 
       // Initialize a tabview for both byAuthor and byTags
       this.tabView = new qx.ui.tabview.TabView();
@@ -244,10 +267,6 @@ qx.Class.define("aiagallery.module.dgallery.appinfo.Gui",
 //beta002 ends
 
 
-
-
-
-
     /**
      * Event handler for input or changeValue events. Enables or disables the
      * Add and Cancel buttons depending on whether text has been entered.
@@ -258,10 +277,17 @@ qx.Class.define("aiagallery.module.dgallery.appinfo.Gui",
     _onInputOrChange : function(e)
     {
       var             value;
+      var             charsLeft;
 
+      // Disable or enable buttons based on how much text is entered
+      // into the text area
       value = qx.lang.String.trim(this.textNewComment.getValue());
       this.butAddComment.setEnabled(!!(value && value.length > 0));
       this.butCancelComment.setEnabled(!!(value && value.length > 0));
+
+      // Update label as text is entered
+      charsLeft = Math.abs(aiagallery.dbif.Constants.FieldLength.Comment - value.length);
+      this.commentCountLabel.setValue(charsLeft.toString() + this.tr(" Characters Left"));
     },
 
     /**
@@ -285,6 +311,7 @@ qx.Class.define("aiagallery.module.dgallery.appinfo.Gui",
       var             model;
       var             comment;
       var             warningText;
+      var             who; 
 
       if (response.type == "failed")
       {
@@ -321,7 +348,6 @@ qx.Class.define("aiagallery.module.dgallery.appinfo.Gui",
         model = qx.data.marshal.Json.createModel(result.byAuthor);
         this.byAuthor.setModel(model);
 
-
         // Generate tagging sidebar(s) based on specific tags of this app
         var tagsHolder = result.appTags;
         var tlHolder = result.appTagsLists;
@@ -336,7 +362,7 @@ qx.Class.define("aiagallery.module.dgallery.appinfo.Gui",
         this.sidebarLabel.setValue(sidebarText);
 
 
-        for (i = 0; i < tagsHolder.length; i++)
+        for (var i = 0; i < tagsHolder.length; i++)
         {
           var tagTabHolder = new qx.ui.tabview.Page(
             tagsHolder[i], "aiagallery/test.png");
@@ -491,6 +517,58 @@ qx.Class.define("aiagallery.module.dgallery.appinfo.Gui",
             }
           },
           this);
+       
+        // Based on whether the user is logged in or not
+        // Disable the add comment button
+        who = qx.core.Init.getApplication().getUserData("whoAmI");
+        
+        if(who.getIsAnonymous())
+        {
+          // Remove the comment buttons and field
+          this.butAddComment.destroy();
+          this.butCancelComment.destroy(); 
+          this.textNewComment.destroy(); 
+
+          // Disable flag and likeit buttons
+          this.searchResult.getChildControl("likeIt").set(
+            {
+              value : this.tr("Login to like!"),
+              font  : "default"
+            });
+        
+          // Remove the listener.
+          if (this.__likeItListener !== null)
+          {
+            this.searchResult.removeListenerById(this.__likeItListener);
+            this.__likeItListener = null;
+          }
+
+          // Reset the cursor
+          this.searchResult.getChildControl("likeIt").setCursor("default");
+
+          // Replace the label
+          this.searchResult.getChildControl("flagIt").set(
+            {
+              value : this.tr("Login to flag!"),
+              font  : "default"
+            });
+        
+          // Remove the listener.
+          if (this.__flagItListener !== null)
+          {
+            this.searchResult.removeListenerById(this.__flagItListener);
+            this.__flagItListener = null;
+          }
+
+          // Reset the cursor
+          this.searchResult.getChildControl("flagIt").setCursor("default");
+        } 
+        else 
+        {
+          // Remove the login label (user is logged in)
+          this.logInToCommentLabel.destroy(); 
+        }
+
         break;
 
       case "addComment":
