@@ -32,10 +32,13 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       var             browseCanvas;
       var             btnManage;
       var             btnBrowse;
-      var             label; 
+      var             label;       
 
       // Layouts
       var             btnLayout; 
+
+      // Need to access the fsm from other functions
+      this.fsm = fsm; 
 
       // Two views to this module
       manageCanvas = new qx.ui.container.Composite(new qx.ui.layout.VBox);
@@ -108,7 +111,18 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
      */
     _browseGroups : function(container)
     {
-      container.add(new qx.ui.basic.Label("YOBRO")); 
+      var      groupScroller;
+      var      vBox; 
+
+      // Create the scroller to hold all of the groups
+      groupScroller = new qx.ui.container.Scroll();
+      container.add(groupScroller, {flex : 1});
+      
+      // The Scroller may contain only one container, so create that container.
+      vBox = new qx.ui.layout.VBox();
+      this.groupScrollContainer =
+        new qx.ui.container.Composite(vBox);
+      groupScroller.add(this.groupScrollContainer);      
     },
 
     /**
@@ -119,6 +133,187 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
      */
     _manageGroups : function(container)
     {
+      var       layout; 
+
+      // Gui objects
+      var             saveBtn;
+      var             deleteBtn;  
+      var             groupNameField;
+      var             groupDescriptionField;
+      var             label; 
+      var             ownedGroupBox; 
+      var             groupNameList; 
+      var             groupUsersList;
+
+      // Utility objects
+      var             userDataArray;
+
+      // Layouts
+      var             mainHBox;
+      var             hBox;
+      var             vBoxBtns; 
+      var             vBoxText; 
+
+      // Horizatal layout to hold everything
+      layout = new qx.ui.layout.HBox();
+      layout.setSpacing(10);      
+      mainHBox = new qx.ui.container.Composite(layout);
+
+      // Create a vertical box for the buttons
+      layout = new qx.ui.layout.VBox();
+      layout.setSpacing(10);      
+      vBoxBtns = new qx.ui.container.Composite(layout);
+      
+      // Create an Save Permission Group button
+      saveBtn = new qx.ui.form.Button(this.tr("Save"));
+      saveBtn.set(
+      {
+        maxHeight : 24,
+        width     : 100
+      });
+      vBoxBtns.add(saveBtn);
+
+      saveBtn.addListener(
+        "click",
+        function(e)
+        {
+          // Fire immediate event
+          this.fsm.fireImmediateEvent(
+            "save", this, e.getTarget());
+        }, this); 
+
+      // Disable button on startup 
+      saveBtn.setEnabled(false); 
+
+      // Create a Delete button
+      deleteBtn = new qx.ui.form.Button(this.tr("Delete"));
+      deleteBtn.set(
+      {
+        maxHeight : 24,
+        width     : 100,
+        enabled   : false
+      });
+      vBoxBtns.add(deleteBtn);
+      deleteBtn.addListener(
+        "click",
+        function(e)
+        {
+          // Fire immediate event
+          this.fsm.fireImmediateEvent(
+            "delete", this, e.getTarget());
+        }, this); 
+      
+      mainHBox.add(vBoxBtns); // Add buttons to layout
+
+      // Create a vertical layout just for the two textfields and labels.
+      layout = new qx.ui.layout.VBox();
+      layout.setSpacing(10);      
+      vBoxText = new qx.ui.container.Composite(layout);
+
+      // Create a label for describing the textfields 
+      label = new qx.ui.basic.Label("Group Name:");
+      vBoxText.add(label);
+
+      // Create textfield for entering in a group name
+      groupNameField = new qx.ui.form.TextField;
+      groupNameField.set(
+      {
+        width     : 200
+      });
+      vBoxText.add(groupNameField);
+
+      // Only enable add button if there is something in the textfield
+      groupNameField.addListener("input", function(e) 
+      {
+        var value = e.getData();
+        saveBtn.setEnabled(value.length > 0);
+        
+        // Deselet all pgroup names
+        groupNameList.resetSelection(); 
+        
+        // Clear description field 
+        groupDescriptionField.setValue("");           
+      }, this); 
+
+      // Create friendly name to get it from the FSM
+      this.fsm.addObject("groupNameField", 
+         groupNameField,"main.fsmUtils.disable_during_rpc");
+
+      // Create a label for describing the textfields 
+      label = new qx.ui.basic.Label("Description:");
+      vBoxText.add(label);
+         
+      // Create a textfield to enter a description for the pGroup
+      groupDescriptionField = new qx.ui.form.TextField;
+      groupDescriptionField.set(
+      {
+        width     : 200
+      });
+
+      // Add textfield to layout
+      vBoxText.add(groupDescriptionField);
+
+      // Create friendly name to get it from the FSM
+      this.fsm.addObject("groupDescriptionField", 
+         groupDescriptionField,"main.fsmUtils.disable_during_rpc");
+    
+      // Add vertical layout to horizantal layout
+      mainHBox.add(vBoxText); 
+
+      // Create a set of finder-style multi-level browsing groups
+      // This will show the groups a user owns
+      ownedGroupBox = new qx.ui.groupbox.GroupBox();
+      ownedGroupBox.setLayout(new qx.ui.layout.HBox());
+      ownedGroupBox.setContentPadding(0);
+      mainHBox.add(ownedGroupBox);
+
+      // create and add the lists. Store them in an array.
+      // the list goes in the groupBox
+      groupNameList = new qx.ui.form.List();
+      groupNameList.setWidth(150);
+      groupNameList.addListener("changeSelection", 
+        this.fsm.eventListener, this.fsm);
+      
+      // Disable delete/save button unless something is selected
+      groupNameList.addListener("changeSelection", function(e) 
+      {
+        var bEnable = (pGroupNameList.getSelection().length != 0);
+        saveBtn.setEnabled(bEnable);
+        deleteBtn.setEnabled(bEnable);
+      }, this); 
+
+      // Add list of group names to group box
+      ownedGroupBox.add(groupNameList);
+
+      // Need to be able to access this list from the fsm 
+      this.fsm.addObject("groupNameList", 
+        groupNameList, "main.fsmUtils.disable_during_rpc");     
+
+      // Track users associated with a group
+      groupUsersList = new qx.ui.form.List();
+      groupUsersList.setWidth(150);
+      groupUsersList.addListener("changeSelection", 
+        this.fsm.eventListener, this.fsm);
+
+      // Allow user to select multiple items
+      groupUsersList.setSelectionMode("multi");
+      
+      // Array to add users to
+      userDataArray = new qx.data.Array(); 
+
+      // Create controller to add users to groupUser list
+      this.userController 
+        = new qx.data.controller.List(userDataArray, groupUsersList); 
+        
+      ownedGroupBox.add(groupUsersList);
+      this.fsm.addObject("groupUsers", 
+        groupUsersList, "main.fsmUtils.disable_during_rpc");
+
+      mainHBox.add(groupNameList);
+
+      // Add to main layout 
+      container.add(mainHBox);
+
     },
     
     /**
