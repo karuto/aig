@@ -40,12 +40,19 @@ qx.Class.define("aiagallery.dbif.ObjGroup",
       {
         /** The name of this group, i.e. UMass Lowell */
         "name"  : "String",
+
+        /** The group's owner (id of Visitor object) */
+        "owner" : "String",
         
-        /** A simple description of the group, i.e. "Class 2013 of UMass Lowell" */
+        /** A simple description of the group, 
+	 * i.e. "Class 2013 of UMass Lowell" */
         "description" : "String",
 
         /** User ids of visitors associated with this group. */
-        "users" : "StringArray"
+        "users" : "StringArray",
+
+       /** User ids of visitors waiting to join this group. */
+        "joiningUsers" : "StringArray"
       };
 
     var canonicalize = 
