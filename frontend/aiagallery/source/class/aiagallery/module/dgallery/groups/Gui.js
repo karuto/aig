@@ -12,7 +12,7 @@
  */
 qx.Class.define("aiagallery.module.dgallery.groups.Gui",
 {
-  type : "singleton",
+  type   : "singleton",
   extend : qx.ui.core.Widget,
 
   members :
@@ -28,10 +28,98 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       var             o;
       var             fsm = module.fsm;
       var             canvas = module.canvas;
+      var             manageCanvas;
+      var             browseCanvas;
+      var             btnManage;
+      var             btnBrowse;
+      var             label; 
 
+      // Layouts
+      var             btnLayout; 
+
+      // Two views to this module
+      manageCanvas = new qx.ui.container.Composite(new qx.ui.layout.VBox);
+      browseCanvas = new qx.ui.container.Composite(new qx.ui.layout.VBox);
+
+      this.__radioView = 
+        new aiagallery.widget.radioview.RadioView(this.tr("Groups: "));
+
+      canvas.add(this.__radioView); 
+
+      // Create the pages
+      [
+        {
+          field  : "__containerBrowse",
+          label  : this.tr("Browse and Join Groups"),
+          custom : this._browseGroups
+        },
+        {
+          field  : "__containerManage",
+          label  : this.tr("Create and Manage Groups"),
+          custom : this._manageGroups
+        }
+      ].forEach(
+        function(pageInfo)
+        {
+          var             layout;
+
+          // Create the page
+          this[pageInfo.field] =
+            new aiagallery.widget.radioview.Page(pageInfo.label);
+
+          // Set its properties
+          this[pageInfo.field].set(
+          {
+            layout       : new qx.ui.layout.VBox(),
+            padding      : 20
+          });
+        
+          // If there's a function for customizing this page, ...
+          if (pageInfo.custom)
+          {
+            // ... then call it now. It's called in our own context, with the
+            // page container as the parameter.
+            qx.lang.Function.bind(pageInfo.custom, this)(this[pageInfo.field]);
+          }
+        
+          // Add this page to the radio view
+          this.__radioView.add(this[pageInfo.field]);
+        },
+        this);
+    
+      // When the radioview selection changes, copy fields or clear entry
+      this.__radioView.addListener(
+        "changeSelection",
+        function(e)
+        {       
+          // Determine what page we are switching to and fire off the 
+          // appropriate FSM event to get the data we need
+  
+        },
+        this);
       
     },
 
+    /**
+     * Create the static content in the browseGroups page
+     * 
+     * @param container {qx.ui.core.Widget}
+     *   The container in which the content should be placed. 
+     */
+    _browseGroups : function(container)
+    {
+      container.add(new qx.ui.basic.Label("YOBRO")); 
+    },
+
+    /**
+     * Create the static content in the manageGrousp page
+     * 
+     * @param container {qx.ui.core.Widget}
+     *   The container in which the content should be placed. 
+     */
+    _manageGroups : function(container)
+    {
+    },
     
     /**
      * Handle the response to a remote procedure call
