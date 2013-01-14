@@ -1,0 +1,77 @@
+/**
+ * Copyright (c) 2013 Derrell Lipman 
+ *                    Paul Geromini
+ * 
+ * License:
+ *   LGPL: http://www.gnu.org/licenses/lgpl.html 
+ *   EPL : http://www.eclipse.org/org/documents/epl-v10.php
+ */
+
+qx.Class.define("aiagallery.dbif.ObjGroup",
+{
+  extend : aiagallery.dbif.Entity,
+ 
+  construct : function(name)
+  {
+    if (typeof name != "undefined")
+    {
+      // Give the entity its name, and a simple description
+      this.setData(
+        {
+          "name"        : name,
+          "description" : null,
+          "users"       : null 
+        });
+    }
+
+    // Use the group's name as the DB key
+    this.setEntityKeyProperty("name");
+    
+    // Call the superclass constructor
+    this.base(arguments, "group", name);
+  },
+  
+  defer : function(clazz)
+  {
+    aiagallery.dbif.Entity.registerEntityType(clazz.classname,
+                                              "group");
+
+    var databaseProperties =
+      {
+        /** The name of this group, i.e. UMass Lowell */
+        "name"  : "String",
+        
+        /** A simple description of the group, i.e. "Class 2013 of UMass Lowell" */
+        "description" : "String",
+
+        /** User ids of visitors associated with this group. */
+        "users" : "StringArray"
+      };
+
+    var canonicalize = 
+      {
+        "name" :
+        {
+          // Store names as lowercase in this field 
+          prop : "name_lc",
+
+          // Type
+          type : "String",
+
+          // Function to convert a value to lower case
+          func : function(value)
+          {
+            return (typeof value == "undefined" || value === null
+                    ? null
+                    : value.toLowerCase());
+          }
+        }
+      };
+
+    // Register our property types
+    aiagallery.dbif.Entity.registerPropertyTypes("group",
+                                                 databaseProperties,
+                                                 "name",
+                                                 canonicalize);
+  }
+});
