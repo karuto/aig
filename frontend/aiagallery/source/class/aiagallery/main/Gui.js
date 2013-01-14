@@ -395,6 +395,38 @@ qx.Class.define("aiagallery.main.Gui",
               // We've instantiated a new module which needs to be added
               bAddModules = true;
             }
+
+           // Add Profile page if user has permission
+            bAllowed = false;
+            [ 
+              // These permissions allow access to the page
+              "getGroups"
+            ].forEach(
+              function(rpcFunc)
+              {
+                if (qx.lang.Array.contains(e.permissions, rpcFunc))
+                {
+                  bAllowed = true;
+                }
+              });
+
+            // If they're allowed access to the page...
+            if (e.isAdmin || bAllowed || !e.isAnonymous)
+            {
+              // ... then create it
+              module = new aiagallery.main.Module(
+                "Groups",
+                "aiagallery/module/emblem-favorite.png",
+                "Groups",
+                aiagallery.main.Constant.PageName.Groups,
+                aiagallery.module.dgallery.groups.Groups);
+
+              moduleList["Groups"] = {}; 	      
+              moduleList["Groups"]["Groups"] = module;
+
+              // We've instantiated a new module which needs to be added
+              bAddModules = true;
+            }
             
             // Determine whether they have access to the database
             // management page.
