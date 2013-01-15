@@ -18,11 +18,12 @@ qx.Class.define("aiagallery.dbif.ObjGroup",
       // Give the entity its name, and a simple description
       this.setData(
         { 
-          "owner"       : owner,
-          "name"        : name,
-          "description" : null,
-          "users"       : null,
-          "joiningUsers": null
+          "owner"           : owner,
+          "name"            : name,
+          "description"     : null,
+          "users"           : [],
+          "joiningUsers"    : [],
+          "requestedUsers"  : []
         });
     }
 

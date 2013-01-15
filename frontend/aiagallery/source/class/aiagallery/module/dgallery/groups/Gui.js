@@ -145,15 +145,18 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       var             groupNameList; 
       var             groupUsersList;
       var             groupUsersField;
+      var             groupWaitList; 
 
       // Utility objects
       var             userDataArray;
+      var             waitListDataArray; 
 
       // Layouts
       var             mainHBox;
       var             hBox;
       var             vBoxBtns; 
       var             vBoxText; 
+      var             listLayout; 
 
       // Horizatal layout to hold everything
       layout = new qx.ui.layout.HBox();
@@ -229,7 +232,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
         var value = e.getData();
         saveBtn.setEnabled(value.length > 0);
         
-        // Deselet all pgroup names
+        // Deselet all group names
         groupNameList.resetSelection(); 
         
         // Clear description field 
@@ -258,7 +261,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       this.fsm.addObject("groupDescriptionField", 
          groupDescriptionField,"main.fsmUtils.disable_during_rpc");
 
- // Create a label for describing the textfield
+      // Create a label for describing the textfield
       label =  new qx.ui.basic.Label(this.tr("Request the Following Users (seperate by comma):"));
       vBoxText.add(label);
          
@@ -281,13 +284,21 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
 
       // Create a set of finder-style multi-level browsing groups
       // This will show the groups a user owns
-      ownedGroupBox = new qx.ui.groupbox.GroupBox();
+      ownedGroupBox = new qx.ui.groupbox.GroupBox("User Management");
       ownedGroupBox.setLayout(new qx.ui.layout.HBox());
-      ownedGroupBox.setContentPadding(0);
+      ownedGroupBox.setContentPadding(5);
       mainHBox.add(ownedGroupBox);
 
-      // create and add the lists. Store them in an array.
-      // the list goes in the groupBox
+      // create and add the lists.
+      // 
+      // Each list has a label to describe it
+      // the label and the list are combined into a layout
+      // the layout goes into the groupbox
+      listLayout = new qx.ui.container.Composite(new qx.ui.layout.VBox);
+
+      label = new qx.ui.basic.Label(this.tr("Group Name"));
+      listLayout.add(label);
+
       groupNameList = new qx.ui.form.List();
       groupNameList.setWidth(150);
       groupNameList.addListener("changeSelection", 
@@ -296,19 +307,30 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       // Disable delete/save button unless something is selected
       groupNameList.addListener("changeSelection", function(e) 
       {
-        var bEnable = (pGroupNameList.getSelection().length != 0);
+        var bEnable = (groupNameList.getSelection().length != 0);
         saveBtn.setEnabled(bEnable);
         deleteBtn.setEnabled(bEnable);
+
+        // Put the selected name in the name field
+        //var value = groupNameList.getSelection()[0].getLabel(); 
+         
+        //groupNameField.setValue(value); 
       }, this); 
 
       // Add list of group names to group box
-      ownedGroupBox.add(groupNameList);
+      listLayout.add(groupNameList);
+      ownedGroupBox.add(listLayout);
 
       // Need to be able to access this list from the fsm 
       this.fsm.addObject("groupNameList", 
         groupNameList, "main.fsmUtils.disable_during_rpc");     
 
-      // Track users associated with a group
+      // Track users who belong to the group
+      listLayout = new qx.ui.container.Composite(new qx.ui.layout.VBox);
+
+      label = new qx.ui.basic.Label(this.tr("Members"));
+      listLayout.add(label);
+
       groupUsersList = new qx.ui.form.List();
       groupUsersList.setWidth(150);
       groupUsersList.addListener("changeSelection", 
@@ -323,12 +345,37 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       // Create controller to add users to groupUser list
       this.userController 
         = new qx.data.controller.List(userDataArray, groupUsersList); 
+      //this.fsm.addObject("userController",
+        //this.userController);
         
-      ownedGroupBox.add(groupUsersList);
+      // Add to layout
+      listLayout.add(groupUsersList);
+      ownedGroupBox.add(listLayout);
+
       this.fsm.addObject("groupUsers", 
         groupUsersList, "main.fsmUtils.disable_during_rpc");
 
-      mainHBox.add(groupNameList);
+      // Track users who are on the group waitList
+      listLayout = new qx.ui.container.Composite(new qx.ui.layout.VBox);
+
+      label = new qx.ui.basic.Label(this.tr("Wait List"));
+      listLayout.add(label);
+
+      groupWaitList = new qx.ui.form.List();
+      groupWaitList.setWidth(150);
+      groupWaitList.addListener("changeSelection", 
+        this.fsm.eventListener, this.fsm);
+
+      // Array to add users to
+      waitListDataArray = new qx.data.Array(); 
+
+      // Create controller to add users to groupWait list
+      this.waitListController 
+        = new qx.data.controller.List(waitListDataArray, groupWaitList); 
+
+      // Add to layout 
+      listLayout.add(groupWaitList);
+      ownedGroupBox.add(listLayout);
 
       // Add to main layout 
       container.add(mainHBox);
@@ -351,6 +398,14 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       var             response = rpcRequest.getUserData("rpc_response");
       var             requestType = rpcRequest.getUserData("requestType");
       var             result;
+      var             groupList; 
+
+      // Objects from the gui we will add/subtract from
+      var             groupNameList = fsm.getObject("groupNameList"); 
+      var             groupDescriptionField = fsm.getObject("groupDescriptionField");
+
+      // System Objects
+      //var             userController = fsm.getObject("userController"); 
 
       // We can ignore aborted requests.
       if (response.type == "aborted")
@@ -370,7 +425,34 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       switch(requestType)
       {
       // Browse Groups
-      case "getGroups":
+      case "appear":
+        groupList = response.data.result;
+
+        groupList.forEach(
+          function(group)
+          {
+            // Add each group name to the list
+            var name = new qx.ui.form.ListItem(group.name);
+            groupNameList.add(name); 
+
+            // Fill fields 
+            groupDescriptionField.setValue(group.description); 
+
+            // Select it
+            groupNameList.setSelection([name]);
+
+            // Convert user lists into data arrays
+            var userMemberDataArray = new qx.data.Array(group.users);
+            var userRequestList = new qx.data.Array(group.joiningUsers);
+            var userWaitList = new qx.data.Array(group.requestedUsers); 
+
+            // Populate lists 
+            this.userController.setSelection(userMemberDataArray);
+	  }
+
+        );
+
+
         // Populate list of existing groups
         // Each item on the list has a button to ask to join group
  
@@ -393,8 +475,9 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       
         break;
 
-      case "saveGroup":
-        // Nothing to do
+      case "addOrEditGroup":
+        // If the group did not exist add it to the list
+        // if it did, do nothing 
         break;
 
 

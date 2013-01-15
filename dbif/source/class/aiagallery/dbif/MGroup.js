@@ -19,6 +19,10 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
                          this.getGroup,
                          [ "groupName" ]);
 
+    this.registerService("aiagallery.features.getUserGroups",
+                         this.getUserGroups,
+                         []);
+
     this.registerService("aiagallery.features.joinGroup",
                          this.joinGroup,
                          [ "groupName" ]);
@@ -141,7 +145,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
         var warnString = this.tr("A group exists with this name already"); 
  
         error.setCode(1);
-        error.setMessage(warningString);
+        error.setMessage(warnString);
         return error;
       }
 
@@ -161,6 +165,125 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
      */ 
     getGroup : function(groupName)
     {
+    },
+
+    /**
+     * Get all the groups a user owns 
+     * 
+     * @return {Array}
+     *   An array of all the groups a user owns
+     *   All user ids will be converted to displayNames
+     */ 
+    getUserGroups : function()
+    {
+      var         whoami;
+      var         criteria;
+      var         resultList; 
+
+      // Get the current user
+      whoami = this.getWhoAmI();
+
+      criteria = 
+        {
+          type  : "element",
+          field : "owner",
+          value : whoami.id
+        };
+
+      resultList = liberated.dbif.Entity.query("aiagallery.dbif.ObjGroup",
+                                               criteria);
+
+      // Convert all user ids to display names 
+      resultList.forEach(
+        function(group)
+        {
+          var     waitList = [];
+          var     authList = [];
+          var     memberList = [];
+          var     queryResult;
+          var     usernameCriteria;
+ 
+          // Convert all users waiting to join
+          if (group.joiningUsers != null && group.joiningUsers.length != 0)
+          {
+            group.joiningUsers.forEach(
+              function(userId)
+              {
+                usernameCriteria = 
+                  {
+                    type  : "element",
+                    field : "id",
+                    value : userId
+                  };
+
+                queryResult = liberated.dbif.Entity.query(
+                              "aiagallery.dbif.ObjVisitors",
+                              usernameCriteria);
+                   
+                if(queryResult.length == 1)
+                {
+                  waitList.push(queryResult[0].displayName ); 
+                }
+              }
+            );    
+          }
+
+          // Users who have been given authorization, but not joined yet
+          if (group.requestedUsers != null && group.requestedUsers.length != 0)
+          {
+            group.requestedUsers.forEach(
+              function(userId)
+              {
+                usernameCriteria = 
+                  {
+                    type  : "element",
+                    field : "id",
+                    value : userId
+                  };
+
+                queryResult = liberated.dbif.Entity.query(
+                              "aiagallery.dbif.ObjVisitors",
+                              usernameCriteria);
+                   
+                if(queryResult.length == 1)
+                {
+                  authList.push(queryResult[0].displayName ); 
+                }
+              }
+            );    
+          }
+
+          // Convert all users who have joined 
+          group.users.forEach(
+            function(userId)
+            {
+              usernameCriteria = 
+                {
+                  type  : "element",
+                  field : "id",
+                  value : userId
+                };
+
+              queryResult = liberated.dbif.Entity.query(
+                            "aiagallery.dbif.ObjVisitors",
+                            usernameCriteria);
+                   
+              if(queryResult.length == 1)
+              {
+                memberList.push(queryResult[0].displayName ); 
+              }
+            }
+          ); 
+
+          // End of name replacement
+          // Replace lists on group
+          group.joiningUsers = waitList; 
+          group.requestedUsers = authList;
+          group.users = memberList;
+        }
+      );
+
+      return resultList;
     },
 
     /**
