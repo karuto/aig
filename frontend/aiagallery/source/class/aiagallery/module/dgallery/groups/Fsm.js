@@ -65,14 +65,8 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
 
         "events" :
         {
-          // On the clicking of a button, execute is fired
-          "execute" :
-          {
-            
-            "queryBtn" : "Transition_Idle_to_AwaitRpcResult_via_query"
-            
-          },
-          
+          save : "Transition_Idle_to_Idle_via_save", 
+         
           // When we get an appear event, retrieve the category tags list. We
           // only want to do it the first time, though, so we use a predicate
           // to determine if it's necessary.
@@ -182,6 +176,53 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
 
       state.addTransition(trans);
 
+      /*
+       * Transition: Idle to  Awaiting RPC Result
+       *
+       * Cause: Save button clicked
+       *
+       * Action:
+       *  Save the group 
+       */
+
+      trans = new qx.util.fsm.Transition(
+        "Transition_Idle_to_Idle_via_save",
+      {
+        "nextState" : "State_Idle",
+
+        "context" : this,
+
+        "ontransition" : function(fsm, event)
+        {
+          var             request;
+          var             name;
+          var             description;
+          var             requestedUsers;
+
+          // Get values from gui
+          name = fsm.getObject("groupNameField").getValue();
+          description = fsm.getObject("groupDescriptionField").getValue();
+
+          // Empty for now
+          requestedUsers = fsm.getObject("groupUsersField").getValue();
+          requestedUsers = requestedUsers.split(",");
+ 
+          // Issue the remote procedure call to execute the query
+          request =
+            this.callRpc(fsm,
+                         "aiagallery.features",
+                         "addOrEditGroup",
+                         [ name, description, requestedUsers]
+                         );
+
+          // When we get the result, we'll need to know what type of request
+          // we made.
+          request.setUserData("requestType", "mobileRequest");
+
+        }
+      });
+
+      state.addTransition(trans);
 
       /*
        * Transition: Idle to Idle

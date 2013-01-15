@@ -11,16 +11,18 @@ qx.Class.define("aiagallery.dbif.ObjGroup",
 {
   extend : aiagallery.dbif.Entity,
  
-  construct : function(name)
+  construct : function(name, owner)
   {
     if (typeof name != "undefined")
     {
       // Give the entity its name, and a simple description
       this.setData(
-        {
+        { 
+          "owner"       : owner,
           "name"        : name,
           "description" : null,
-          "users"       : null 
+          "users"       : null,
+          "joiningUsers": null
         });
     }
 
@@ -51,7 +53,10 @@ qx.Class.define("aiagallery.dbif.ObjGroup",
         /** User ids of visitors associated with this group. */
         "users" : "StringArray",
 
-       /** User ids of visitors waiting to join this group. */
+        /** User ids of visitors the admin has requested. */
+        "requestedUsers" : "StringArray",
+
+        /** User ids of visitors waiting to join this group. */
         "joiningUsers" : "StringArray"
       };
 

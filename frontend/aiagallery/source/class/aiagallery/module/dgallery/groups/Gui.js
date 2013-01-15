@@ -144,6 +144,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       var             ownedGroupBox; 
       var             groupNameList; 
       var             groupUsersList;
+      var             groupUsersField;
 
       // Utility objects
       var             userDataArray;
@@ -211,7 +212,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       vBoxText = new qx.ui.container.Composite(layout);
 
       // Create a label for describing the textfields 
-      label = new qx.ui.basic.Label("Group Name:");
+      label = new qx.ui.basic.Label(this.tr("Group Name:"));
       vBoxText.add(label);
 
       // Create textfield for entering in a group name
@@ -240,7 +241,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
          groupNameField,"main.fsmUtils.disable_during_rpc");
 
       // Create a label for describing the textfields 
-      label = new qx.ui.basic.Label("Description:");
+      label = new qx.ui.basic.Label(this.tr("Description:"));
       vBoxText.add(label);
          
       // Create a textfield to enter a description for the pGroup
@@ -256,6 +257,24 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       // Create friendly name to get it from the FSM
       this.fsm.addObject("groupDescriptionField", 
          groupDescriptionField,"main.fsmUtils.disable_during_rpc");
+
+ // Create a label for describing the textfield
+      label =  new qx.ui.basic.Label(this.tr("Request the Following Users (seperate by comma):"));
+      vBoxText.add(label);
+         
+      // Create a textfield to enter a description for the pGroup
+      groupUsersField = new qx.ui.form.TextField;
+      groupUsersField.set(
+      {
+        width     : 200
+      });
+
+      // Add textfield to layout
+      vBoxText.add(groupUsersField);
+
+      // Create friendly name to get it from the FSM
+      this.fsm.addObject("groupUsersField", 
+         groupUsersField,"main.fsmUtils.disable_during_rpc");
     
       // Add vertical layout to horizantal layout
       mainHBox.add(vBoxText); 
@@ -350,6 +369,35 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       // Dispatch to the appropriate handler, depending on the request type
       switch(requestType)
       {
+      // Browse Groups
+      case "getGroups":
+        // Populate list of existing groups
+        // Each item on the list has a button to ask to join group
+ 
+        break; 
+      
+      // Manage Groups
+      case "getOwnedGroups":
+        // Populate list of groups owned by this user
+
+        // Select the top one
+
+        // Populate userList of that selected group
+
+        // Populate both textfields with info about this group
+
+        break;
+
+      case "deleteGroup":
+        // Remove group from list
+      
+        break;
+
+      case "saveGroup":
+        // Nothing to do
+        break;
+
+
       default:
         throw new Error("Unexpected request type: " + requestType);
       }

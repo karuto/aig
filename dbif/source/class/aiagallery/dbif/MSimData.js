@@ -2214,7 +2214,10 @@ qx.Mixin.define("aiagallery.dbif.MSimData",
       },
       "system" :
       {
-      }
+      },
+      "group" :
+      {
+      }  
     }
   }
 });
