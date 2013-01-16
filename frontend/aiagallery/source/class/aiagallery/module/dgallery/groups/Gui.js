@@ -345,8 +345,6 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       // Create controller to add users to groupUser list
       this.userController 
         = new qx.data.controller.List(userDataArray, groupUsersList); 
-      //this.fsm.addObject("userController",
-        //this.userController);
         
       // Add to layout
       listLayout.add(groupUsersList);
@@ -447,10 +445,9 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
             var userWaitList = new qx.data.Array(group.requestedUsers); 
 
             // Populate lists 
-            this.userController.setSelection(userMemberDataArray);
-	  }
-
-        );
+            this.userController.setModel(userMemberDataArray); 
+            this.waitListController.setModel(userWaitList); 
+	  }, this);
 
 
         // Populate list of existing groups
