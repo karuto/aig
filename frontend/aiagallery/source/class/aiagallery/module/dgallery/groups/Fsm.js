@@ -64,9 +64,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
         },
 
         "events" :
-        {
-          save : "Transition_Idle_to_Idle_via_save", 
-         
+        {         
           // When we get an appear event, retrieve the category tags list. We
           // only want to do it the first time, though, so we use a predicate
           // to determine if it's necessary.
@@ -80,7 +78,26 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
           "disappear" :
           {
             //"main.canvas" : "Transition_Idle_to_Idle_via_disappear"
-          }
+          },
+
+          // Button clicks
+          "execute":
+          {
+            "saveBtn" : "Transition_Idle_to_AwaitRpcResult_via_save", 
+
+            "deleteBtn" : "Transition_Idle_to_AwaitRpcResult_via_delete",
+
+            "approveAllGroupUser" :
+              "Transition_Idle_to_AwaitRpcResult_via_approveAllGroupUser",
+
+            "approveGroupUser" :
+              "Transition_Idle_to_AwaitRpcResult_via_approveGroupUser",   
+
+            "deleteGroupUsers" :
+              "Transition_Idle_to_AwaitRpcResult_via_deleteGroupUsers"  
+          },
+
+          "getGroup" : "Transition_Idle_to_AwaitRpcResult_via_getGroup"     
         }
       });
 
@@ -153,9 +170,9 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
        */
 
       trans = new qx.util.fsm.Transition(
-        "Transition_Idle_to_Idle_via_save",
+        "Transition_Idle_to_AwaitRpcResult_via_save",
       {
-        "nextState" : "State_Idle",
+        "nextState" : "State_AwaitRpcResult",
 
         "context" : this,
 
@@ -185,6 +202,41 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
           // When we get the result, we'll need to know what type of request
           // we made.
           request.setUserData("requestType", "addOrEditGroup");
+
+        }
+      });
+
+      state.addTransition(trans);
+
+      trans = new qx.util.fsm.Transition(
+        "Transition_Idle_to_AwaitRpcResult_via_delete",
+      {
+        "nextState" : "State_AwaitRpcResult",
+
+        "context" : this,
+
+        "ontransition" : function(fsm, event)
+        {
+          var             request;
+          var             name;
+          var             description;
+          var             requestedUsers;
+
+          // Get values from gui
+          name = fsm.getObject("groupNameList")
+                   .getSelection()[0].getLabel();
+ 
+          // Issue the remote procedure call to execute the query
+          request =
+            this.callRpc(fsm,
+                         "aiagallery.features",
+                         "deleteGroup",
+                         [ name ]
+                         );
+
+          // When we get the result, we'll need to know what type of request
+          // we made.
+          request.setUserData("requestType", "deleteGroup");
 
         }
       });

@@ -30,6 +30,14 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
     this.registerService("aiagallery.features.addMembers",
                          this.addMembers,
                          [ "groupName", "members" ]);
+
+    this.registerService("aiagallery.features.deleteGroup",
+                         this.deleteGroup,
+                         [ "groupName" ]);
+
+    this.registerService("aiagallery.features.mgmtDeleteGroup",
+                         this.addMembers,
+                         [ "groupName" ]);
   },
 
   members :
@@ -43,6 +51,9 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
      * 
      * @param description {String}
      *   Short description of the group
+     * 
+     * @return {ObjGroup || Error}
+     *   Return the group object we made / edited or an error 
      * 
      */
     addOrEditGroup : function(groupName, description, requestedUsers, error)
@@ -73,13 +84,9 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
         groupData.requestedUsers = this._mapUsernamesToIds(requestedUsers);    
      
         // Put on db 
-        liberated.dbif.Entity.asTransaction(
-          function()
-          {
-            group.put();
-          });
+        group.put();
 
-        return true; 
+        return group; 
 
       } 
       else if (groupData.owner == whoami.id)
@@ -136,7 +143,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
         // Write updated group to db
         group.put(); 
 
-        return true; 
+        return group; 
       }
       else 
       {
@@ -149,7 +156,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
         return error;
       }
 
-      return true; 
+      return group; 
     },
 
     /**
@@ -158,13 +165,74 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
      * @param groupName {String}
      *   The name of the group
      * 
-     * @return {Map}
+     * @param error {Error}
+     *   The error object
+     * 
+     * @return {Map || Error}
      *   A map of data related to a group. This includes the list of users
      *   associated with the group, the apps they have produced, a
      *   description of the group, and the users waiting to join the group. 
      */ 
-    getGroup : function(groupName)
+    getGroup : function(groupName, error)
     {
+      var      criteria;
+      var      resultList;
+      var      group; 
+      var      groupMap;
+
+      criteria = 
+        {
+          type  : "element",
+          field : "name",
+          value : groupName
+        };
+
+      resultList = liberated.dbif.Entity.query("aiagallery.dbif.ObjGroup",
+                                               criteria);
+
+      if (resultList.length != 1)
+      {
+        // Group not found
+        var warnString = this.tr("Group does not exist");
+
+        error.setCode(1);
+        error.setMessage(warnString);
+        return error;
+      } 
+
+      group = resultList[0]; 
+
+      // Init group map
+      groupMap = 
+        {
+          name           : group.name,
+          description    : group.description, 
+          users          : null,
+          joiningUsers   : null,
+          requestedUsers : null
+	};
+
+      // Convert all user fields from ids to displayNames
+      // Convert all users waiting to join
+      if (group.joiningUsers != null && group.joiningUsers.length != 0)
+      {
+        groupMap.joiningUsers 
+          = this._mapIdToDisplayname(group.joiningUsers);    
+      }
+
+      // Users who have been given authorization, but not joined yet
+      if (group.requestedUsers != null && group.requestedUsers.length != 0)
+      {
+        groupMap.requestedUsers 
+          = this._mapIdToDisplayname(group.requestedUsers);      
+      }
+
+      // Convert all users who have joined 
+      // should always be atleast one user, the admin
+      groupMap.users = this._mapIdToDisplayname(group.users); 
+
+      return groupMap;  
+
     },
 
     /**
@@ -206,82 +274,25 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
           // Convert all users waiting to join
           if (group.joiningUsers != null && group.joiningUsers.length != 0)
           {
-            group.joiningUsers.forEach(
-              function(userId)
-              {
-                usernameCriteria = 
-                  {
-                    type  : "element",
-                    field : "id",
-                    value : userId
-                  };
-
-                queryResult = liberated.dbif.Entity.query(
-                              "aiagallery.dbif.ObjVisitors",
-                              usernameCriteria);
-                   
-                if(queryResult.length == 1)
-                {
-                  waitList.push(queryResult[0].displayName ); 
-                }
-              }
-            );    
+            waitList = this._mapIdToDisplayname(group.joiningUsers);    
           }
 
           // Users who have been given authorization, but not joined yet
           if (group.requestedUsers != null && group.requestedUsers.length != 0)
           {
-            group.requestedUsers.forEach(
-              function(userId)
-              {
-                usernameCriteria = 
-                  {
-                    type  : "element",
-                    field : "id",
-                    value : userId
-                  };
-
-                queryResult = liberated.dbif.Entity.query(
-                              "aiagallery.dbif.ObjVisitors",
-                              usernameCriteria);
-                   
-                if(queryResult.length == 1)
-                {
-                  authList.push(queryResult[0].displayName ); 
-                }
-              }
-            );    
+            authList = this._mapIdToDisplayname(group.requestedUsers);      
           }
 
           // Convert all users who have joined 
-          group.users.forEach(
-            function(userId)
-            {
-              usernameCriteria = 
-                {
-                  type  : "element",
-                  field : "id",
-                  value : userId
-                };
-
-              queryResult = liberated.dbif.Entity.query(
-                            "aiagallery.dbif.ObjVisitors",
-                            usernameCriteria);
-                   
-              if(queryResult.length == 1)
-              {
-                memberList.push(queryResult[0].displayName ); 
-              }
-            }
-          ); 
+          // should always be atleast one user, the admin
+          memberList = this._mapIdToDisplayname(group.users);     
 
           // End of name replacement
           // Replace lists on group
           group.joiningUsers = waitList; 
           group.requestedUsers = authList;
           group.users = memberList;
-        }
-      );
+        }, this);
 
       return resultList;
     },
@@ -302,6 +313,42 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
     },
 
     /**
+     * Delete a group that the user owns
+     * 
+     * @param groupName {String}
+     *   The name of the group
+     * 
+     * @param error {Error}
+     *   The error object
+     * 
+     * @return {Boolean || Error}
+     *   True if the group was deleted, an error otherwise
+     * 
+     */ 
+    deleteGroup : function(groupName, error)
+    {
+      return this._deleteGroup(groupName, false, error);
+    },
+
+    /**
+     * Delete any group. User must have permissions to do so
+     * 
+     * @param groupName {String}
+     *   The name of the group
+     * 
+     * @param error {Error}
+     *   The error object
+     * 
+     * @return {Boolean || Error}
+     *   True if the group was deleted, an error otherwise
+     * 
+     */ 
+    mgmtDeleteGroup : function(groupName, error)
+    {
+      return this._deleteGroup(groupName, true, error); 
+    },
+
+    /**
      * Add waiting members to an existing group. This is done by
      * the group owner.
      * 
@@ -317,7 +364,59 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
     },
 
     /**
-     * Take a list of user ids and get their user ids
+     * Delete a group
+     * 
+     * @param groupName {String}
+     *   The name of the group
+     * 
+     * @param bManagement {Boolean}
+     *   If the user is an admin or not
+     * 
+     * @param error {Error}
+     *   The error object
+     * 
+     * @return {Boolean || Error}
+     *   True if the group was deleted, an error otherwise
+     * 
+     */
+    _deleteGroup : function(groupName, bManagement, error)
+    {
+      var     whoami;
+      var     group;
+      var     groupData;
+
+      // Get logged in user
+      whoami = this.getWhoAmI();
+
+      // Check to see that user owns this group
+      group = new aiagallery.dbif.ObjGroup(groupName, whoami.id);
+      groupData = group.getData();
+
+      if (group.getBrandNew())
+      {
+        // Object does not exist
+        var warnString = this.tr("Group does not exist");
+
+        error.setCode(1);
+        error.setMessage(warnString);
+        return error;
+      } 
+      else if (!bManagement && groupData.owner != whoami.id)
+      {
+        // User does not own the group
+        var warnString = this.tr("You do not own this group");
+
+        error.setCode(2);
+        error.setMessage(warnString);
+        return error; 
+      }
+
+      group.removeSelf();
+      return true; 
+    },
+
+    /**
+     * Take a list of user names and get their user ids
      * 
      * @param usernameArray {StringArray}
      *   An array of user names
@@ -355,6 +454,47 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       ); 
 
       return userIdMap;
+    },
+
+    /**
+     * Accept an array of user ids and convert them to display names
+     * 
+     * @param idArray {Array}
+     *   The array of user ids to be converted
+     * 
+     * @return {Array}
+     *   An array containing display names
+     */
+    _mapIdToDisplayname : function (idArray)
+    {
+
+      var    displaynameArray = [];
+
+      idArray.forEach(
+        function(userId)
+        {
+          var     criteria;
+          var     queryResult; 
+
+          criteria = 
+            {
+              type  : "element",
+              field : "id",
+              value : userId
+            };
+
+          queryResult = liberated.dbif.Entity.query(
+                        "aiagallery.dbif.ObjVisitors",
+                        criteria);
+                   
+          if(queryResult.length == 1)
+          {
+            displaynameArray.push(queryResult[0].displayName ); 
+          }
+        }
+      );
+
+      return displaynameArray;  
     }
   }
 }); 
