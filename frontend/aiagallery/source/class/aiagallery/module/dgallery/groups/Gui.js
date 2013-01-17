@@ -283,7 +283,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       label =  new qx.ui.basic.Label(this.tr("Request the Following Users (seperate by comma):"));
       vBoxText.add(label);
          
-      // Create a textfield to enter a description for the pGroup
+      // Create a textfield to enter a description for the group
       groupUsersField = new qx.ui.form.TextField;
       groupUsersField.set(
       {
@@ -540,11 +540,12 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       var             userWaitList;
 
       // Objects from the gui we will add/subtract from
+      var             groupNameField = fsm.getObject("groupNameField");
       var             groupNameList = fsm.getObject("groupNameList"); 
       var             groupDescriptionField = fsm.getObject("groupDescriptionField");
       var             groupUsersList = fsm.getObject("groupUsersList");
       var             groupWaitList = fsm.getObject("groupWaitList");
-      var             groupRequestList = fsm.getObject("groupUserList");
+      var             groupRequestList = fsm.getObject("groupRequestList");
       var             groupUsersField = fsm.getObject("groupUsersField"); 
 
       // We can ignore aborted requests.
@@ -590,7 +591,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
             this.userController.setModel(userMemberDataArray); 
             this.waitListController.setModel(userWaitList);
             this.requestListController.setModel(userRequestList); 
-	  }, this);
+          }, this);
 
 
         // Populate list of existing groups
@@ -626,11 +627,14 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
           // Clear out requested user field
           groupUsersField.setValue("");
 
+          // clear description field
+          groupDescriptionField.setValue("");
+
           // Clear out user lists    
           groupUsersList.removeAll(); 
           groupWaitList.removeAll();
           groupRequestList.removeAll();     
-	}
+        }
       
         break;
 
@@ -642,7 +646,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
         result = response.data.result;
 
         // if (error)
-	
+        
         // Is this a new group or an existing one
         var groupLabels = groupNameList.getChildren().map(
           function(listItem)
@@ -655,11 +659,24 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
           // New group add to groupList
           var name = new qx.ui.form.ListItem(result.name);   
           groupNameList.add(name);
-	}
+        }
 
-        // Request list may have been updated either way 
+        // Any of these lists may have been updated or 
+	// it could be the first time we are updating them
+        // Convert user lists into data arrays
+        userMemberDataArray = new qx.data.Array(result.users);
+        userWaitList = new qx.data.Array(result.joiningUsers);
         userRequestList = new qx.data.Array(result.requestedUsers); 
-        this.requestListController.setModel(userRequestList);
+
+        // Populate lists 
+        this.userController.setModel(userMemberDataArray); 
+        this.waitListController.setModel(userWaitList);
+        this.requestListController.setModel(userRequestList); 
+
+        // Clear out the fields
+        groupDescriptionField.setValue("");
+        groupNameField.setValue("");
+        groupUsersField.setValue(""); 
 
         break;
 
@@ -688,6 +705,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       case "removeGroupUsers":
         // Recieve an array of names of removed users.
         // Take those users off the user list.
+        result = response.data.result;
  
         break;
 

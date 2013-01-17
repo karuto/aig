@@ -187,8 +187,16 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
 
           // Empty for now
           requestedUsers = fsm.getObject("groupUsersField").getValue();
-          requestedUsers = requestedUsers.split(",");
- 
+
+          if(requestedUsers.length != 0)
+          {
+            requestedUsers = requestedUsers.split(",");
+          }
+          else 
+          {
+            requestedUsers = null; 
+          }
+
           // Issue the remote procedure call to execute the query
           request =
             this.callRpc(fsm,

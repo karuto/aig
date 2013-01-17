@@ -88,14 +88,26 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
         // By design the first user is the owner
         groupData.users = [whoami.id]; 
 
-        // Possibly send emails to all these users 
-        groupData.requestedUsers = this._mapUsernamesToIds(requestedUsers);    
-     
-        // Put on db 
-        group.put();
+        // FIME : Possibly send emails to all these users 
+        // Convert all requested users to ids 
+        // Only do so if requested users is not null
+        if (requestedUsers)
+        {
+          requestedUsers = this._mapUsernamesToIds(requestedUsers);
 
-        return group; 
+          // User cannot add themselves to requestedUser list
+          for (var i = 0; i < requestedUsers.length; i++)
+          {
+            if (requestedUsers[i] == whoami.id)
+            {
+              // Remove owner from requested user list 
+              requestedUsers.splice(i,1);
+              break; 
+            }
+          }
 
+          groupData.requestedUsers = requestedUsers;    
+        }
       } 
       else if (groupData.owner == whoami.id)
       {
@@ -115,6 +127,17 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
         if (groupData.joiningUsers != null && 
             groupData.joiningUsers.length != 0)
         {
+
+          // User cannot add themselves to requestedUser list
+          for (var i = 0; i < requestedUsers.length; i++)
+          {
+            if (requestedUsers[i] == whoami.id)
+            {
+              // Remove owner from requested user list 
+              requestedUsers.splice(i,1);
+              break; 
+            }
+          }
 
           userIds = this._mapUsernamesToIds(requestedUsers);       
  
@@ -148,10 +171,6 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
           );
         }
 
-        // Write updated group to db
-        group.put(); 
-
-        return group; 
       }
       else 
       {
@@ -164,7 +183,11 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
         return error;
       }
 
-      return group; 
+       // Write updated or new group to db
+       group.put(); 
+
+       // Clean up the return data
+       return this._turnToMap(groupData);
     },
 
     /**
@@ -186,7 +209,6 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       var      criteria;
       var      resultList;
       var      group; 
-      var      groupMap;
 
       criteria = 
         {
@@ -210,37 +232,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
 
       group = resultList[0]; 
 
-      // Init group map
-      groupMap = 
-        {
-          name           : group.name,
-          description    : group.description, 
-          users          : null,
-          joiningUsers   : null,
-          requestedUsers : null
-        };
-
-      // Convert all user fields from ids to displayNames
-      // Convert all users waiting to join
-      if (group.joiningUsers != null && group.joiningUsers.length != 0)
-      {
-        groupMap.joiningUsers 
-          = this._mapIdToDisplayname(group.joiningUsers);    
-      }
-
-      // Users who have been given authorization, but not joined yet
-      if (group.requestedUsers != null && group.requestedUsers.length != 0)
-      {
-        groupMap.requestedUsers 
-          = this._mapIdToDisplayname(group.requestedUsers);      
-      }
-
-      // Convert all users who have joined 
-      // should always be atleast one user, the admin
-      groupMap.users = this._mapIdToDisplayname(group.users); 
-
-      return groupMap;  
-
+      return this._turnToMap(group); 
     },
 
     /**
@@ -342,6 +334,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       var        group;
       var        groupData; 
       var        removedUsers = [];
+      var        whoami;
 
       // Check for existence and ownership
       try
@@ -354,13 +347,20 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
         return x; 
       }
 
+      // Convert all display names to user ids
+      removeList = this._mapUsernamesToIds(removeList); 
+
+      // Get logged in user
+      whoami = this.getWhoAmI();
+
       // Remove each user on the removeList from the user array
       removeList.forEach(
         function(user)
         {
           for(var i = 0; i < groupData.users.length; i++)
           {
-            if(user == groupData.users[i])
+            // User cannot remove themselves from the group
+            if(user == groupData.users[i] && user == whoami.id)
             {
               delete groupData.users[i];
               removedUsers.push(user);
@@ -599,7 +599,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
             {
               type  : "element",
               field : "displayName", 
-              value : name
+              value : name.trim()
             }; 
 
            ids = liberated.dbif.Entity.query("aiagallery.dbif.ObjVisitors",
@@ -697,6 +697,54 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       }
 
       return group; 
+    },
+
+    /**
+     * Take groupData and turn it into a map suitable for
+     *   using on the frontend
+     * 
+     * @param groupData {ObjGroup Data}
+     *   The easily accessible ObjGroup Data
+     * 
+     * @return {Map}
+     *   A map of the group data with properties mapped to data
+     */
+    _turnToMap : function(groupData)
+    {
+      var     groupMap;
+
+      // Init group map
+      groupMap = 
+        {
+          name           : groupData.name,
+          description    : groupData.description, 
+          users          : null,
+          joiningUsers   : null,
+          requestedUsers : null
+        };
+
+      // Convert all user fields from ids to displayNames
+      // Convert all users waiting to join
+      if (groupData.joiningUsers != null && 
+          groupData.joiningUsers.length != 0)
+      {
+        groupMap.joiningUsers 
+          = this._mapIdToDisplayname(groupData.joiningUsers);    
+      }
+
+      // Users who have been given authorization, but not joined yet
+      if (groupData.requestedUsers != null && 
+         groupData.requestedUsers.length != 0)
+      {
+        groupMap.requestedUsers 
+          = this._mapIdToDisplayname(groupData.requestedUsers);      
+      }
+
+      // Convert all users who have joined 
+      // should always be atleast one user, the admin
+      groupMap.users = this._mapIdToDisplayname(groupData.users); 
+
+      return groupMap; 
     }
   }
 }); 
