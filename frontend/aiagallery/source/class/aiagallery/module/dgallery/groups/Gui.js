@@ -362,7 +362,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       vBoxBtns.add(new qx.ui.basic.Label()); 
 
       // Create a Delete button
-      button = new qx.ui.form.Button(this.tr("Delete User(s)"));
+      button = new qx.ui.form.Button(this.tr("Remove User(s)"));
       button.set(
       {
         maxHeight : 30,
@@ -372,7 +372,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       button.addListener("execute", this.fsm.eventListener, this.fsm);
 
       // We'll be receiving events on the object so save its friendly name
-      this.fsm.addObject("deleteGroupUsers", 
+      this.fsm.addObject("removeGroupUsers", 
          button, "main.fsmUtils.disable_during_rpc");
 
       // Button to approve a user from the wait list 
@@ -468,6 +468,9 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       this.fsm.addObject("groupWaitList", 
          groupWaitList,"main.fsmUtils.disable_during_rpc");
 
+      // Allow user to select multiple items
+      groupWaitList.setSelectionMode("multi");
+
       // Array to add users to
       waitListDataArray = new qx.data.Array(); 
 
@@ -493,6 +496,9 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       // Create friendly name to get it from the FSM
       this.fsm.addObject("groupRequestList", 
          groupRequestList,"main.fsmUtils.disable_during_rpc");
+
+      // Allow user to select multiple items
+      groupRequestList.setSelectionMode("multi");
 
       // Array to add users to
       requestListDataArray = new qx.data.Array(); 
@@ -677,6 +683,12 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
         this.waitListController.setModel(userWaitList);
         this.requestListController.setModel(userRequestList); 
 
+        break;
+
+      case "removeGroupUsers":
+        // Recieve an array of names of removed users.
+        // Take those users off the user list.
+ 
         break;
 
       default:

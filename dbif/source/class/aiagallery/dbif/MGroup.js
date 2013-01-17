@@ -27,13 +27,17 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
                          this.joinGroup,
                          [ "groupName" ]);
 
-    this.registerService("aiagallery.features.addMembers",
-                         this.addMembers,
+    this.registerService("aiagallery.features.approveUsers",
+                         this.approveUsers,
                          [ "groupName", "members" ]);
 
-    this.registerService("aiagallery.features.addAllMembers",
-                         this.addAllMembers,
+    this.registerService("aiagallery.features.approveAllUsers",
+                         this.approveAllUsers,
                          [ "groupName" ]);
+
+    this.registerService("aiagallery.features.removeGroupUsers",
+                         this.removeGroupUsers,
+                         [ "groupName", "members" ]);
 
     this.registerService("aiagallery.features.deleteGroup",
                          this.deleteGroup,
@@ -214,7 +218,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
           users          : null,
           joiningUsers   : null,
           requestedUsers : null
-	};
+        };
 
       // Convert all user fields from ids to displayNames
       // Convert all users waiting to join
@@ -317,6 +321,63 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
     },
 
     /**
+     * Take a list of user displayNames and remove them
+     *   from the user list of a group
+     * 
+     * @param groupName {String}
+     *   The name of the group
+     * 
+     * @param removeList {Array}
+     *   String array of display names to remove
+     * 
+     * @param error {Error}
+     *   The error object
+     * 
+     * @return {Array || Error}
+     *   The array of removed user display names, an error otherwise
+     * 
+     */ 
+    removeGroupUsers : function(groupName, removeList, error)
+    {
+      var        group;
+      var        groupData; 
+      var        removedUsers = [];
+
+      // Check for existence and ownership
+      try
+      {
+        group = this._checkExistenceAndOwnership(groupName);
+        groupData = group.getData(); 
+      } 
+      catch (x)
+      {
+        return x; 
+      }
+
+      // Remove each user on the removeList from the user array
+      removeList.forEach(
+        function(user)
+        {
+          for(var i = 0; i < groupData.users.length; i++)
+          {
+            if(user == groupData.users[i])
+            {
+              delete groupData.users[i];
+              removedUsers.push(user);
+
+              break;
+            }
+          }
+        }
+      );
+  
+      // Save back onto db
+      group.put();
+
+      return removedUsers;    
+    },
+
+    /**
      * Delete a group that the user owns
      * 
      * @param groupName {String}
@@ -366,58 +427,43 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
      *   The error object
      * 
      */ 
-    addMembers : function(groupName, usersToAdd, error)
+    approveUsers : function(groupName, usersToAdd, error)
     {
-      var     whoami;
       var     group;
       var     groupData;
 
-      // Get logged in user
-      whoami = this.getWhoAmI();
-
-      // Check to see that user owns this group
-      group = new aiagallery.dbif.ObjGroup(groupName, whoami.id);
-      groupData = group.getData();
-
-      if (group.getBrandNew())
+      // Check for existence and ownership
+      try
       {
-        // Object does not exist
-        var warnString = this.tr("Group does not exist");
-
-        error.setCode(1);
-        error.setMessage(warnString);
-        return error;
+        group = this._checkExistenceAndOwnership(groupName);
+        groupData = group.getData(); 
       } 
-      else if (groupData.owner != whoami.id)
+      catch (x)
       {
-        // User does not own the group
-        var warnString = this.tr("You do not own this group");
-
-        error.setCode(2);
-        error.setMessage(warnString);
-        return error; 
+        return x; 
       }
 
       // Take the array of added users and convert display names to ids
       usersToAdd = this._mapUsernamesToIds(usersToAdd); 
       
-      // remove the user from the requestedUsers list
+      // remove the user from the requestedUsers array
+      // and add to user array
       usersToAdd.forEach(
         function(user)
         {
           // Find the user in the requestedUsers list
-          for (var i; i < group.requestedUser.length; i++)
+          for (var i; i < groupData.requestedUser.length; i++)
           {
-            if (group.requestedUser[i] == user)
+            if (groupData.requestedUser[i] == user)
             {
               // add to users list
-              group.users.push(group.requestedUser[i]); 
+              groupData.users.push(group.requestedUser[i]); 
 
-              delete group.requestedUsers[i];
+              delete groupData.requestedUsers[i];
               break;
             }
           }
-	});
+        });
       
       // Update group
       group.put();
@@ -441,36 +487,21 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
      *   Array containing all the users who are members of the group 
      * 
      */ 
-    addAllMembers : function(groupName, error)
+    approveAllUsers : function(groupName, error)
     {
       var     whoami;
       var     group;
       var     groupData;
 
-      // Get logged in user
-      whoami = this.getWhoAmI();
-
-      // Check to see that user owns this group
-      group = new aiagallery.dbif.ObjGroup(groupName, whoami.id);
-      groupData = group.getData();
-
-      if (group.getBrandNew())
+      // Check for existence and ownership
+      try
       {
-        // Object does not exist
-        var warnString = this.tr("Group does not exist");
-
-        error.setCode(1);
-        error.setMessage(warnString);
-        return error;
+        group = this._checkExistenceAndOwnership(groupName);
+        groupData = group.getData(); 
       } 
-      else if (groupData.owner != whoami.id)
+      catch (x)
       {
-        // User does not own the group
-        var warnString = this.tr("You do not own this group");
-
-        error.setCode(2);
-        error.setMessage(warnString);
-        return error; 
+        return x; 
       }
 
       // Add all users on the wait list to the user list
@@ -629,11 +660,43 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
      * @param groupName {String}
      *   Group name
      * 
-     * @return {Boolean}
-     *   True if it exists and is owned by the user, false otherwise.
+     * @return {ObjGroup || Error}
+     *   ObjGroup if it exists and is owned by the user,
+     *     an error otherwise.
      */
     _checkExistenceAndOwnership : function(groupName)
     {
+      var     whoami;
+      var     group;
+      var     groupData;
+
+      // Get logged in user
+      whoami = this.getWhoAmI();
+
+      // Check to see that user owns this group
+      group = new aiagallery.dbif.ObjGroup(groupName, whoami.id);
+      groupData = group.getData();
+
+      if (group.getBrandNew())
+      {
+        // Object does not exist
+        var warnString = this.tr("Group does not exist");
+
+        error.setCode(1);
+        error.setMessage(warnString);
+        throw error;
+      } 
+      else if (groupData.owner != whoami.id)
+      {
+        // User does not own the group
+        var warnString = this.tr("You do not own this group");
+
+        error.setCode(2);
+        error.setMessage(warnString);
+        throw error; 
+      }
+
+      return group; 
     }
   }
 }); 
