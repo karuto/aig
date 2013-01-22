@@ -16,7 +16,7 @@ require(aiagallery.module.dgallery.appinfo.AppInfo)
  */
 qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
 {
-  type : "singleton",
+  type   : "singleton",
   extend : aiagallery.main.AbstractModuleFsm,
 
   members :
@@ -97,7 +97,11 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
               "Transition_Idle_to_AwaitRpcResult_via_removeGroupUsers"  
           },
 
-          "getGroup" : "Transition_Idle_to_AwaitRpcResult_via_getGroup"     
+          "changeSelection":
+          {
+            "groupNameList" 
+              : "Transition_Idle_to_AwaitRpcResult_via_getGroup"     
+          }
         }
       });
 
@@ -183,6 +187,13 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
 
           // Get values from gui
           name = fsm.getObject("groupNameField").getValue();
+
+          // User is updating existing group
+          if (name == "" || !name)
+          {
+            name = fsm.getObject("groupNameList").getSelection()[0].getLabel();
+          }
+
           description = fsm.getObject("groupDescriptionField").getValue();
 
           // Empty for now
@@ -330,14 +341,14 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
             function(sel)
             {
               usersToApprove.push(sel.getLabel()); 
-	    }
+            }
           );
 
           // Issue the remote procedure call to execute the query
           request =
             this.callRpc(fsm,
                          "aiagallery.features",
-                         "approveAllUsers",
+                         "approveUsers",
                          [ name, usersToApprove ]
                          );
 
@@ -382,7 +393,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
             function(sel)
             {
               usersToRemove.push(sel.getLabel()); 
-	    }
+            }
           );
 
           // Issue the remote procedure call to execute the query
@@ -390,7 +401,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
             this.callRpc(fsm,
                          "aiagallery.features",
                          "removeGroupUsers",
-                         [ name, usersToApprove ]
+                         [ name, usersToRemove ]
                          );
 
           // When we get the result, we'll need to know what type of request
@@ -418,15 +429,31 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
 
         "context" : this,
 
+        "predicate" : function(fsm, event)
+        {
+          if(fsm.getObject("groupNameList")
+                   .getSelection().length != 0)
+          { 
+            // Accept
+            return true;
+          }
+          else 
+          {
+            // Ignore request
+            return null; 
+          }
+        },
+
         "ontransition" : function(fsm, event)
         {
           var             request;
           var             name;
 
           // Get values from gui
+          // Only get a name if we can, if not ignore request
           name = fsm.getObject("groupNameList")
                    .getSelection()[0].getLabel();
- 
+
           // Issue the remote procedure call to execute the query
           request =
             this.callRpc(fsm,

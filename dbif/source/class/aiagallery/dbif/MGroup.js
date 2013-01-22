@@ -72,6 +72,8 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       var         group; 
       var         groupData;
       var         userIds; 
+      var         bUpdate = false; 
+      var         returnMap; 
 
       // Get the current user
       whoami = this.getWhoAmI();
@@ -111,6 +113,9 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       } 
       else if (groupData.owner == whoami.id)
       {
+        // Update
+        bUpdate = true; 
+
         // Group exists and belongs to owner          
         // New data
         groupData.description = description;
@@ -176,7 +181,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       {
         // Group exists, but does not belong to owner
         // This is an error, the user must choose a new name 
-        var warnString = this.tr("A group exists with this name already"); 
+        var warnString = "A group exists with this name already"; 
  
         error.setCode(1);
         error.setMessage(warnString);
@@ -186,8 +191,13 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
        // Write updated or new group to db
        group.put(); 
 
+       returnMap = this._turnToMap(groupData);
+             
+       // Set update bit
+       returnMap.update = bUpdate; 
+
        // Clean up the return data
-       return this._turnToMap(groupData);
+       return returnMap; 
     },
 
     /**
@@ -223,7 +233,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       if (resultList.length != 1)
       {
         // Group not found
-        var warnString = this.tr("Group does not exist");
+        var warnString = "Group does not exist";
 
         error.setCode(1);
         error.setMessage(warnString);
@@ -426,11 +436,15 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
      * @param error {Error}
      *   The error object
      * 
+     * @return {Map || Error}
+     *   The map containing the waitlist users and approved users
+     *   or an error. 
      */ 
     approveUsers : function(groupName, usersToAdd, error)
     {
       var     group;
       var     groupData;
+      var     returnMap; 
 
       // Check for existence and ownership
       try
@@ -441,6 +455,17 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       catch (x)
       {
         return x; 
+      }
+
+      // Do we have any users to approve
+      if(usersToAdd.length == 0)
+      {
+        // Object does not exist
+        var warnString = "Select users from the wait list to allow membership. ";
+
+        error.setCode(1);
+        error.setMessage(warnString);
+        return error;
       }
 
       // Take the array of added users and convert display names to ids
@@ -469,7 +494,13 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       group.put();
 
       // Return array of current users
-      return this._mapIdToDisplayname(groupData.users); 
+      returnMap = 
+        {
+          users    : this._mapIdToDisplayname(groupData.users),
+          waitList : this._mapIdToDisplayname(groupData.joiningUsers)
+        }; 
+
+      return returnMap;
 
     },
 
@@ -483,8 +514,9 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
      * @param error {Error}
      *   The error object
      * 
-     * @return {Array}
-     *   Array containing all the users who are members of the group 
+     * @return {Map || Error}
+     *   The map containing the waitlist users and approved users
+     *   or an error. 
      * 
      */ 
     approveAllUsers : function(groupName, error)
@@ -492,6 +524,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       var     whoami;
       var     group;
       var     groupData;
+      var     returnMap; 
 
       // Check for existence and ownership
       try
@@ -504,6 +537,17 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
         return x; 
       }
 
+      // Do we have any users to approve
+      if(groupData.joiningUsers.length == 0)
+      {
+        // Object does not exist
+        var warnString = "No waiting users";
+
+        error.setCode(1);
+        error.setMessage(warnString);
+        return error;
+      }
+
       // Add all users on the wait list to the user list
       groupData.users.push(groupData.joiningUsers);
 
@@ -513,9 +557,15 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
 
       // Push back to db
       group.push();
- 
 
-      return groupData.users; 
+      // Return array of current users
+      returnMap = 
+        {
+          users    : this._mapIdToDisplayname(groupData.users),
+          waitList : this._mapIdToDisplayname(groupData.joiningUsers)
+        }; 
+
+      return returnMap;
 
     },
 
@@ -551,7 +601,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       if (group.getBrandNew())
       {
         // Object does not exist
-        var warnString = this.tr("Group does not exist");
+        var warnString = "Group does not exist";
 
         error.setCode(1);
         error.setMessage(warnString);
@@ -560,7 +610,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       else if (!bManagement && groupData.owner != whoami.id)
       {
         // User does not own the group
-        var warnString = this.tr("You do not own this group");
+        var warnString = "You do not own this group";
 
         error.setCode(2);
         error.setMessage(warnString);
@@ -660,11 +710,14 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
      * @param groupName {String}
      *   Group name
      * 
+     * @param error {Error}
+     *   The error object
+     * 
      * @return {ObjGroup || Error}
      *   ObjGroup if it exists and is owned by the user,
      *     an error otherwise.
      */
-    _checkExistenceAndOwnership : function(groupName)
+    _checkExistenceAndOwnership : function(groupName, error)
     {
       var     whoami;
       var     group;
@@ -680,7 +733,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       if (group.getBrandNew())
       {
         // Object does not exist
-        var warnString = this.tr("Group does not exist");
+        var warnString = "Group does not exist";
 
         error.setCode(1);
         error.setMessage(warnString);
@@ -689,7 +742,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       else if (groupData.owner != whoami.id)
       {
         // User does not own the group
-        var warnString = this.tr("You do not own this group");
+        var warnString = "You do not own this group";
 
         error.setCode(2);
         error.setMessage(warnString);

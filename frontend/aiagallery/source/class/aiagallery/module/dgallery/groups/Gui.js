@@ -321,6 +321,9 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       groupNameList.setWidth(150);
       groupNameList.addListener("changeSelection", 
         this.fsm.eventListener, this.fsm);
+
+      // Ensure one item is always selected if possible
+      groupNameList.setSelectionMode("one"); 
       
       // Disable delete/save button unless something is selected
       groupNameList.addListener("changeSelection", function(e) 
@@ -329,16 +332,11 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
         saveBtn.setEnabled(bEnable);
         deleteBtn.setEnabled(bEnable);
 
-        // Put the selected name in the name field
-        //var value = groupNameList.getSelection()[0].getLabel(); 
-         
-        //groupNameField.setValue(value); 
-
-        // If a new group was selected fire an fsm event 
-        // to pull data for that event.
         if (bEnable)
         {
-          this.fsm.fireEvent("getGroup"); 
+          // Put the selected name in the name field
+          //var value = groupNameList.getSelection()[0].getLabel(); 
+          //groupNameField.setValue(value); 
         }
       }, this); 
 
@@ -554,10 +552,17 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
           return;
       }
 
-      if (response.type == "failed")
+      // Errors with code 1 will be handled specially 
+      if (response.type == "failed" && response.data.code != 1)
       {
         // FIXME: Add the failure to the cell editor window rather than alert
         alert("Async(" + response.id + ") exception: " + response.data);
+        return;
+      } 
+      else if (response.data.code == 1)
+      {
+        // Special error
+        dialog.Dialog.warning(this.tr(response.data.message));
         return;
       }
 
@@ -614,9 +619,6 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       case "deleteGroup":
         result = response.data.result;
 
-        // Check for and display error if needed
-        // if (error)
- 
         // Remove group from list 
         // by removing currently selected label
         groupNameList.remove(groupNameList.getSelection()[0]); 
@@ -642,10 +644,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
         // If the group did not exist add it to the list
         // if it did, do nothing 
  
-        // Check for error
         result = response.data.result;
-
-        // if (error)
         
         // Is this a new group or an existing one
         var groupLabels = groupNameList.getChildren().map(
@@ -662,7 +661,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
         }
 
         // Any of these lists may have been updated or 
-	// it could be the first time we are updating them
+        // it could be the first time we are updating them
         // Convert user lists into data arrays
         userMemberDataArray = new qx.data.Array(result.users);
         userWaitList = new qx.data.Array(result.joiningUsers);
@@ -673,8 +672,17 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
         this.waitListController.setModel(userWaitList);
         this.requestListController.setModel(userRequestList); 
 
-        // Clear out the fields
-        groupDescriptionField.setValue("");
+        if (result.bUpdate)
+        {
+          // Update so change description field if we need to
+          groupDescriptionField.setValue(result.description);
+        }
+        else 
+        {
+          // New 
+	  groupDescriptionField.setValue("");   
+	}
+        
         groupNameField.setValue("");
         groupUsersField.setValue(""); 
 
@@ -682,10 +690,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
 
       case "getGroup":
         // Change selection event 
-        // Check for error
         result = response.data.result;
-
-        // if (error)
 
         // Update description
         groupDescriptionField.setValue(result.description);
@@ -707,6 +712,20 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
         // Take those users off the user list.
         result = response.data.result;
  
+        break;
+
+      case "approveGroupUser":
+      case "approveAllGroupUser":
+        result = response.data.result;
+
+        // Clean up lists
+        // Convert user lists into data arrays
+        userMemberDataArray = new qx.data.Array(result.users);
+        userWaitList = new qx.data.Array(result.joiningUsers);
+
+        // Populate lists 
+        this.userController.setModel(userMemberDataArray); 
+        this.waitListController.setModel(userWaitList);
         break;
 
       default:
