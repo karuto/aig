@@ -36,12 +36,16 @@ qx.Class.define("aiagallery.module.dgallery.appinfo.Gui",
     buildGui : function(module)
     {
       var             fsm = module.fsm;
-      var             canvas = module.canvas;
+      var             outerCanvas = module.canvas;
+      var             canvas; 
       var             o;
       var             grid;
       var             commentsGrid;
       var             vbox;
       var             font;
+      var             vBoxComments;
+      var             commentBoxAndCountLayout;
+      var             scrollContainer; 
 
       //
       // The overall layout if a grid, where the left portion has the
@@ -49,7 +53,15 @@ qx.Class.define("aiagallery.module.dgallery.appinfo.Gui",
       // the right (narrow) portion has a list of all apps by this author.
       // beta002: the right portion also has a list of apps by tags.
       //
+      
+      // Put entire page into a scroller 
+      outerCanvas.setLayout(new qx.ui.layout.VBox());
+      scrollContainer = new qx.ui.container.Scroll();
+ 
+      // Align to left of module
+      scrollContainer.setAlignX("right"); 
 
+      outerCanvas.add(scrollContainer, { flex : 1 });
       
       // First, create the grid layout
       grid = new qx.ui.layout.Grid(10, 10);
@@ -57,8 +69,13 @@ qx.Class.define("aiagallery.module.dgallery.appinfo.Gui",
       grid.setColumnWidth(1, 310);// Fixed column width for by-author list
       grid.setColumnFlex(0, 1);
       grid.setRowFlex(1, 1);      // Comments take up remaining space
-      canvas.setLayout(grid);
+      //canvas.setLayout(grid);
       
+      // Finish putting things into the scroller
+      canvas = new qx.ui.container.Composite(new qx.ui.layout.VBox(30));
+      canvas.setLayout(grid);
+      scrollContainer.add(canvas, { flex : 1 });
+
       // Put the application detail in the top-left
       this.searchResult = new aiagallery.widget.SearchResult("appInfo");
       fsm.addObject("searchResult", this.searchResult);
@@ -117,8 +134,9 @@ qx.Class.define("aiagallery.module.dgallery.appinfo.Gui",
       this.textNewComment = new qx.ui.form.TextArea();
       this.textNewComment.set(
         {
-          height    : 60,
-          maxLength : 1000
+          height        : 60,
+          maxLength     : aiagallery.dbif.Constants.FieldLength.Comment,
+          placeholder   : this.tr("Talk about this app")
         });
       this.textNewComment.addListener("input",
                                       this._onInputOrChange,
@@ -127,7 +145,21 @@ qx.Class.define("aiagallery.module.dgallery.appinfo.Gui",
                                       this._onInputOrChange, 
                                       this);
       fsm.addObject("textNewComment", this.textNewComment);
-      commentsGrid.add(this.textNewComment,
+
+      // Implement and add updating label to tell a user how many
+      // characters they have left
+      this.commentCountLabel = new qx.ui.basic.Label(this.tr("480 Characters Left"));
+
+      // Layout to hold count and text area
+      this.commentBoxAndCountLayout = new qx.ui.layout.VBox();
+      this.commentBoxAndCountLayout.setSpacing(5);      
+      vBoxComments = new qx.ui.container.Composite(this.commentBoxAndCountLayout);
+
+      // Add both count label and comment text area to this layout
+      vBoxComments.add(this.textNewComment);
+      vBoxComments.add(this.commentCountLabel);   
+
+      commentsGrid.add(vBoxComments,
                        { row : 3, column : 0, colSpan : 3 });
       
       // Add the Add button
@@ -250,10 +282,6 @@ qx.Class.define("aiagallery.module.dgallery.appinfo.Gui",
 //beta002 ends
 
 
-
-
-
-
     /**
      * Event handler for input or changeValue events. Enables or disables the
      * Add and Cancel buttons depending on whether text has been entered.
@@ -264,10 +292,17 @@ qx.Class.define("aiagallery.module.dgallery.appinfo.Gui",
     _onInputOrChange : function(e)
     {
       var             value;
+      var             charsLeft;
 
+      // Disable or enable buttons based on how much text is entered
+      // into the text area
       value = qx.lang.String.trim(this.textNewComment.getValue());
       this.butAddComment.setEnabled(!!(value && value.length > 0));
       this.butCancelComment.setEnabled(!!(value && value.length > 0));
+
+      // Update label as text is entered
+      charsLeft = Math.abs(aiagallery.dbif.Constants.FieldLength.Comment - value.length);
+      this.commentCountLabel.setValue(charsLeft.toString() + this.tr(" Characters Left"));
     },
 
     /**
@@ -320,6 +355,9 @@ qx.Class.define("aiagallery.module.dgallery.appinfo.Gui",
         source = result.app.source;
         delete result.app.source;
 
+        result.app.tagsdesc = "This app is tagged with: ";
+        result.app.tagsline = [result.appTags].join("");
+
         // Add the app detail
         this.searchResult.set(result.app);
         
@@ -342,7 +380,7 @@ qx.Class.define("aiagallery.module.dgallery.appinfo.Gui",
         this.sidebarLabel.setValue(sidebarText);
 
 
-        for (i = 0; i < tagsHolder.length; i++)
+        for (var i = 0; i < tagsHolder.length; i++)
         {
           var tagTabHolder = new qx.ui.tabview.Page(
             tagsHolder[i], "aiagallery/test.png");
