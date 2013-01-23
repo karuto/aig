@@ -562,10 +562,43 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
         alert("Async(" + response.id + ") exception: " + response.data);
         return;
       } 
-      else if (response.data.code == 1)
+      else if (response.data.code == 1 ||
+               response.data.code == 2 ||
+               response.data.code == 3 ||
+               response.data.code == 4 ||
+               response.data.code == 5 )
       {
         // Special error
-        dialog.Dialog.warning(this.tr(response.data.message));
+        var warnString = "";
+
+        switch(response.data.code)
+        {
+        case 1:
+          warnString = this.tr("A group exists with this name already"); 
+          break;
+
+        case 2:
+          warnString = this.tr("Group does not exist");
+          break;
+
+        case 3:
+          warnString = this.tr("Select users from the wait list to allow membership. ");
+          break;
+
+        case 4:
+          warnString = this.tr("No waiting users");
+          break; 
+
+        case 5:
+          warnString = this.tr("You do not own this group");
+          break;
+
+        default:
+          warnString = this.tr("Unknown error relating to group management"); 
+          break;
+        }  
+
+        dialog.Dialog.warning(warnString);
         return;
       }
 

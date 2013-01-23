@@ -3083,7 +3083,7 @@ qx.Mixin.define("aiagallery.dbif.MApps",
         tlist.forEach(
           function(app) {
             // Issue owner query for EACH app (expensive)
-            each_owners = liberated.dbif.Entity.query("aiagallery.dbif.ObjVisitors", 
+            var each_owners = liberated.dbif.Entity.query("aiagallery.dbif.ObjVisitors", 
                                            app.owner);
             app.displayName = each_owners[0].displayName || "<>";
             delete app.owner; // Remove the owner field

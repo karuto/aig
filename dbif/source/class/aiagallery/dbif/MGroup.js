@@ -262,7 +262,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
         // Group not found
         var warnString = "Group does not exist";
 
-        error.setCode(1);
+        error.setCode(2);
         error.setMessage(warnString);
         return error;
       } 
@@ -545,7 +545,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
         // Object does not exist
         var warnString = "Select users from the wait list to allow membership. ";
 
-        error.setCode(1);
+        error.setCode(3);
         error.setMessage(warnString);
         return error;
       }
@@ -625,7 +625,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
         // Object does not exist
         var warnString = "No waiting users";
 
-        error.setCode(1);
+        error.setCode(4);
         error.setMessage(warnString);
         return error;
       }
@@ -685,7 +685,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
         // Object does not exist
         var warnString = "Group does not exist";
 
-        error.setCode(1);
+        error.setCode(2);
         error.setMessage(warnString);
         return error;
       } 
@@ -694,7 +694,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
         // User does not own the group
         var warnString = "You do not own this group";
 
-        error.setCode(2);
+        error.setCode(5);
         error.setMessage(warnString);
         return error; 
       }
@@ -817,7 +817,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
         // Object does not exist
         var warnString = "Group does not exist";
 
-        error.setCode(1);
+        error.setCode(2);
         error.setMessage(warnString);
         throw error;
       } 
@@ -826,7 +826,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
         // User does not own the group
         var warnString = "You do not own this group";
 
-        error.setCode(2);
+        error.setCode(5);
         error.setMessage(warnString);
         throw error; 
       }
