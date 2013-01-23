@@ -323,7 +323,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
         this.fsm.eventListener, this.fsm);
 
       // Ensure one item is always selected if possible
-      groupNameList.setSelectionMode("one"); 
+      groupNameList.setSelectionMode("single"); 
       
       // Disable delete/save button unless something is selected
       groupNameList.addListener("changeSelection", function(e) 
@@ -334,6 +334,9 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
 
         if (bEnable)
         {
+          // Clear name field as long as something is selected
+          groupNameField.setValue(""); 
+
           // Put the selected name in the name field
           //var value = groupNameList.getSelection()[0].getLabel(); 
           //groupNameField.setValue(value); 
@@ -658,7 +661,10 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
           // New group add to groupList
           var name = new qx.ui.form.ListItem(result.name);   
           groupNameList.add(name);
-        }
+
+          // Select this new group
+          groupNameList.setSelection([name]);
+        } 
 
         // Any of these lists may have been updated or 
         // it could be the first time we are updating them
@@ -672,7 +678,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
         this.waitListController.setModel(userWaitList);
         this.requestListController.setModel(userRequestList); 
 
-        if (result.bUpdate)
+        if (result.update)
         {
           // Update so change description field if we need to
           groupDescriptionField.setValue(result.description);
@@ -680,8 +686,8 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
         else 
         {
           // New 
-	  groupDescriptionField.setValue("");   
-	}
+          groupDescriptionField.setValue("");   
+        }
         
         groupNameField.setValue("");
         groupUsersField.setValue(""); 
@@ -708,10 +714,28 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
         break;
 
       case "removeGroupUsers":
-        // Recieve an array of names of removed users.
-        // Take those users off the user list.
+        // Recieve a map of the three user lists
         result = response.data.result;
- 
+
+        // Convert user lists into data arrays
+        if (result.users != null)
+        {
+          userMemberDataArray = new qx.data.Array(result.users);
+          this.userController.setModel(userMemberDataArray); 
+        }
+
+        if (result.joiningUsers != null)
+        {
+          userWaitList = new qx.data.Array(result.joiningUsers);
+          this.waitListController.setModel(userWaitList);
+        }
+
+        if (result.requestedUsers != null)
+        {
+          userRequestList = new qx.data.Array(result.requestedUsers); 
+          this.requestListController.setModel(userRequestList); 
+        }
+
         break;
 
       case "approveGroupUser":

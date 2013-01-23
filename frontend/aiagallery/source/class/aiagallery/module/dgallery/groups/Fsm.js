@@ -381,7 +381,14 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
           var             request;
           var             name;
           var             selection;
-          var             usersToRemove = [];
+          var             usersToRemoveMap;
+
+          usersToRemoveMap = 
+            {
+              users     : [],
+              waitList  : [],
+              requested : []        
+            };
 
           // Get values from gui
           name = fsm.getObject("groupNameList")
@@ -392,7 +399,25 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
           selection.forEach(
             function(sel)
             {
-              usersToRemove.push(sel.getLabel()); 
+              usersToRemoveMap.users.push(sel.getLabel()); 
+            }
+          );
+
+          selection = fsm.getObject("groupWaitList").getSelection();
+
+          selection.forEach(
+            function(sel)
+            {
+              usersToRemoveMap.waitList.push(sel.getLabel()); 
+            }
+          );
+
+          selection = fsm.getObject("groupRequestList").getSelection();
+
+          selection.forEach(
+            function(sel)
+            {
+              usersToRemoveMap.requested.push(sel.getLabel()); 
             }
           );
 
@@ -401,7 +426,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
             this.callRpc(fsm,
                          "aiagallery.features",
                          "removeGroupUsers",
-                         [ name, usersToRemove ]
+                         [ name, usersToRemoveMap ]
                          );
 
           // When we get the result, we'll need to know what type of request

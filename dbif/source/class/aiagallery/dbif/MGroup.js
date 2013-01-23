@@ -72,6 +72,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       var         group; 
       var         groupData;
       var         userIds; 
+      var         remainingUsers; 
       var         bUpdate = false; 
       var         returnMap; 
 
@@ -110,6 +111,9 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
 
           groupData.requestedUsers = requestedUsers;    
         }
+
+        // Prep empty arrays
+        groupData.joiningUsers = []; 
       } 
       else if (groupData.owner == whoami.id)
       {
@@ -126,11 +130,9 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
         // Convert all names in list to ids and then check to see 
         // if the id exists in both joiningUsers array and requestedUsers array.
         // If it does then both the user and the admin want the user to
-        // join the group. If not add the id to the list. 
-        
-        // Do not do anything if there are no users requesting to join
-        if (groupData.joiningUsers != null && 
-            groupData.joiningUsers.length != 0)
+        // join the group. If not add the id to the list.      
+        if (requestedUsers != null &&
+            requestedUsers.length != 0)
         {
 
           // User cannot add themselves to requestedUser list
@@ -139,13 +141,31 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
             if (requestedUsers[i] == whoami.id)
             {
               // Remove owner from requested user list 
-              requestedUsers.splice(i,1);
+              requestedUsers.splice(i, 1);
               break; 
             }
           }
 
-          userIds = this._mapUsernamesToIds(requestedUsers);       
- 
+          userIds = this._mapUsernamesToIds(requestedUsers);    
+
+          // User cannot add a user who is already on the requested
+          // user list
+          for (i = 0; i < userIds.length; i++)
+          {
+            if (groupData.requestedUsers.indexOf(userIds[i]) != -1)
+            {
+              userIds.splice(i, 1);
+            }
+          }
+
+          // Push the requested user param to the actual obj
+          userIds.forEach(
+            function(user)
+            {
+              groupData.requestedUsers.push(user);
+            }
+          );
+
           userIds.forEach(
            function(id)
             {
@@ -157,6 +177,13 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
                 return;
               }
              
+              // Do not do a check if there are no users requesting to join
+              if (groupData.joiningUsers == null && 
+                  groupData.joiningUsers.length == 0)
+              {
+                return;
+              }
+
               // Check to see if a user who the admin has requested
               // is on the list of users who have requested to join
               for(i = 0; i < groupData.joiningUsers.length; i++)
@@ -171,10 +198,10 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
 
                   break; 
                 }
-              }           
+              }         
             }
           );
-        }
+        }      
 
       }
       else 
@@ -329,8 +356,9 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
      * @param groupName {String}
      *   The name of the group
      * 
-     * @param removeList {Array}
-     *   String array of display names to remove
+     * @param removeMap {Map}
+     *   Map of the three categories of users to remove 
+     *   (users, waitlist, and requested)
      * 
      * @param error {Error}
      *   The error object
@@ -339,11 +367,12 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
      *   The array of removed user display names, an error otherwise
      * 
      */ 
-    removeGroupUsers : function(groupName, removeList, error)
+    removeGroupUsers : function(groupName, removeMap, error)
     {
       var        group;
       var        groupData; 
       var        removedUsers = [];
+      var        returnMap = {}; 
       var        whoami;
 
       // Check for existence and ownership
@@ -358,19 +387,21 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       }
 
       // Convert all display names to user ids
-      removeList = this._mapUsernamesToIds(removeList); 
+      removeMap.users = this._mapUsernamesToIds(removeMap.users); 
+      removeMap.waitList = this._mapUsernamesToIds(removeMap.waitList); 
+      removeMap.requestedUsers = this._mapUsernamesToIds(removeMap.requested); 
 
       // Get logged in user
       whoami = this.getWhoAmI();
 
-      // Remove each user on the removeList from the user array
-      removeList.forEach(
+      // Remove each user on the removeMap from their respective array
+      removeMap.users.forEach(
         function(user)
         {
           for(var i = 0; i < groupData.users.length; i++)
           {
             // User cannot remove themselves from the group
-            if(user == groupData.users[i] && user == whoami.id)
+            if(user == groupData.users[i] && user != whoami.id)
             {
               delete groupData.users[i];
               removedUsers.push(user);
@@ -380,11 +411,62 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
           }
         }
       );
+
+      removeMap.waitList.forEach(
+        function(user)
+        {
+          for(var i = 0; i < groupData.joiningUsers.length; i++)
+          {
+            if(user == groupData.joiningUsers[i])
+            {
+              delete groupData.joiningUsers[i];
+              removedUsers.push(user);
+
+              break;
+            }
+          }
+        }
+      );
+
+      // Ensure field is not null 
+      if (groupData.joiningUsers == null)
+      {
+        groupData.joiningUsers = [];
+      }
+
+      removeMap.requestedUsers.forEach(
+        function(user)
+        {
+          for(var i = 0; i < groupData.requestedUsers.length; i++)
+          {
+            // User cannot remove themselves from the group
+            if(user == groupData.requestedUsers[i])
+            {
+              delete groupData.requestedUsers[i];
+              removedUsers.push(user);
+
+              break;
+            }
+          }
+        }
+      );
+
+      // Ensure field is not null 
+      if (groupData.requestedUsers == null)
+      {
+        groupData.requestedUsers = [];
+      }
   
+      // Prep map for return
+      returnMap.users = this._mapIdToDisplayname(groupData.users);
+      returnMap.requestedUsers 
+        = this._mapIdToDisplayname(groupData.requestedUsers);
+      returnMap.joiningUsers = this._mapIdToDisplayname(groupData.joiningUsers);
+
       // Save back onto db
       group.put();
 
-      return removedUsers;    
+      return returnMap;    
     },
 
     /**
@@ -639,7 +721,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       // Do nothing if the array is not filled
       if (usernameArray == null || usernameArray.length == 0)
       {
-        return null;
+        return [];
       }
 
       userIdMap = usernameArray.map(
