@@ -44,6 +44,16 @@ qx.Class.define("aiagallery.main.Constant",
         PublicUser : "PublicUser",
         Contest    : "Contest",
         Groups     : "Groups"
-      }
+      },
+
+    // Group types
+    GroupTypes :
+    {
+      General     : "General",
+      Educational : "Educational",
+      K8          : "K-8",
+      HS          : "High School",
+      College     : "College/University"
+    }
   }
 });

@@ -408,6 +408,9 @@ qx.Mixin.define("aiagallery.dbif.MDbifCommon",
       case "getPublicUserProfile":
         return true; 
 
+      //
+      // MGroup
+      //
       case "addOrEditGroup":
       case "getGroup":
       case "getUserGroups":

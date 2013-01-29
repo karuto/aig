@@ -143,6 +143,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       var             groupNameField;
       var             groupDescriptionField;
       var             groupUsersField;
+      var             groupTypeBox; 
 
       var             label; 
 
@@ -158,8 +159,13 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       var             userDataArray;
       var             waitListDataArray; 
       var             requestListDataArray; 
+      var             translatedTxt; 
+      var             eduTypeRadioButtonGroup;
+      var             radioButton;
+      var             scrollContainer;
 
       // Layouts
+      var            outerCanvas; 
       var             mainHBox;
       var             userHBox; 
       var             hBox;
@@ -167,6 +173,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       var             vBoxText; 
       var             listLayout; 
 
+      // MAIN LAYOUTS
       // Horizatal layout to hold group management 
       layout = new qx.ui.layout.HBox();
       layout.setSpacing(10);      
@@ -177,6 +184,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       layout.setSpacing(10);      
       userHBox = new qx.ui.container.Composite(layout);
 
+      // LAYOUTS WITHIN MAIN LAYOUT
       // Create a vertical box for the buttons
       layout = new qx.ui.layout.VBox();
       layout.setSpacing(10);      
@@ -300,6 +308,61 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       this.fsm.addObject("groupUsersField", 
          groupUsersField,"main.fsmUtils.disable_during_rpc");
     
+      // Type of group
+      groupTypeBox = new qx.ui.form.SelectBox(); 
+
+      // Add group types
+      translatedTxt = this.tr("General");
+      groupTypeBox.add(new qx.ui.form.ListItem(translatedTxt));
+
+      translatedTxt = this.tr("Educational");
+      groupTypeBox.add(new qx.ui.form.ListItem(translatedTxt));
+
+      // Create radio buttons for use if a user selects
+      // an educational group type
+      eduTypeRadioButtonGroup = new qx.ui.form.RadioButtonGroup();
+
+      translatedTxt = this.tr("K-8");
+      radioButton = new qx.ui.form.RadioButton(translatedTxt);
+      eduTypeRadioButtonGroup.add(radioButton); 
+
+      translatedTxt = this.tr("High School");
+      radioButton = new qx.ui.form.RadioButton(translatedTxt);
+      eduTypeRadioButtonGroup.add(radioButton); 
+
+      translatedTxt = this.tr("College / University");
+      radioButton = new qx.ui.form.RadioButton(translatedTxt);
+      eduTypeRadioButtonGroup.add(radioButton); 
+
+      // This group starts disabled 
+      eduTypeRadioButtonGroup.setEnabled(false); 
+
+      // If a user selects an educational group then
+      // display some subgroup info
+      groupTypeBox.addListener("changeSelection", 
+        function(e)
+          {
+            // Is the new selection educational
+            var label = groupTypeBox.getSelection()[0].getLabel();
+            
+            if (label == aiagallery.main.Constant.GroupTypes.Educational)
+            {
+              // Display Radiobuttons
+              eduTypeRadioButtonGroup.setEnabled(true);
+            } 
+            else 
+            {
+              // Hide Radiobuttons
+              eduTypeRadioButtonGroup.setEnabled(false);
+            }
+
+	  }
+      );
+
+      // Add to text layout 
+      vBoxText.add(groupTypeBox); 
+      vBoxText.add(eduTypeRadioButtonGroup);
+
       // Add vertical layout to horizantal layout
       mainHBox.add(vBoxText); 
 
@@ -322,6 +385,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
 
       groupNameList = new qx.ui.form.List();
       groupNameList.setWidth(150);
+      groupNameList.setHeight(300); 
       groupNameList.addListener("changeSelection", 
         this.fsm.eventListener, this.fsm);
 
@@ -353,9 +417,6 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       // Need to be able to access this list from the fsm 
       this.fsm.addObject("groupNameList", 
         groupNameList, "main.fsmUtils.disable_during_rpc");     
-
-      // Add to main layout 
-      container.add(mainHBox);
 
       // Reinit vbox to hold btns for user management 
       layout = new qx.ui.layout.VBox();
@@ -516,7 +577,22 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       userGroupBox.add(listLayout);
       userHBox.add(userGroupBox); 
 
-      container.add(userHBox);
+      // Outer canvas holds the two layouts that comprise the
+      // management gui
+      outerCanvas = new qx.ui.container.Composite(new qx.ui.layout.VBox());
+
+      outerCanvas.add(mainHBox); 
+      outerCanvas.add(userHBox);
+
+      // Put whole page into scroller
+      scrollContainer = new qx.ui.container.Scroll();
+
+      // Need to set heigh manually as this container is within 
+      // a special widget 
+      scrollContainer.setHeight(500); 
+      scrollContainer.add(outerCanvas); 
+
+      container.add(scrollContainer);
 
     },
     
@@ -681,8 +757,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
 
       case "addOrEditGroup":
         // If the group did not exist add it to the list
-        // if it did, do nothing 
- 
+        // if it did, do nothing  
         result = response.data.result;
         
         // Is this a new group or an existing one
