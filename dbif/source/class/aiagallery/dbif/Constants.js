@@ -224,6 +224,16 @@ qx.Class.define("aiagallery.dbif.Constants",
       mgmtDeleteGroup  : "Delete any group (admin only)"
      
     },
+
+    // Group types
+    GroupTypes :
+    {
+      General     : "General",
+      Educational : "Educational",
+      K8          : "K-8",               // Subtype
+      HS          : "High School",       // Subtype
+      College     : "College/University" // Subtype
+    },
     
     // Log messages. Comments above each are required parameters
     LogMessage :

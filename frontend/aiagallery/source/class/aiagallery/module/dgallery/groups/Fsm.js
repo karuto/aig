@@ -184,6 +184,8 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
           var             name;
           var             description;
           var             requestedUsers;
+          var             groupType; 
+          var             subGroupType;
 
           // Get values from gui
           name = fsm.getObject("groupNameField").getValue();
@@ -196,7 +198,6 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
 
           description = fsm.getObject("groupDescriptionField").getValue();
 
-          // Empty for now
           requestedUsers = fsm.getObject("groupUsersField").getValue();
 
           if(requestedUsers && requestedUsers.length != 0)
@@ -207,13 +208,25 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
           {
             requestedUsers = null; 
           }
+ 
+          // Group Type
+          groupType = fsm.getObject("groupTypeBox")
+                        .getSelection()[0].getLabel().__txt;
+
+          if (groupType == aiagallery.dbif.Constants.GroupTypes.Educational)
+          {
+            // Set the subgroup type
+            subGroupType = fsm.getObject("eduTypeRadioButtonGroup")
+                             .getSelection()[0].getLabel().__txt; 
+          }
 
           // Issue the remote procedure call to execute the query
           request =
             this.callRpc(fsm,
                          "aiagallery.features",
                          "addOrEditGroup",
-                         [ name, description, requestedUsers]
+                         [ name, description, requestedUsers, 
+                           groupType, subGroupType]
                          );
 
           // When we get the result, we'll need to know what type of request

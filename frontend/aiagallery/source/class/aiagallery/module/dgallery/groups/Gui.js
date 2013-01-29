@@ -334,8 +334,9 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       radioButton = new qx.ui.form.RadioButton(translatedTxt);
       eduTypeRadioButtonGroup.add(radioButton); 
 
-      // This group starts disabled 
-      eduTypeRadioButtonGroup.setEnabled(false); 
+      // Need to be able to access the radiobuttons on the fsm
+      this.fsm.addObject("eduTypeRadioButtonGroup", 
+        eduTypeRadioButtonGroup, "main.fsmUtils.disable_during_rpc");   
 
       // If a user selects an educational group then
       // display some subgroup info
@@ -345,7 +346,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
             // Is the new selection educational
             var label = groupTypeBox.getSelection()[0].getLabel();
             
-            if (label == aiagallery.main.Constant.GroupTypes.Educational)
+            if (label == aiagallery.dbif.Constants.GroupTypes.Educational)
             {
               // Display Radiobuttons
               eduTypeRadioButtonGroup.setEnabled(true);
@@ -358,6 +359,13 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
 
 	  }
       );
+
+     // This group starts disabled 
+      eduTypeRadioButtonGroup.setEnabled(false); 
+
+      // Need to be able to access the radiobuttons on the fsm
+      this.fsm.addObject("groupTypeBox", 
+        groupTypeBox, "main.fsmUtils.disable_during_rpc");   
 
       // Add to text layout 
       vBoxText.add(groupTypeBox); 
@@ -627,6 +635,8 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       var             groupWaitList = fsm.getObject("groupWaitList");
       var             groupRequestList = fsm.getObject("groupRequestList");
       var             groupUsersField = fsm.getObject("groupUsersField"); 
+      var             eduTypeRadioButtonGroup = fsm.getObject("eduTypeRadioButtonGroup");
+      var             groupTypeBox = fsm.getObject("groupTypeBox"); 
 
       // We can ignore aborted requests.
       if (response.type == "aborted")
@@ -701,6 +711,31 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
 
             // Select it
             groupNameList.setSelection([name]);
+
+            // Select type/subtype 
+            var children = groupTypeBox.getChildren(); 
+            for(var i = 0; i < children.length; i++)
+            {
+              if(children[i].getLabel() == group.type)
+              {
+                groupTypeBox.setSelection([children[i]]);
+                break; 
+              }
+            }          
+
+            // If there is a subtype selec it
+            if(group.subType)
+            {
+              children = eduTypeRadioButtonGroup.getChildren(); 
+              for(i = 0; i < children.length; i++)
+              {
+                if(children[i].getLabel() == group.subType)
+                {
+                  eduTypeRadioButtonGroup.setSelection([children[i]]);
+                  break; 
+                }
+              }                
+            }
 
             // Convert user lists into data arrays
             userMemberDataArray = new qx.data.Array(group.users);

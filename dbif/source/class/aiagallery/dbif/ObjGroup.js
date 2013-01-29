@@ -23,7 +23,9 @@ qx.Class.define("aiagallery.dbif.ObjGroup",
           "description"     : null,
           "users"           : [],
           "joiningUsers"    : [],
-          "requestedUsers"  : []
+          "requestedUsers"  : [],
+          "type"            : null,
+          "subType"         : null
         });
     }
 
@@ -58,7 +60,14 @@ qx.Class.define("aiagallery.dbif.ObjGroup",
         "requestedUsers" : "StringArray",
 
         /** User ids of visitors waiting to join this group. */
-        "joiningUsers" : "StringArray"
+        "joiningUsers" : "StringArray",
+
+        /** The type of a group as defined in dbif.constants.GroupTypes*/
+        type : "String",
+
+        /** The subtype of a group as defined in dbif.constants.GroupTypes */
+        subType : "String"
+
       };
 
     var canonicalize = 

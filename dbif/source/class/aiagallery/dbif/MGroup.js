@@ -13,7 +13,9 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
   {
     this.registerService("aiagallery.features.addOrEditGroup",
                          this.addOrEditGroup,
-                         [ "groupName", "description"]);
+                         [ "groupName", "description",
+                           "requestedUsers", "groupType", 
+                           "subGroupType"]);
 
     this.registerService("aiagallery.features.getGroup",
                          this.getGroup,
@@ -60,11 +62,25 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
      * @param description {String}
      *   Short description of the group
      * 
+     * @param requestedUsers {Array}
+     *   An array of user displaynames the group owner is requesting 
+     *   to join the group
+     * 
+     * @param groupType {String}
+     *   The type of group this is
+     *  
+     * @param subGroupType {String || null}
+     *   The sub type this group is
+     * 
+     * @param error {Error}
+     *   The error object
+     * 
      * @return {ObjGroup || Error}
      *   Return the group object we made / edited or an error 
      * 
      */
-    addOrEditGroup : function(groupName, description, requestedUsers, error)
+    addOrEditGroup : function(groupName, description, requestedUsers, 
+                              groupType, subGroupType, error)
     {
       var         whoami;
       var         criteria; 
@@ -87,6 +103,14 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
         // Group does not exist, create new one
         // If no description provided it will be null
         groupData.description = description;
+
+        // Assign group type
+        groupData.type = groupType;
+
+        if (subGroupType)
+        {
+          groupData.subType = subGroupType;
+        }
 
         // By design the first user is the owner
         groupData.users = [whoami.id]; 
@@ -123,6 +147,14 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
         // Group exists and belongs to owner          
         // New data
         groupData.description = description;
+
+        // Assign group type
+        groupData.type = groupType;
+
+        if (subGroupType)
+        {
+          groupData.type = subGroupType;
+        }
           
         // Owner may have provided a list of users they want
         // to be part of the group
@@ -855,7 +887,9 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
           description    : groupData.description, 
           users          : null,
           joiningUsers   : null,
-          requestedUsers : null
+          requestedUsers : null,
+          type           : groupData.type, 
+          subType        : groupData.subType
         };
 
       // Convert all user fields from ids to displayNames
