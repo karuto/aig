@@ -232,7 +232,8 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       groupNameField = new qx.ui.form.TextField;
       groupNameField.set(
       {
-        width     : 200
+        width     : 200,
+        maxLength : aiagallery.dbif.Constants.FieldLength.Title
       });
       vBoxText.add(groupNameField);
 
@@ -265,11 +266,12 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       label = new qx.ui.basic.Label(this.tr("Description:"));
       vBoxText.add(label);
          
-      // Create a textfield to enter a description for the pGroup
-      groupDescriptionField = new qx.ui.form.TextField;
+      // Create a textarea to enter a description for the pGroup
+      groupDescriptionField = new qx.ui.form.TextArea;
       groupDescriptionField.set(
       {
-        width     : 200
+        width     : 200,
+        maxLength : aiagallery.dbif.Constants.FieldLength.Group
       });
 
       // Add textfield to layout
@@ -283,11 +285,12 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       label =  new qx.ui.basic.Label(this.tr("Request the Following Users (seperate by comma):"));
       vBoxText.add(label);
          
-      // Create a textfield to enter a description for the group
+      // Create a textfield to request specific users
       groupUsersField = new qx.ui.form.TextField;
       groupUsersField.set(
       {
-        width     : 200
+        width     : 200,
+        maxLength : aiagallery.dbif.Constants.FieldLength.Group
       });
 
       // Add textfield to layout

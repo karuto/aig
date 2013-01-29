@@ -408,6 +408,20 @@ qx.Mixin.define("aiagallery.dbif.MDbifCommon",
       case "getPublicUserProfile":
         return true; 
 
+      case "addOrEditGroup":
+      case "getGroup":
+      case "getUserGroups":
+      case "joinGroup": 
+      case "approveUsers":   
+      case "approveAllUsers":
+      case "removeGroupUsers":
+      case "deleteGroup":
+        return ! bAnonymous; // Allowed if logged in
+
+      case "mgmtDeleteGroup": 
+        // Allowed if has access 
+        return aiagallery.dbif.MDbifCommon._deepPermissionCheck(methodName);
+
       default:
         // Do not allow access to unrecognized method names
         return false;

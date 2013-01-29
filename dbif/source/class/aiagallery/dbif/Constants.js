@@ -75,6 +75,7 @@ qx.Class.define("aiagallery.dbif.Constants",
       Tags        : 20,
       Comment     : 480,
       Bio         : 480,
+      Group       : 480, 
       User        : 100 
     },
 
@@ -207,7 +208,21 @@ qx.Class.define("aiagallery.dbif.Constants",
       //
       "getMotd" : "Get the message of the day",
       "setMotd" : "Set the message of the day",
-      "sendEmail" : "Send email to a user"
+      "sendEmail" : "Send email to a user",
+
+      // 
+      // MGroup
+      //
+      addOrEditGroup   : "Create/Edit a group a user owns",
+      getGroup         : "Get information about a group",
+      getUserGroups    : "Get the groups a user owns",
+      joinGroup        : "Request to join a group", 
+      approveUsers     : "Approve a user for access to a group",
+      approveAllUsers  : "Approve all waiting users for group access",
+      removeGroupUsers : "Remove a user from group access",
+      deleteGroup      : "Delete a group a user owns", 
+      mgmtDeleteGroup  : "Delete any group (admin only)"
+     
     },
     
     // Log messages. Comments above each are required parameters

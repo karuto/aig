@@ -199,7 +199,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
           // Empty for now
           requestedUsers = fsm.getObject("groupUsersField").getValue();
 
-          if(requestedUsers.length != 0)
+          if(requestedUsers && requestedUsers.length != 0)
           {
             requestedUsers = requestedUsers.split(",");
           }
