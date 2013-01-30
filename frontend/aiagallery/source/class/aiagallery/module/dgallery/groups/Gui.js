@@ -180,6 +180,9 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       // Add to main layout
       container.add(searchLayout); 
 
+      // Browse categories 
+      
+
       // Create the container to hold all the group objects
       this.groupContainer = new qx.ui.container.Composite(new qx.ui.layout.VBox());
 
