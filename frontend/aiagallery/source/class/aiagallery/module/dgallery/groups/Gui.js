@@ -27,7 +27,8 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
     {
       var             o;
       var             fsm = module.fsm;
-      var             canvas = module.canvas;
+      var             canvas;
+      var             outerCanvas = module.canvas;
       var             manageCanvas;
       var             browseCanvas;
       var             btnManage;
@@ -36,6 +37,8 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
 
       // Layouts
       var             btnLayout; 
+
+      var             scrollContainer; 
 
       // Need to access the fsm from other functions
       this.fsm = fsm; 
@@ -46,6 +49,13 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
 
       this.__radioView = 
         new aiagallery.widget.radioview.RadioView(this.tr("Groups: "));
+
+      // Put whole page into scroller
+      scrollContainer = new qx.ui.container.Scroll();
+
+      canvas = new qx.ui.container.Composite(new qx.ui.layout.VBox); 
+      scrollContainer.add(canvas); 
+      outerCanvas.add(scrollContainer, {flex : 1});
 
       canvas.add(this.__radioView); 
 
@@ -592,16 +602,8 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       outerCanvas.add(mainHBox); 
       outerCanvas.add(userHBox);
 
-      // Put whole page into scroller
-      scrollContainer = new qx.ui.container.Scroll();
-
-      // Need to set heigh manually as this container is within 
-      // a special widget 
-      scrollContainer.setHeight(500); 
-      scrollContainer.add(outerCanvas); 
-
-      container.add(scrollContainer);
-
+      // Container is the main layout for this radioButton page
+      container.add(outerCanvas); 
     },
     
     /**
