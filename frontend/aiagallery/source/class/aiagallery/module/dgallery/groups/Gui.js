@@ -460,8 +460,11 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       groupNameList = new qx.ui.form.List();
       groupNameList.setWidth(150);
       groupNameList.setHeight(300); 
-      groupNameList.addListener("changeSelection", 
-        this.fsm.eventListener, this.fsm);
+
+      // We will add a changeSelection listener to the FSM
+      // In the handleResponse appear switch statement.
+      // This ensures on appear we do not immediately call
+      // getGroup unnecessarily
 
       // Ensure one item is always selected if possible
       groupNameList.setSelectionMode("single"); 
@@ -819,8 +822,9 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
           eduTypeRadioButtonGroup.setEnabled(false); 
         }
       
-        // Populate list of existing groups
-        // Each item on the list has a button to ask to join group
+        // Start listening for changes on name list
+        groupNameList.addListener("changeSelection", 
+          fsm.eventListener, this.fsm);
  
         break; 
       
