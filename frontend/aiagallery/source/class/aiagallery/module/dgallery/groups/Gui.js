@@ -751,6 +751,18 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
           }, this);
 
 
+        // If the currently selected group has an educational type
+        // enable the radio buttons, else disable
+        if( groupTypeBox.getSelection()[0].getLabel() 
+          ==  aiagallery.dbif.Constants.GroupTypes.Educational)
+        {
+          eduTypeRadioButtonGroup.setEnabled(true);
+        }
+        else 
+        {
+          eduTypeRadioButtonGroup.setEnabled(false); 
+        }
+      
         // Populate list of existing groups
         // Each item on the list has a button to ask to join group
  
@@ -787,7 +799,13 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
           // Clear out user lists    
           groupUsersList.removeAll(); 
           groupWaitList.removeAll();
-          groupRequestList.removeAll();     
+          groupRequestList.removeAll();  
+
+          // Reset type info 
+          // Select the first child
+          var children = groupTypeBox.getChildren(); 
+          groupTypeBox.setSelection(children[0]); 
+          eduTypeRadioButtonGroup.setEnabled(false); 
         }
       
         break;
@@ -840,6 +858,18 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
         groupNameField.setValue("");
         groupUsersField.setValue(""); 
 
+        // If the currently selected group has an educational type
+        // enable the radio buttons, else disable
+        if( groupTypeBox.getSelection()[0].getLabel() 
+          ==  aiagallery.dbif.Constants.GroupTypes.Educational)
+        {
+          eduTypeRadioButtonGroup.setEnabled(true);
+        }
+        else 
+        {
+          eduTypeRadioButtonGroup.setEnabled(false); 
+        }
+
         break;
 
       case "getGroup":
@@ -858,6 +888,43 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
         this.userController.setModel(userMemberDataArray); 
         this.waitListController.setModel(userWaitList);
         this.requestListController.setModel(userRequestList); 
+
+        // Update type
+        var children = groupTypeBox.getChildren(); 
+        for(var i = 0; i < children.length; i++)
+        {
+          if(children[i].getLabel() == result.type)
+          {
+            groupTypeBox.setSelection([children[i]]);
+            break; 
+          }
+        }          
+
+        // If there is a subtype select it
+        if(result.subType)
+        {
+          children = eduTypeRadioButtonGroup.getChildren(); 
+          for(i = 0; i < children.length; i++)
+          {
+            if(children[i].getLabel() == result.subType)
+            {
+              eduTypeRadioButtonGroup.setSelection([children[i]]);
+              break; 
+            }
+          }                
+        }
+
+        // If the currently selected group has an educational type
+        // enable the radio buttons, else disable
+        if( groupTypeBox.getSelection()[0].getLabel() 
+          ==  aiagallery.dbif.Constants.GroupTypes.Educational)
+        {
+          eduTypeRadioButtonGroup.setEnabled(true);
+        }
+        else 
+        {
+          eduTypeRadioButtonGroup.setEnabled(false); 
+        }
 
         break;
 

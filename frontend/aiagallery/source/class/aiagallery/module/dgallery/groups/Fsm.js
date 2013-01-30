@@ -218,6 +218,10 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
             // Set the subgroup type
             subGroupType = fsm.getObject("eduTypeRadioButtonGroup")
                              .getSelection()[0].getLabel().__txt; 
+          } 
+          else 
+          {
+            subGroupType = null; 
           }
 
           // Issue the remote procedure call to execute the query

@@ -153,7 +153,11 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
 
         if (subGroupType)
         {
-          groupData.type = subGroupType;
+          groupData.subType = subGroupType;
+        }
+        else 
+        {
+          groupData.subType = null; 
         }
           
         // Owner may have provided a list of users they want
