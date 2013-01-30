@@ -121,9 +121,19 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
      */
     _browseGroups : function(container)
     {
-      var      groupScroller;
-      var      vBox; 
+      //var      groupScroller;
 
+      // Layouts
+      var      vBox; 
+      var      layout;
+      var      searchLayout; 
+
+      // GUI Objects
+      var      searchTextField;
+      var      searchButton; 
+      var      label; 
+
+/* Not needed since main page is in a scroller
       // Create the scroller to hold all of the groups
       groupScroller = new qx.ui.container.Scroll();
       container.add(groupScroller, {flex : 1});
@@ -132,7 +142,50 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       vBox = new qx.ui.layout.VBox();
       this.groupScrollContainer =
         new qx.ui.container.Composite(vBox);
-      groupScroller.add(this.groupScrollContainer);      
+      groupScroller.add(this.groupScrollContainer);
+*/ 
+      // Create a search bar to search for groups
+      layout = new qx.ui.layout.HBox();
+      layout.setSpacing(5);      
+      searchLayout = new qx.ui.container.Composite(layout);
+
+      // Description label
+      label = new qx.ui.basic.Label(this.tr("Find a group"));
+
+      // Text field to enter search query
+      searchTextField = new qx.ui.form.TextField;
+      searchTextField.setWidth(500); 
+
+      // Need to access the field on the fsm
+      this.fsm.addObject("searchTextField", 
+         searchTextField, "main.fsmUtils.disable_during_rpc");     
+
+      // Button to execute search
+      searchButton = new qx.ui.form.Button(this.tr("Search"));
+      searchButton.addListener("execute", this.fsm.eventListener, this.fsm);
+
+      // We'll be receiving events on the object so save its friendly name
+      this.fsm.addObject("searchBtn", 
+         searchButton, "main.fsmUtils.disable_during_rpc");      
+
+      // Allow 'Enter' to fire a search
+      //command = new qx.ui.core.Command("Enter");
+      //this.searchButton.setCommand(command);
+
+      // Add label, button. and search text field to layout
+      searchLayout.add(label); 
+      searchLayout.add(searchTextField);
+      searchLayout.add(searchButton);
+    
+      // Add to main layout
+      container.add(searchLayout); 
+
+      // Create the container to hold all the group objects
+      this.groupContainer = new qx.ui.container.Composite(new qx.ui.layout.VBox());
+
+      // Add to layout
+      container.add(this.groupContainer); 
+      
     },
 
     /**
@@ -966,6 +1019,15 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
         this.userController.setModel(userMemberDataArray); 
         this.waitListController.setModel(userWaitList);
         break;
+
+      case "groupSearch":
+        result = response.data.result;
+
+        // Create gui group obj for each found group
+
+        // Update the container with all the found groups
+
+        break; 
 
       default:
         throw new Error("Unexpected request type: " + requestType);

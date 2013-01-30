@@ -425,6 +425,9 @@ qx.Mixin.define("aiagallery.dbif.MDbifCommon",
         // Allowed if has access 
         return aiagallery.dbif.MDbifCommon._deepPermissionCheck(methodName);
 
+      case "groupSearch":
+        return true; // Allowed for all users 
+
       default:
         // Do not allow access to unrecognized method names
         return false;

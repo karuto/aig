@@ -48,6 +48,10 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
     this.registerService("aiagallery.features.mgmtDeleteGroup",
                          this.mgmtDeleteGroup,
                          [ "groupName" ]);
+
+    this.registerService("aiagallery.features.groupSearch",
+                         this.groupSearch,
+                         [ "query" ]);
   },
 
   members :
@@ -685,6 +689,103 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
 
       return returnMap;
 
+    },
+
+    /**
+     * Find groups with this name
+     * 
+     * @param query {String}
+     *   The search query
+     * 
+     * @return {Array}
+     *   An array of group objects that satisfy the search
+     */
+    groupSearch : function (query)
+    {
+      var        criteria;
+      var        whoami;
+      var        resultList; 
+      var        returnList = []; 
+
+      // FIXME MAKE USUSABLE FOR ANON USER 
+
+      // Get logged in user
+      whoami = this.getWhoAmI();
+
+      criteria =
+        {
+          type  : "element",
+          field : "name",
+          value : query
+        }; 
+
+      resultList = liberated.dbif.Entity.query("aiagallery.dbif.ObjGroup",
+                                               criteria);
+
+      // For each found group convert to a map after determining status
+      // of searching user in relation to the group
+      resultList.forEach(
+        function(group)
+        {
+          var     status;
+          var     i; 
+          var     map;
+  
+          // Does the user owner the group
+          if (group.owner == whoami.id)
+          {
+            status = aiagallery.dbif.Constants.GroupStatus.Owner; 
+          } 
+          else if (!status)
+          {
+            for (i = 0; i < group.users.length; i++)
+            {
+              if (group.users[i] == whoami.id)
+              {
+                status = aiagallery.dbif.Constants.GroupStatus.Member; 
+                break;
+              }
+            }  
+          }
+          else if (!status)
+          {
+            for (i = 0; i < group.joiningUsers.length; i++)
+            {
+              if (group.joiningUsers[i] == whoami.id)
+              {
+                status = aiagallery.dbif.Constants.GroupStatus.WaitList; 
+                break;
+              }
+            }  
+          }
+          else if (!status)
+          {
+            for (i = 0; i < group.requestedUsers.length; i++)
+            {
+              if (group.requestedUsers[i] == whoami.id)
+              {
+                status = aiagallery.dbif.Constants.GroupStatus.Requested; 
+                break;
+              }
+            }  
+          }
+          else 
+          {
+            status = aiagallery.dbif.Constants.GroupStatus.NonMemeber;
+          }
+
+          // Convert group to map
+          map = this._turnToMap(group); 
+
+          // Add status part
+          map["Status"] = status; 
+          
+          returnList.push(map); 
+	}
+
+      , this);
+
+      return returnList; 
     },
 
     /**

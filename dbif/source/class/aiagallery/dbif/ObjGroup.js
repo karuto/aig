@@ -63,10 +63,10 @@ qx.Class.define("aiagallery.dbif.ObjGroup",
         "joiningUsers" : "StringArray",
 
         /** The type of a group as defined in dbif.constants.GroupTypes*/
-        type : "String",
+        "type" : "String",
 
         /** The subtype of a group as defined in dbif.constants.GroupTypes */
-        subType : "String"
+        "subType" : "String"
 
       };
 

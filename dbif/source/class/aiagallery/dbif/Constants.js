@@ -103,6 +103,16 @@ qx.Class.define("aiagallery.dbif.Constants",
       "root"
     ],
 
+    /** Status of a user in realtion to a group */
+    GroupStatus :
+    {
+      NonMember : 0,
+      WaitList  : 1,
+      Requested : 2,
+      Memeber   : 3, 
+      Owner     : 4
+    },
+
     /** Mapping of permission names to descriptions */
     Permissions :
     {
@@ -221,7 +231,8 @@ qx.Class.define("aiagallery.dbif.Constants",
       approveAllUsers  : "Approve all waiting users for group access",
       removeGroupUsers : "Remove a user from group access",
       deleteGroup      : "Delete a group a user owns", 
-      mgmtDeleteGroup  : "Delete any group (admin only)"
+      mgmtDeleteGroup  : "Delete any group (admin only)",
+      groupSearch      : "Look for a group"
      
     },
 

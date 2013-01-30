@@ -71,7 +71,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
           "appear"    :
           {
             "main.canvas" : 
-              qx.util.fsm.FiniteStateMachine.EventHandling.PREDICATE
+              "Transition_Idle_to_AwaitRpcResult_via_appear"
           },
 
           // When we get a disappear event
@@ -83,6 +83,10 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
           // Button clicks
           "execute":
           {
+            // Browse Buttons
+            "searchBtn" : "Transition_Idle_to_AwaitRpcResult_via_groupSearch",
+
+            // Management Buttons
             "saveBtn" : "Transition_Idle_to_AwaitRpcResult_via_save", 
 
             "deleteBtn" : "Transition_Idle_to_AwaitRpcResult_via_delete",
@@ -94,7 +98,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
               "Transition_Idle_to_AwaitRpcResult_via_approveGroupUser",   
 
             "removeGroupUsers" :
-              "Transition_Idle_to_AwaitRpcResult_via_removeGroupUsers"  
+              "Transition_Idle_to_AwaitRpcResult_via_removeGroupUsers" 
           },
 
           "changeSelection":
@@ -108,9 +112,64 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
       // Replace the initial Idle state with this one
       fsm.replaceState(state, true);
 
+      // BROWSE RPCS
+      /*
+       * Transition: Idle to AwaitRpcResult
+       *
+       * Cause: User excuted a search for a group
+       *
+       * Action:
+       *  Get and return groups of this name
+       */
+      trans = new qx.util.fsm.Transition(
+        "Transition_Idle_to_AwaitRpcResult_via_groupSearch",
+      {
+        "nextState" : "State_AwaitRpcResult",
 
-      // The following transitions have a predicate, so must be listed first
+        "context" : this,
 
+        "predicate" : function(fsm, event)
+        {
+          if(fsm.getObject("searchTextField")
+                   .getValue().trim().length != 0)
+          { 
+            // Accept
+            return true;
+          }
+          else 
+          {
+            // Ignore search it is empty 
+            return null; 
+          }
+        },
+
+        "ontransition" : function(fsm, event)
+        {
+          var             request;
+          var             query;
+
+          // Get values from gui
+          query = fsm.getObject("searchTextField")
+                   .getValue().trim(); 
+
+          // Issue the remote procedure call to execute the query
+          request =
+            this.callRpc(fsm,
+                         "aiagallery.features",
+                         "groupSearch",
+                         [ query ]
+                         );
+
+          // When we get the result, we'll need to know what type of request
+          // we made.
+          request.setUserData("requestType", "groupSearch");
+
+        }
+      });
+
+      state.addTransition(trans);
+      
+      // MANAGEMENT RPCS 
       /*
        * Transition: Idle to Idle
        *
