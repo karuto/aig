@@ -232,7 +232,8 @@ qx.Class.define("aiagallery.dbif.Constants",
       removeGroupUsers : "Remove a user from group access",
       deleteGroup      : "Delete a group a user owns", 
       mgmtDeleteGroup  : "Delete any group (admin only)",
-      groupSearch      : "Look for a group"
+      groupSearch      : "Look for a group",
+      requestUsers     : "Request users to join a group"
      
     },
 
