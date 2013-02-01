@@ -199,11 +199,11 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
      */
     _manageGroups : function(container)
     {
-      var       layout; 
-
       // Gui objects
+      var             newBtn; 
       var             saveBtn;
-      var             deleteBtn;  
+      var             deleteBtn;
+      var             requestBtn;   
       var             button; 
 
       var             groupNameField;
@@ -230,14 +230,16 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       var             radioButton;
       var             scrollContainer;
 
-      // Layouts
-      var            outerCanvas; 
+      // Layouts / Containers
+      var             outerCanvas; 
       var             mainHBox;
       var             userHBox; 
       var             hBox;
       var             vBoxBtns; 
       var             vBoxText; 
       var             listLayout; 
+      var             requestLayout;
+      var             layout; 
 
       // MAIN LAYOUTS
       // Horizatal layout to hold group management 
@@ -257,8 +259,43 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       vBoxBtns = new qx.ui.container.Composite(layout);
       
       // Space out the buttons to line up things nicely.
-      // Do this by adding a blank label. 
-      vBoxBtns.add(new qx.ui.basic.Label());
+      vBoxBtns.add(new qx.ui.core.Spacer(0, 20));
+
+      // Create an Save Permission Group button
+      newBtn = new qx.ui.form.Button(this.tr("Create New"));
+      newBtn.set(
+      {
+        maxHeight : 24,
+        width     : 100
+      });
+      vBoxBtns.add(newBtn);
+
+      newBtn.addListener("execute", function(e) 
+      {
+        // Clear out all the fields and deselect the group name
+        // Deselet all group names
+        groupNameList.resetSelection(); 
+
+        // Clear out name field 
+        groupNameField.setValue("");  
+        
+        // Clear description field 
+        groupDescriptionField.setValue("");   
+
+        // Clear out requested user field
+        groupUsersField.setValue("");
+
+        // Clear out user lists    
+        groupUsersList.removeAll(); 
+        groupWaitList.removeAll();
+        groupRequestList.removeAll();  
+
+        // Reset type info 
+        // Select the first child
+        var children = groupTypeBox.getChildren(); 
+        groupTypeBox.setSelection([children[0]]); 
+        eduTypeRadioButtonGroup.setEnabled(false); 
+      }, this); 
 
       // Create an Save Permission Group button
       saveBtn = new qx.ui.form.Button(this.tr("Save"));
@@ -290,8 +327,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
 
       // We'll be receiving events on the object so save its friendly name
       this.fsm.addObject("deleteBtn", 
-         deleteBtn, "main.fsmUtils.disable_during_rpc");      
-      mainHBox.add(vBoxBtns); // Add buttons to layout
+         deleteBtn, "main.fsmUtils.disable_during_rpc");            
 
       // Create a vertical layout just for the two textfields and labels.
       layout = new qx.ui.layout.VBox();
@@ -311,25 +347,12 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       });
       vBoxText.add(groupNameField);
 
-      // Only enable add button if there is something in the textfield
+      // Only enable save button if there is something in the textfield
       groupNameField.addListener("input", function(e) 
       {
         var value = e.getData();
         saveBtn.setEnabled(value.length > 0);
         
-        // Deselet all group names
-        groupNameList.resetSelection(); 
-        
-        // Clear description field 
-        groupDescriptionField.setValue("");   
-
-        // Clear out requested user field
-        groupUsersField.setValue("");
-
-        // Clear out user lists    
-        groupUsersList.removeAll(); 
-        groupWaitList.removeAll();
-        groupRequestList.removeAll();     
       }, this); 
 
       // Create friendly name to get it from the FSM
@@ -354,25 +377,6 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       // Create friendly name to get it from the FSM
       this.fsm.addObject("groupDescriptionField", 
          groupDescriptionField,"main.fsmUtils.disable_during_rpc");
-
-      // Create a label for describing the textfield
-      label =  new qx.ui.basic.Label(this.tr("Request the Following Users (seperate by comma):"));
-      vBoxText.add(label);
-         
-      // Create a textfield to request specific users
-      groupUsersField = new qx.ui.form.TextField;
-      groupUsersField.set(
-      {
-        width     : 200,
-        maxLength : aiagallery.dbif.Constants.FieldLength.Group
-      });
-
-      // Add textfield to layout
-      vBoxText.add(groupUsersField);
-
-      // Create friendly name to get it from the FSM
-      this.fsm.addObject("groupUsersField", 
-         groupUsersField,"main.fsmUtils.disable_during_rpc");
     
       // Type of group
       groupTypeBox = new qx.ui.form.SelectBox(); 
@@ -423,10 +427,10 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
               eduTypeRadioButtonGroup.setEnabled(false);
             }
 
-	  }
+          }
       );
 
-     // This group starts disabled 
+      // This group starts disabled 
       eduTypeRadioButtonGroup.setEnabled(false); 
 
       // Need to be able to access the radiobuttons on the fsm
@@ -437,15 +441,20 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       vBoxText.add(groupTypeBox); 
       vBoxText.add(eduTypeRadioButtonGroup);
 
-      // Add vertical layout to horizantal layout
-      mainHBox.add(vBoxText); 
-
       // Create a set of finder-style multi-level browsing groups
       // This will show the groups a user owns and users in the group
       ownedGroupBox = new qx.ui.groupbox.GroupBox("Group Management");
       ownedGroupBox.setLayout(new qx.ui.layout.HBox());
       ownedGroupBox.setContentPadding(5);
+
+      // All gorup manage gui objects made tweak order
       mainHBox.add(ownedGroupBox);
+
+      // Add vertical layout to horizantal layout
+      mainHBox.add(vBoxText); 
+
+      // Add buttons to layout
+      mainHBox.add(vBoxBtns); 
 
       // create and add the lists.
       // 
@@ -479,11 +488,11 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
         if (bEnable)
         {
           // Clear name field as long as something is selected
-          groupNameField.setValue(""); 
+          //groupNameField.setValue(""); 
 
           // Put the selected name in the name field
-          //var value = groupNameList.getSelection()[0].getLabel(); 
-          //groupNameField.setValue(value); 
+          var value = groupNameList.getSelection()[0].getLabel(); 
+          groupNameField.setValue(value); 
         }
       }, this); 
 
@@ -503,7 +512,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       // Space the buttons down by one by adding a spacer
       vBoxBtns.add(new qx.ui.basic.Label()); 
 
-      // Create a Delete button
+      // Create a remove user button
       button = new qx.ui.form.Button(this.tr("Remove User(s)"));
       button.set(
       {
@@ -647,19 +656,64 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
 
       // Create controller to add users to groupWait list
       this.requestListController 
-        = new qx.data.controller.List(requestListDataArray, groupRequestList); 
+        = new qx.data.controller.List(requestListDataArray, groupRequestList);
 
       // Add to layout 
       listLayout.add(groupRequestList);
       userGroupBox.add(listLayout);
       userHBox.add(userGroupBox); 
 
-      // Outer canvas holds the two layouts that comprise the
+      // Layout to hold the request user section
+      requestLayout = new qx.ui.container.Composite(new qx.ui.layout.HBox(10));
+
+      // Create a request button
+      requestBtn = new qx.ui.form.Button(this.tr("Request Users"));
+      requestBtn.set(
+      {
+        maxHeight : 24,
+        width     : 150,
+        enabled   : false
+      });
+      requestLayout.add(requestBtn);
+      requestBtn.addListener("execute", this.fsm.eventListener, this.fsm);
+
+      // We'll be receiving events on the object so save its friendly name
+      this.fsm.addObject("requestBtn", 
+         requestBtn, "main.fsmUtils.disable_during_rpc");    
+
+      // Hold label and text area
+      layout =  new qx.ui.container.Composite(new qx.ui.layout.VBox(10));    
+
+      // Create a label for describing the textfield
+      label =  new qx.ui.basic.Label(this.tr("Request the Following Users (seperate by comma):"));
+      layout.add(label);
+         
+      // Create a textfield to request specific users
+      groupUsersField = new qx.ui.form.TextArea;
+      groupUsersField.set(
+      {
+        maxWidth     : 350,
+        maxHeight    : 350
+        //maxLength    : aiagallery.dbif.Constants.FieldLength.Group
+      });
+
+      // Add textfield to layout
+      layout.add(groupUsersField);
+      requestLayout.add(layout);
+
+      // Create friendly name to get it from the FSM
+      this.fsm.addObject("groupUsersField", 
+         groupUsersField,"main.fsmUtils.disable_during_rpc"); 
+
+      // Outer canvas holds the layouts that comprise the
       // management gui
       outerCanvas = new qx.ui.container.Composite(new qx.ui.layout.VBox());
 
       outerCanvas.add(mainHBox); 
+      outerCanvas.add(new qx.ui.core.Spacer(0, 30)); 
       outerCanvas.add(userHBox);
+      outerCanvas.add(new qx.ui.core.Spacer(0, 30));
+      outerCanvas.add(requestLayout); 
 
       // Container is the main layout for this radioButton page
       container.add(outerCanvas); 
@@ -687,6 +741,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       var             userMemberDataArray;
       var             userRequestList;
       var             userWaitList;
+      var             warnString; 
 
       // Objects from the gui we will add/subtract from
       var             groupNameField = fsm.getObject("groupNameField");
@@ -719,7 +774,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
                response.data.code == 5 )
       {
         // Special error
-        var warnString = "";
+        warnString = "";
 
         switch(response.data.code)
         {
@@ -850,6 +905,9 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
         // If there are no remaning groups left clear fields/lists
         if (groupNameList.getSelection().length == 0)
         {
+          // Clear our name field 
+          groupNameField.setValue("");
+
           // Clear out requested user field
           groupUsersField.setValue("");
 
@@ -864,7 +922,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
           // Reset type info 
           // Select the first child
           var children = groupTypeBox.getChildren(); 
-          groupTypeBox.setSelection(children[0]); 
+          groupTypeBox.setSelection([children[0]]); 
           eduTypeRadioButtonGroup.setEnabled(false); 
         }
       
@@ -914,10 +972,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
           // New 
           groupDescriptionField.setValue("");   
         }
-        
-        groupNameField.setValue("");
-        groupUsersField.setValue(""); 
-
+            
         // If the currently selected group has an educational type
         // enable the radio buttons, else disable
         if( groupTypeBox.getSelection()[0].getLabel() 
@@ -1026,6 +1081,31 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
         this.userController.setModel(userMemberDataArray); 
         this.waitListController.setModel(userWaitList);
         break;
+
+      case "requestUsers":
+        result = response.data.result;
+
+        // Convert user lists into data arrays
+        userMemberDataArray = new qx.data.Array(result.users);
+        userWaitList = new qx.data.Array(result.joiningUsers);
+        userRequestList = new qx.data.Array(result.requestedUsers); 
+
+        // Populate lists 
+        this.userController.setModel(userMemberDataArray); 
+        this.waitListController.setModel(userWaitList);
+        this.requestListController.setModel(userRequestList); 
+
+        // Clear out requestUser text area
+        groupUsersField.setValue(""); 
+
+        // Popup with any bad names we found
+        if(result.badUsers.length != 0)
+        {
+          warnString = "The following names/emails were not found: "; 
+          dialog.Dialog.warning(warnString + result.badUsers);
+        }
+
+        break; 
 
       case "groupSearch":
         result = response.data.result;

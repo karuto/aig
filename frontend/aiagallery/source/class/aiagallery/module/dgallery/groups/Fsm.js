@@ -98,7 +98,10 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
               "Transition_Idle_to_AwaitRpcResult_via_approveGroupUser",   
 
             "removeGroupUsers" :
-              "Transition_Idle_to_AwaitRpcResult_via_removeGroupUsers" 
+              "Transition_Idle_to_AwaitRpcResult_via_removeGroupUsers", 
+
+            "requestBtn" :
+              "Transition_Idle_to_AwaitRpcResult_via_requestUsers"
           },
 
           "changeSelection":
@@ -237,12 +240,33 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
 
         "context" : this,
 
+        "predicate" : function(fsm, event)
+        {
+          var      name;
+          var      warnString;
+ 
+          // User must specify group name
+          name = fsm.getObject("groupNameField").getValue().trim();
+          if (name == null || name == "")
+          {
+            // FIXME get this.tr working for this string
+            warnString = "You must specify a group name.";
+
+            dialog.Dialog.warning(warnString);
+
+            return null; 
+          }
+          
+          
+          // Accept this transition
+          return true;
+        },
+
         "ontransition" : function(fsm, event)
         {
           var             request;
           var             name;
           var             description;
-          var             requestedUsers;
           var             groupType; 
           var             subGroupType;
 
@@ -256,17 +280,6 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
           }
 
           description = fsm.getObject("groupDescriptionField").getValue();
-
-          requestedUsers = fsm.getObject("groupUsersField").getValue();
-
-          if(requestedUsers && requestedUsers.length != 0)
-          {
-            requestedUsers = requestedUsers.split(",");
-          }
-          else 
-          {
-            requestedUsers = null; 
-          }
  
           // Group Type
           groupType = fsm.getObject("groupTypeBox")
@@ -288,7 +301,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
             this.callRpc(fsm,
                          "aiagallery.features",
                          "addOrEditGroup",
-                         [ name, description, requestedUsers, 
+                         [ name, description, 
                            groupType, subGroupType]
                          );
 
@@ -566,6 +579,97 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
           // When we get the result, we'll need to know what type of request
           // we made.
           request.setUserData("requestType", "getGroup");
+
+        }
+      });
+
+      state.addTransition(trans);
+
+      /*
+       * Transition: Idle to AwaitRpcResult
+       *
+       * Cause: User hit request users button
+       *
+       * Action:
+       *  Parse the names/emails of requested users 
+       */
+      trans = new qx.util.fsm.Transition(
+        "Transition_Idle_to_AwaitRpcResult_via_requestUsers",
+      {
+        "nextState" : "State_AwaitRpcResult",
+
+        "context" : this,
+
+        "predicate" : function(fsm, event)
+        {
+          var requestedUsers;
+          var name;
+          var warnString; 
+
+          requestedUsers = fsm.getObject("groupUsersField").getValue().trim(); 
+
+          if(requestedUsers == null || requestedUsers == "")
+          { 
+            // Bad request no users to work with
+            warnString = "You must enter in either some user names or user"
+                         + "gmail emails."; 
+
+            dialog.Dialog.warning(warnString); 
+
+            return null; 
+          }
+
+          name = fsm.getObject("groupNameList")
+                   .getSelection()[0].getLabel();
+
+          if(name == null || name == "")
+          { 
+            // Bad request no users to work with
+            warnString = "You must make a group first before"
+			 + " requesting users for it";
+
+            dialog.Dialog.warning(warnString); 
+
+            return null; 
+          }          
+
+          // Accept this transition
+          return true; 
+        },
+
+        "ontransition" : function(fsm, event)
+        {
+          var             request;
+          var             name;
+          var             requestedUsers;
+
+          // Get values from gui
+          name = fsm.getObject("groupNameList")
+                   .getSelection()[0].getLabel();
+
+          // Get requested users
+          requestedUsers = fsm.getObject("groupUsersField").getValue();
+
+          if(requestedUsers && requestedUsers.length != 0)
+          {
+            requestedUsers = requestedUsers.split(",");
+          }
+          else 
+          {
+            requestedUsers = null; 
+          }
+ 
+          // Issue the remote procedure call to execute the query
+          request =
+            this.callRpc(fsm,
+                         "aiagallery.features",
+                         "requestUsers",
+                         [ name, requestedUsers ]
+                         );
+
+          // When we get the result, we'll need to know what type of request
+          // we made.
+          request.setUserData("requestType", "requestUsers");
 
         }
       });

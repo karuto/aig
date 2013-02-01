@@ -14,8 +14,12 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
     this.registerService("aiagallery.features.addOrEditGroup",
                          this.addOrEditGroup,
                          [ "groupName", "description",
-                           "requestedUsers", "groupType", 
+                           "groupType", 
                            "subGroupType"]);
+
+    this.registerService("aiagallery.features.requestUsers",
+                         this.requestUsers,
+                         [ "groupName", "requestedUsers" ]);
 
     this.registerService("aiagallery.features.getGroup",
                          this.getGroup,
@@ -66,10 +70,6 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
      * @param description {String}
      *   Short description of the group
      * 
-     * @param requestedUsers {Array}
-     *   An array of user displaynames the group owner is requesting 
-     *   to join the group
-     * 
      * @param groupType {String}
      *   The type of group this is
      *  
@@ -83,7 +83,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
      *   Return the group object we made / edited or an error 
      * 
      */
-    addOrEditGroup : function(groupName, description, requestedUsers, 
+    addOrEditGroup : function(groupName, description, 
                               groupType, subGroupType, error)
     {
       var         whoami;
@@ -119,27 +119,6 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
         // By design the first user is the owner
         groupData.users = [whoami.id]; 
 
-        // FIME : Possibly send emails to all these users 
-        // Convert all requested users to ids 
-        // Only do so if requested users is not null
-        if (requestedUsers)
-        {
-          requestedUsers = this._mapUsernamesToIds(requestedUsers);
-
-          // User cannot add themselves to requestedUser list
-          for (var i = 0; i < requestedUsers.length; i++)
-          {
-            if (requestedUsers[i] == whoami.id)
-            {
-              // Remove owner from requested user list 
-              requestedUsers.splice(i,1);
-              break; 
-            }
-          }
-
-          groupData.requestedUsers = requestedUsers;    
-        }
-
         // Prep empty arrays
         groupData.joiningUsers = []; 
       } 
@@ -163,86 +142,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
         {
           groupData.subType = null; 
         }
-          
-        // Owner may have provided a list of users they want
-        // to be part of the group
-        //        
-        // Convert all names in list to ids and then check to see 
-        // if the id exists in both joiningUsers array and requestedUsers array.
-        // If it does then both the user and the admin want the user to
-        // join the group. If not add the id to the list.      
-        if (requestedUsers != null &&
-            requestedUsers.length != 0)
-        {
-
-          // User cannot add themselves to requestedUser list
-          for (var i = 0; i < requestedUsers.length; i++)
-          {
-            if (requestedUsers[i] == whoami.id)
-            {
-              // Remove owner from requested user list 
-              requestedUsers.splice(i, 1);
-              break; 
-            }
-          }
-
-          userIds = this._mapUsernamesToIds(requestedUsers);    
-
-          // User cannot add a user who is already on the requested
-          // user list
-          for (i = 0; i < userIds.length; i++)
-          {
-            if (groupData.requestedUsers.indexOf(userIds[i]) != -1)
-            {
-              userIds.splice(i, 1);
-            }
-          }
-
-          // Push the requested user param to the actual obj
-          userIds.forEach(
-            function(user)
-            {
-              groupData.requestedUsers.push(user);
-            }
-          );
-
-          userIds.forEach(
-           function(id)
-            {
-              var     i;  
-
-              // If null we did not find the name
-              if(id == null)
-              {
-                return;
-              }
-             
-              // Do not do a check if there are no users requesting to join
-              if (groupData.joiningUsers == null && 
-                  groupData.joiningUsers.length == 0)
-              {
-                return;
-              }
-
-              // Check to see if a user who the admin has requested
-              // is on the list of users who have requested to join
-              for(i = 0; i < groupData.joiningUsers.length; i++)
-              {
-                if (groupData.joiningUsers[i] == id)
-                {
-                  // Add id to list of users in this group
-                  groupData.users.push(id);
-
-                  // Remove from joining list
-                  delete groupData.joiningUsers[i]; 
-
-                  break; 
-                }
-              }         
-            }
-          );
-        }      
-
+                
       }
       else 
       {
@@ -266,6 +166,192 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
        // Clean up the return data
        return returnMap; 
     },
+
+    /**
+     * Request some users join the group. Requested users will receive
+     *   an email
+     * 
+     * @param groupName {String}
+     *   The name of the group
+     * 
+     * @param requestedUsers {Array}
+     *   An array of user displaynames the group owner is requesting 
+     *   to join the group
+     * 
+     * @param error {Error}
+     *   The error object
+     * 
+     * @return {Map || Error}
+     *   Retrun either a map of the group with the bad usernames or
+     *   the error object. 
+     */
+    requestUsers : function(groupName, requestedUsers, error)
+    {
+    
+      var     whoami;
+      var     groupData;
+      var     group; 
+      var     userIds;
+      var     badUsers = []; 
+      var     i; 
+      var     returnMap;   
+
+      // Check for existence and ownership
+      try
+      {
+        group = this._checkExistenceAndOwnership(groupName);
+        groupData = group.getData(); 
+      } 
+      catch (x)
+      {
+        return x; 
+      }
+
+      // Need user 
+      whoami = this.getWhoAmI();
+
+      // Convert all requested users to ids 
+      // Only do so if requested users is not null
+      userIds = this._mapUsernamesToIds(requestedUsers);
+
+      // In userIds is an array of ids or nulls.
+      // Compare this array to the array of requested users.
+      // If a name/email does not have a corresponding id
+      // it is a bad name/email add it to the array of badUsers
+      for (i = 0; i < userIds.length; i++)
+      {
+        if(userIds[i] == null)
+        {
+          badUsers.push(requestedUsers[i]);
+        }
+      }
+
+      // If the lengths are equal all the users 
+      // are bad, return
+      if (badUsers.length == userIds.length)
+      {
+        returnMap = this._turnToMap(groupData); 
+        returnMap["badUsers"] = badUsers;
+           
+        return returnMap; 
+      }
+
+      // We do not need to maintain the structure anymore so
+      // clear out nulls from userIds
+      for(i = 0; i < userIds.length; i++)
+      {
+        if(userIds[i] == null)
+        {
+          userIds.splice(i, 1);
+        }
+      } 
+
+      // User cannot add themselves to requestedUser list
+      for (i = 0; i < userIds.length; i++)
+      {
+        if (userIds[i] == whoami.id)
+        {
+          // Remove owner from requested user list 
+          userIds.splice(i,1);
+          break; 
+        }
+      }
+
+      // Check to see 
+      // if the id exists in both joiningUsers array and requestedUsers array.
+      // If it does then both the user and the admin want the user to
+      // join the group. If not add the id to the list.       
+
+      // User cannot add a user who is already on the requested
+      // user list
+      for (i = 0; i < userIds.length; i++)
+      {
+        if (groupData.requestedUsers.indexOf(userIds[i]) != -1)
+        {
+          userIds.splice(i, 1);
+        }
+      }
+
+      // Push the requested user param to the actual obj
+      userIds.forEach(
+        function(user)
+        {
+          groupData.requestedUsers.push(user);
+        }
+      );
+
+      // Do not do a check if there are no users requesting to join
+      if (groupData.joiningUsers != null || 
+          groupData.joiningUsers.length != 0)
+      {
+        userIds.forEach(
+          function(id)
+          {
+            var     i;  
+            
+            // Check to see if a user who the admin has requested
+            // is on the list of users who have requested to join
+            for(i = 0; i < groupData.joiningUsers.length; i++)
+            {
+              if (groupData.joiningUsers[i] == id)
+              {
+                // Add id to list of users in this group
+                groupData.users.push(id);
+
+                // Remove from joining list
+                delete groupData.joiningUsers[i]; 
+  
+                break; 
+              }
+            }         
+          }
+        );
+      }
+
+      // Send email to all the users who requested to join
+      userIds.forEach(
+        function(user)
+        {
+          var     criteria;
+          var     ids;
+          var     email; 
+          var     msgBody; 
+          var     subject;
+
+          // Get the user's email
+          criteria =
+            {
+              type  : "element",
+              field : "id", 
+              value : user
+            }; 
+
+          ids = liberated.dbif.Entity.query("aiagallery.dbif.ObjVisitors",
+                                    criteria);
+
+          // Should only be one result
+          email = ids[0].email;
+ 
+          msgBody = "You have been invited to join the " + groupName + ".\n" 
+                    + "To join to the group page at: ADD IN GROUP PAGE"
+                    + "and click \"Join Group\" ";
+
+          subject = "MIT AIG Invitation to Join " + groupName + " Group";
+
+          // Send email
+          this.sendEmail(msgBody, subject, email);
+        }
+
+      , this);
+
+      // Update group object
+      group.put();
+
+      returnMap = this._turnToMap(groupData); 
+      returnMap["badUsers"] = badUsers;
+          
+      return returnMap; 
+    }, 
 
     /**
      * Get a group
@@ -781,7 +867,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
           map["Status"] = status; 
           
           returnList.push(map); 
-	}
+        }
 
       , this);
 
@@ -841,7 +927,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
     },
 
     /**
-     * Take a list of user names and get their user ids
+     * Take a list of user names or emails and get their user ids
      * 
      * @param usernameArray {StringArray}
      *   An array of user names
@@ -864,17 +950,39 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       userIdMap = usernameArray.map(
         function(name)
         {
-          criteria =
-            {
-              type  : "element",
-              field : "displayName", 
-              value : name.trim()
-            }; 
 
-           ids = liberated.dbif.Entity.query("aiagallery.dbif.ObjVisitors",
+          // Check for email ending
+          if (name.indexOf("@gmail") == -1)
+          {
+            // Non email search
+            criteria =
+              {
+                type  : "element",
+                field : "displayName", 
+                value : name.trim()
+              }; 
+
+            ids = liberated.dbif.Entity.query("aiagallery.dbif.ObjVisitors",
                                       criteria);
 
-           return ids.length == 1 ? ids[0].id : null;
+          }
+          else 
+          {
+            // Email search 
+            criteria =
+              {
+                type  : "element",
+                field : "email", 
+                value : name.trim()
+              }; 
+
+            ids = liberated.dbif.Entity.query("aiagallery.dbif.ObjVisitors",
+                                      criteria);
+
+          }
+
+          return ids.length == 1 ? ids[0].id : null;
+
         }
       ); 
 
