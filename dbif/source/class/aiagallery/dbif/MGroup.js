@@ -281,8 +281,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       );
 
       // Do not do a check if there are no users requesting to join
-      if (groupData.joiningUsers != null || 
-          groupData.joiningUsers.length != 0)
+      if (groupData.joiningUsers.length != 0)
       {
         userIds.forEach(
           function(id)
@@ -952,7 +951,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
         {
 
           // Check for email ending
-          if (name.indexOf("@gmail") == -1)
+          if (name.indexOf("@gmail") == -1 && name.indexOf("@") == -1)
           {
             // Non email search
             criteria =

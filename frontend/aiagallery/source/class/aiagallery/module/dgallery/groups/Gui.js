@@ -468,7 +468,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
 
       groupNameList = new qx.ui.form.List();
       groupNameList.setWidth(150);
-      groupNameList.setHeight(300); 
+      groupNameList.setHeight(250); 
 
       // We will add a changeSelection listener to the FSM
       // In the handleResponse appear switch statement.
