@@ -184,10 +184,28 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       
 
       // Create the container to hold all the group objects
-      this.groupContainer = new qx.ui.container.Composite(new qx.ui.layout.VBox());
+      
+      this.groupContainer
+        = new qx.ui.container.Composite(new qx.ui.layout.VBox());
+      
+
+      //this.groupContainer = new qx.ui.list.List();
+
+      // Space out search bar and results
+      container.add(new qx.ui.core.Spacer(0, 20)); 
+
+      // Add the search results label
+      var font = qx.theme.manager.Font.getInstance().resolve("bold").clone();
+      font.setSize(18);
+      label = new qx.ui.basic.Label(this.tr("Search Results"));
+      label.set(
+        {
+          font : font
+        });
+      container.add(label);
 
       // Add to layout
-      container.add(this.groupContainer); 
+      container.add(this.groupContainer, {flex : 1}); 
       
     },
 
@@ -1110,17 +1128,59 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       case "groupSearch":
         result = response.data.result;
 
+        // Clear search field before populating it
+        this.groupContainer.removeAll();
+ 
         // Create gui group obj for each found group
         result.forEach(
           function(group)
           {
-            var groupGui; 
+            var   groupGui; 
+            var   label; 
+            var   layout;
+           
+            // Main group layout
+            groupGui = new qx.ui.container.Composite(new qx.ui.layout.VBox());
+
+            // Title and Author layout
+            layout = new qx.ui.container.Composite(new qx.ui.layout.HBox());
+
+            label = new qx.ui.basic.Label(group.name);
+            layout.add(label);
+
+            label = new qx.ui.basic.Label(group.owner);
+            layout.add(label); 
+
+            // Add to main layout
+            groupGui.add(layout);
+
+            // Add description
+            label = new qx.ui.basic.Label(group.description);
+            groupGui.add(label);
+
+            // Add category info
+            layout = new qx.ui.container.Composite(new qx.ui.layout.HBox());
+
+            label = new qx.ui.basic.Label(group.type);
+            layout.add(label); 
+
+            // Space out category types
+            layout.add(new qx.ui.core.Spacer(10));
+
+            label = new qx.ui.basic.Label(group.subType);
+            layout.add(label); 
+
+            // Add to main layout
+            groupGui.add(layout);
 
             // Update the container with all the found groups
-            this.groupContainer.add();
+            this.groupContainer.add(groupGui);
+
+            // Space out any results that come next
+            this.groupContainer.add(new qx.ui.core.Spacer(0, 20)); 
           }
 
-        );
+        ,this);
 
 
 

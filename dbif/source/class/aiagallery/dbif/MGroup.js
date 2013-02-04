@@ -1096,6 +1096,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       groupMap = 
         {
           name           : groupData.name,
+          owner          : null, 
           description    : groupData.description, 
           users          : null,
           joiningUsers   : null,
@@ -1124,6 +1125,10 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       // Convert all users who have joined 
       // should always be atleast one user, the admin
       groupMap.users = this._mapIdToDisplayname(groupData.users); 
+
+      // Take the owner id and get their display name
+      // Should be the first result in the returned array
+      groupMap.owner = this._mapIdToDisplayname([groupData.owener])[0];
 
       return groupMap; 
     }
