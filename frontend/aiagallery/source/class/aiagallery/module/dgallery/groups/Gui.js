@@ -1111,8 +1111,18 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
         result = response.data.result;
 
         // Create gui group obj for each found group
+        result.forEach(
+          function(group)
+          {
+            var groupGui; 
 
-        // Update the container with all the found groups
+            // Update the container with all the found groups
+            this.groupContainer.add();
+          }
+
+        );
+
+
 
         break; 
 
