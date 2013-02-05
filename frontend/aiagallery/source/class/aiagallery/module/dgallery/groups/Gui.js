@@ -172,12 +172,15 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       // Browse categories 
     
       // Create the container to hold all the group objects
-/*      
-      this.groupContainer
-        = new qx.ui.container.Composite(new qx.ui.layout.VBox());
-*/    
-
-      this.groupContainer = new qx.ui.list.List();
+      this.groupContainer = new qx.ui.form.List();
+      this.groupContainer.set(
+        {
+          selectionMode : "one",
+          selectable    : true,
+          maxHeight     : 500,
+          maxWidth      : 700
+        }
+      );
 
       // Space out search bar and results
       container.add(new qx.ui.core.Spacer(0, 20)); 
@@ -1119,6 +1122,9 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
         // Clear search field before populating it
         this.groupContainer.removeAll();
  
+        // Array to hold all group layouts
+        var groupArray = [];
+
         // Create gui group obj for each found group
         result.forEach(
           function(group)
@@ -1126,7 +1132,22 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
             var   groupGui; 
             var   label; 
             var   layout;
-           
+
+            // Concatenate into one long group string
+            var groupStr = group.name + " Owned by: " + group.owner 
+                           + " Type: " + group.type;
+
+            if(group.subType)
+            {
+              groupStr += " SubType: " + group.subType;
+            }
+
+            var listItem = new qx.ui.form.ListItem(groupStr);
+            this.groupContainer.add(listItem);            
+
+            return; 
+
+            /* Beutify this later
             // Main group layout
             groupGui = new qx.ui.container.Composite(new qx.ui.layout.VBox());
 
@@ -1161,17 +1182,18 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
             // Add to main layout
             groupGui.add(layout);
 
+            groupArray.push(groupGui);
+
             // Update the container with all the found groups
             this.groupContainer.add(groupGui);
 
             // Space out any results that come next
-            this.groupContainer.add(new qx.ui.core.Spacer(0, 20)); 
+            //this.groupContainer.add(new qx.ui.core.Spacer(0, 20)); 
+ 
+            */ 
           }
 
         ,this);
-
-
-
         break; 
 
       default:

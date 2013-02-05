@@ -1128,7 +1128,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
 
       // Take the owner id and get their display name
       // Should be the first result in the returned array
-      groupMap.owner = this._mapIdToDisplayname([groupData.owener])[0];
+      groupMap.owner = this._mapIdToDisplayname([groupData.owner])[0];
 
       return groupMap; 
     }
