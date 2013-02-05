@@ -133,17 +133,6 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       var      searchButton; 
       var      label; 
 
-/* Not needed since main page is in a scroller
-      // Create the scroller to hold all of the groups
-      groupScroller = new qx.ui.container.Scroll();
-      container.add(groupScroller, {flex : 1});
-      
-      // The Scroller may contain only one container, so create that container.
-      vBox = new qx.ui.layout.VBox();
-      this.groupScrollContainer =
-        new qx.ui.container.Composite(vBox);
-      groupScroller.add(this.groupScrollContainer);
-*/ 
       // Create a search bar to search for groups
       layout = new qx.ui.layout.HBox();
       layout.setSpacing(5);      
@@ -181,15 +170,14 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       container.add(searchLayout); 
 
       // Browse categories 
-      
-
+    
       // Create the container to hold all the group objects
-      
+/*      
       this.groupContainer
         = new qx.ui.container.Composite(new qx.ui.layout.VBox());
-      
+*/    
 
-      //this.groupContainer = new qx.ui.list.List();
+      this.groupContainer = new qx.ui.list.List();
 
       // Space out search bar and results
       container.add(new qx.ui.core.Spacer(0, 20)); 
