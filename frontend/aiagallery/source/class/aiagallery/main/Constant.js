@@ -43,7 +43,8 @@ qx.Class.define("aiagallery.main.Constant",
         User       : "Profile",
         PublicUser : "PublicUser",
         Contest    : "Contest",
-        Groups     : "Groups"
+        Groups     : "Groups", 
+        GroupInfo  : "GroupInfo"
       }
   }
 });

@@ -1143,7 +1143,27 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
             }
 
             var listItem = new qx.ui.form.ListItem(groupStr);
-            this.groupContainer.add(listItem);            
+
+            // Will need the name later when we pop the group info page
+            listItem.setUserData("groupName", group.name); 
+
+            // On each dblcick on a list item pop the groupInfo page
+            listItem.addListener("dblclick", 
+              function(e)
+              {
+                var groupName;
+
+                // Get selection
+                groupName = e.getTarget().getUserData("groupName");
+
+                // Pop page
+                aiagallery.module.dgallery
+                  .groupinfo.GroupInfo.addGroupView(groupName, 
+                                                    groupName);
+              }
+            );
+
+            this.groupContainer.add(listItem);  
 
             return; 
 
