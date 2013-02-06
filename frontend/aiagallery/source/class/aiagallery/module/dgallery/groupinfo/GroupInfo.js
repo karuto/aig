@@ -50,7 +50,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.GroupInfo",
                }
               ]);
 
-      // Transmit the UID of this module */
+      // Transmit the group name of this module */
       group.setUserData("groupName", name);
 
       // Make this module ephemeral

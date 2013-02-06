@@ -29,6 +29,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
       var             fsm = module.fsm;
       var             canvas = module.canvas;
 
+      canvas.add(new qx.ui.basic.Label("IPSE")); 
       
     },
 
