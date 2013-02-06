@@ -175,7 +175,6 @@ qx.Class.define("aiagallery.module.dgallery.appinfo.Comment",
           "click",
           function(e)
           {
-            var             query;
             var             displayName;
 
             // Prevent the default 'click' behavior

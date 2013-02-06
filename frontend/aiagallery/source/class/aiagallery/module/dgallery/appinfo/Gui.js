@@ -58,7 +58,7 @@ qx.Class.define("aiagallery.module.dgallery.appinfo.Gui",
       outerCanvas.setLayout(new qx.ui.layout.VBox());
       scrollContainer = new qx.ui.container.Scroll();
  
-      // Align to left of module
+      // Align scroller to right of module
       scrollContainer.setAlignX("right"); 
 
       outerCanvas.add(scrollContainer, { flex : 1 });

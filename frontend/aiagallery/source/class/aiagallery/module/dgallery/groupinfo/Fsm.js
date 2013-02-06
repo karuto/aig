@@ -69,7 +69,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Fsm",
           "execute" :
           {
             
-            "queryBtn" : "Transition_Idle_to_AwaitRpcResult_via_query"
+            "joinBtn" : "Transition_Idle_to_AwaitRpcResult_via_joinGroup"
             
           },
           
@@ -78,8 +78,8 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Fsm",
           // to determine if it's necessary.
           "appear"    :
           {
-            //"main.canvas" : 
-              //qx.util.fsm.FiniteStateMachine.EventHandling.PREDICATE
+            "main.canvas" : 
+              "Transition_Idle_to_AwaitRpcResult_via_appear"
           },
 
           // When we get a disappear event
@@ -93,16 +93,13 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Fsm",
       // Replace the initial Idle state with this one
       fsm.replaceState(state, true);
 
-
-      // The following transitions have a predicate, so must be listed first
-
       /*
        * Transition: Idle to Idle
        *
        * Cause: "appear" on canvas
        *
        * Action:
-       *  If this is the very first appear, retrieve the category list.
+       *  If this is the very first appear, retrieve group info.
        */
 
       trans = new qx.util.fsm.Transition(
@@ -130,24 +127,36 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Fsm",
 
         "ontransition" : function(fsm, event)
         {
-         // If we wanted to do something as the page appeared, it would go here.
+          var     request; 
+
+          request =
+            this.callRpc(fsm,
+                         "aiagallery.features",
+                         "getGroup",
+                         [
+                           module.getUserData("groupName")
+                         ]);
+
+          // When we get the result, we'll need to know what type of request
+          // we made.
+          request.setUserData("requestType", "appear");
+
         }
       });
 
       state.addTransition(trans);
 
-
-        /*
-       * Transition: Idle to Awaiting RPC Result
+      /*
+       * Transition: Idle to Idle
        *
-       * Cause: "Search" button pressed
+       * Cause: User clicked join group button
        *
        * Action:
-       *  Initiate a request for the list of  matching applications.
+       *  Try and join the group the user is on
        */
-        
+
       trans = new qx.util.fsm.Transition(
-        "Transition_Idle_to_AwaitRpcResult_via_query",
+        "Transition_Idle_to_AwaitRpcResult_via_joinGroup",
       {
         "nextState" : "State_AwaitRpcResult",
 
@@ -155,33 +164,24 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Fsm",
 
         "ontransition" : function(fsm, event)
         {
-          var             criteria;
-          var             criterium;
-          var             request;
-          var             selection;
+          var     request; 
 
-
-
-          // Issue the remote procedure call to execute the query
           request =
             this.callRpc(fsm,
                          "aiagallery.features",
-                         "mobileRequest",
+                         "joinGroup",
                          [
-
-                          fsm.getObject("queryField").getValue()
-                           
-                        ]);
+                           module.getUserData("groupName")
+                         ]);
 
           // When we get the result, we'll need to know what type of request
           // we made.
-          request.setUserData("requestType", "mobileRequest");
+          request.setUserData("requestType", "joinGroup");
 
         }
       });
 
       state.addTransition(trans);
-
 
       /*
        * Transition: Idle to Idle
