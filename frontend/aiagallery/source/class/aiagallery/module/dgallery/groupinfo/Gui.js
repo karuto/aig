@@ -299,19 +299,19 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
 
         // Create a layout to show 5 users across.
         // Each user should be clickable to their profile page.
-        layout = new qx.ui.container.Composite(new qx.ui.layout.HBox());
+        layout = new qx.ui.container.Composite(new qx.ui.layout.HBox(7));
 
          group.users.forEach(
            function(user)
            {
              if (count == 4)
              {
-               // Reint count
+               // re-int count
                count = 0;
  
                // Add existing layout and reint
                this.groupLayout.add(layout);
-               layout = new qx.ui.container.Composite(new qx.ui.layout.HBox());
+               layout = new qx.ui.container.Composite(new qx.ui.layout.HBox(7));
              } 
 
              label = new qx.ui.basic.Label(user);
@@ -341,7 +341,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
                  e.preventDefault();
                  e.stop();
 
-                 // Remove "by" from displayName
+                 // Get displayname 
                  displayName = e.getTarget().getValue();
 
                  // Launch user page module
@@ -379,7 +379,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
           this.joinGroupBtn.setEnabled(false);
 
           break;
-        case aiagallery.dbif.Constants.GroupStatus.User:
+        case aiagallery.dbif.Constants.GroupStatus.Member:
           this.joinGroupBtn.setLabel(this.tr("Already Joined")); 
 
           // Disable button
