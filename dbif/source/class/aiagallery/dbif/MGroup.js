@@ -477,10 +477,13 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
      * @param groupName {String}
      *   The name of the group
      * 
+     * @param error {Error}
+     *   The error object 
+     * 
      * @return {aiagallery.dbif.Constants.GroupStatus || Error}
      *   Return either the users group status constant, or an error. 
      */ 
-    joinGroup : function(groupName)
+    joinGroup : function(groupName, error)
     {
       var     criteria;
       var     whoami;
@@ -516,7 +519,8 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
          throw error;
        } 
 
-       group = resultList[0]; 
+       group = new aiagallery.dbif.ObjGroup(resultList[0].name, 
+                                            resultList[0].owner);
        groupData = group.getData();
 
        // If the user is on the requested user list then add the user as
@@ -612,7 +616,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
             // User cannot remove themselves from the group
             if(user == groupData.users[i] && user != whoami.id)
             {
-              delete groupData.users[i];
+              groupData.users.splice(i, 1);
               removedUsers.push(user);
 
               break;
@@ -628,7 +632,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
           {
             if(user == groupData.joiningUsers[i])
             {
-              delete groupData.joiningUsers[i];
+              groupData.joiningUsers.splice(i, 1);
               removedUsers.push(user);
 
               break;
@@ -651,7 +655,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
             // User cannot remove themselves from the group
             if(user == groupData.requestedUsers[i])
             {
-              delete groupData.requestedUsers[i];
+              groupData.requestedUsers.splice(i, 1);
               removedUsers.push(user);
 
               break;
@@ -736,6 +740,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       var     group;
       var     groupData;
       var     returnMap; 
+      var     i;
 
       // Check for existence and ownership
       try
@@ -752,7 +757,8 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       if(usersToAdd.length == 0)
       {
         // Object does not exist
-        var warnString = "Select users from the wait list to allow membership. ";
+        var warnString = "Select users from the wait "
+                         + "list to allow membership. ";
 
         error.setCode(3);
         error.setMessage(warnString);
@@ -762,29 +768,29 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       // Take the array of added users and convert display names to ids
       usersToAdd = this._mapUsernamesToIds(usersToAdd); 
       
-      // remove the user from the requestedUsers array
+      // remove the user from the joiningUsers array
       // and add to user array
       usersToAdd.forEach(
         function(user)
         {
           // Find the user in the requestedUsers list
-          for (var i; i < groupData.requestedUser.length; i++)
+          for (i = 0; i < groupData.joiningUsers.length; i++)
           {
-            if (groupData.requestedUser[i] == user)
+            if (groupData.joiningUsers[i] == user)
             {
               // add to users list
-              groupData.users.push(group.requestedUser[i]); 
+              groupData.users.push(groupData.joiningUsers[i]); 
 
-              delete groupData.requestedUsers[i];
+              groupData.joiningUsers.splice(i, 1); 
               break;
             }
           }
         });
-      
+
       // Update group
       group.put();
 
-      // Return array of current users
+      // Create return map 
       returnMap = 
         {
           users    : this._mapIdToDisplayname(groupData.users),
@@ -840,14 +846,20 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       }
 
       // Add all users on the wait list to the user list
-      groupData.users.push(groupData.joiningUsers);
+      groupData.joiningUsers.forEach(
+        function(user)
+        {
+          // Add new user
+          groupData.users.push(user);
+        } 
+      );
 
-      // clear out the waitlist
+      // clear out joiningUsers array
       delete groupData.joiningUsers;
       groupData.joiningUsers = [];
 
       // Push back to db
-      group.push();
+      group.put();
 
       // Return array of current users
       returnMap = 
@@ -1227,17 +1239,17 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
         groupMap.userStatus = aiagallery.dbif.Constants.GroupStatus.Owner;
       } 
       // User on waitlist
-      else if (groupData.joiningUsers.indexOf(whoami.id))
+      else if (groupData.joiningUsers.indexOf(whoami.id) != -1)
       {
         groupMap.userStatus = aiagallery.dbif.Constants.GroupStatus.WaitList;
       }
       // User has been requested to join
-      else if (groupData.requestedUsers.indexOf(whoami.id))
+      else if (groupData.requestedUsers.indexOf(whoami.id) != -1)
       {
         groupMap.userStatus = aiagallery.dbif.Constants.GroupStatus.Requested;
       }
       // User is a member of this group
-      else if (groupData.users.indexOf(whoami.id))
+      else if (groupData.users.indexOf(whoami.id) != -1)
       {
         groupMap.userStatus = aiagallery.dbif.Constants.GroupStatus.Member;
       }

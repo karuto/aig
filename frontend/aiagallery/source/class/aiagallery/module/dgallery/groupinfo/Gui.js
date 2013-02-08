@@ -54,7 +54,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
       this.joinGroupBtn.addListener("execute", fsm.eventListener, fsm);
       this.joinGroupBtn.set(
         {
-          maxWidth  : 100,
+          maxWidth : 160,
           maxHeight : 60
         }
       );
@@ -64,7 +64,6 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
          this.joinGroupBtn, "main.fsmUtils.disable_during_rpc");    
 
       // We will add this button later
-      //this.groupLayout.add(this.joinGroupBtn);
 
       canvas.add(this.groupLayout); 
       canvas.add(new qx.ui.core.Spacer(20));   
@@ -161,16 +160,8 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
       {
           return;
       }
-
-      // Errors with code 1 will be handled specially 
-      if (response.type == "failed" && response.data.code != 1)
-      {
-        // FIXME: Add the failure to the cell editor window rather than alert
-        alert("Async(" + response.id + ") exception: " + response.data);
-        return;
-      } 
-      else if (response.data.code == 1 ||
-               response.data.code == 2)
+      if (response.type == "failed" &&
+         (response.data.code == 1 || response.data.code == 2))
       {
         // Special error
         warnString = "";
@@ -190,6 +181,13 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
         dialog.Dialog.warning(warnString);
         return;
       }
+      // Generic errors
+      else if (response.type == "failed")
+      {
+        // FIXME: Add the failure to the cell editor window rather than alert
+        alert("Async(" + response.id + ") exception: " + response.data);
+        return;
+      } 
 
       // Successful RPC request.
       // Dispatch to the appropriate handler, depending on the request type
