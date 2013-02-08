@@ -32,7 +32,6 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
       var             canvas;
       var             outerCanvas = module.canvas;
       var             scrollContainer;
-      var             button;
 
       // Wrap layout in scroller
       outerCanvas.setLayout(new qx.ui.layout.VBox());
@@ -50,10 +49,10 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
       canvas.add(new qx.ui.core.Spacer(0, 20));
 
       // Button to join group
-      button = new qx.ui.form.Button(this.tr("Join Group")); 
+      this.joinGroupBtn = new qx.ui.form.Button(this.tr("Join Group")); 
 
-      button.addListener("execute", fsm.eventListener, fsm);
-      button.set(
+      this.joinGroupBtn.addListener("execute", fsm.eventListener, fsm);
+      this.joinGroupBtn.set(
         {
           maxWidth  : 100,
           maxHeight : 60
@@ -62,9 +61,9 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
 
       // We'll be receiving events on the object so save its friendly name
       fsm.addObject("joinBtn", 
-         button, "main.fsmUtils.disable_during_rpc");    
+         this.joinGroupBtn, "main.fsmUtils.disable_during_rpc");    
 
-      canvas.add(button);     
+      canvas.add(this.joinGroupBtn);     
 
     },
 
@@ -92,7 +91,9 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
       var             label; 
       var             guiObject; 
       var             count = 0; 
-      var             transText; 
+
+      var             warnString; 
+      var             stringMsg; 
 
       // We can ignore aborted requests.
       if (response.type == "aborted")
@@ -100,10 +101,32 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
           return;
       }
 
-      if (response.type == "failed")
+      // Errors with code 1 will be handled specially 
+      if (response.type == "failed" && response.data.code != 1)
       {
         // FIXME: Add the failure to the cell editor window rather than alert
         alert("Async(" + response.id + ") exception: " + response.data);
+        return;
+      } 
+      else if (response.data.code == 1 ||
+               response.data.code == 2)
+      {
+        // Special error
+        warnString = "";
+
+        switch(response.data.code)
+        {
+        case 1:
+        case 2:
+          warnString = this.tr("Group does not exist"); 
+          break;
+
+        default:
+          warnString = this.tr("Unknown error relating to pulling group info"); 
+          break;
+        }  
+
+        dialog.Dialog.warning(warnString);
         return;
       }
 
@@ -135,12 +158,56 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
         this.groupLayout.add(new qx.ui.core.Spacer(20)); 
 
         // Owner
-        transText = this.tr("Group Owner: ");
-        label = new qx.ui.basic.Label(transText + group.owner);
-        this.groupLayout.add(label); 
+        label = new qx.ui.basic.Label(this.tr("Group Owner:"));
+        label.setFont("bold");
+ 
+        // Need to have two seperate labels here.
+        // Use hbox layout.
+        layout = new qx.ui.container.Composite(new qx.ui.layout.HBox());
+        layout.add(label);
+
+        label = new qx.ui.basic.Label(group.owner);
+
+        font.set(
+          {
+            color      : "#75940c",     // android-green-dark
+            decoration : "underline",
+            size       : 12
+          });
+
+        label.set(
+          {
+            textColor : null,       // Prevent color overide
+            font      : font,
+            cursor    : "pointer"
+          });
+
+        label.addListener(
+           "click",
+           function(e)
+           {
+             var             displayName;
+
+             // Prevent the default 'click' behavior
+             e.preventDefault();
+             e.stop();
+
+             // Remove "by" from displayName
+             displayName = e.getTarget().getValue();
+
+             // Launch user page module
+             aiagallery.module.dgallery.userinfo.UserInfo.addPublicUserView(
+               displayName);
+           },
+           this);
+
+        layout.add(label); 
+
+        this.groupLayout.add(layout); 
 
         // Description
         label = new qx.ui.basic.Label(this.tr("Description: "));
+        label.setFont("bold");
         this.groupLayout.add(label); 
 
         guiObject = new qx.ui.form.TextArea("");
@@ -159,6 +226,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
 
         // Members
         label = new qx.ui.basic.Label(this.tr("Members: "));
+        label.setFont("bold");
         this.groupLayout.add(label); 
 
         // Create a layout to show 5 users across.
@@ -222,6 +290,82 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
 
          // Add remaining names 
          this.groupLayout.add(layout);
+
+        // Based on the status of the user in relation to the group
+        // modify the join group button
+        switch (group.userStatus)
+        {
+        case aiagallery.dbif.Constants.GroupStatus.Requested:
+          // Pop message
+          stringMsg = this.tr("The admin of this group has requested you to join, to complete this proccess click the \"Join Group\" button");
+
+          label = new qx.ui.basic.Label(stringMsg); 
+
+          this.groupLayout.add(label);
+          break;
+
+        case aiagallery.dbif.Constants.GroupStatus.WaitList:
+          this.joinGroupBtn.setLabel(this.tr("Waiting for Approval")); 
+
+          // Disable button
+          this.joinGroupBtn.setEnabled(false);
+
+          break;
+        case aiagallery.dbif.Constants.GroupStatus.User:
+          this.joinGroupBtn.setLabel(this.tr("Already Joined")); 
+
+          // Disable button
+          this.joinGroupBtn.setEnabled(false);
+
+          break;
+        case aiagallery.dbif.Constants.GroupStatus.Owner:
+          this.joinGroupBtn.setLabel(this.tr("Own Group")); 
+
+          // Disable button
+          this.joinGroupBtn.setEnabled(false);
+          break;
+
+        default:
+          break;
+        }
+
+        break;
+
+      case "joinGroup":
+        result = response.data.result;  
+
+        // Based on the status change the join group button
+        switch (result)
+        {
+        case aiagallery.dbif.Constants.GroupStatus.Member:
+          this.joinGroupBtn.setLabel(this.tr("Already Joined")); 
+
+          // Disable button
+          this.joinGroupBtn.setEnabled(false);
+
+          // Add user's name to list of members
+
+          break;
+
+        case aiagallery.dbif.Constants.GroupStatus.WaitList:
+          this.joinGroupBtn.setLabel(this.tr("Waiting for Approval")); 
+
+          // Disable button
+          this.joinGroupBtn.setEnabled(false);
+ 
+          // Pop message
+          stringMsg = this.tr("You have been added to the wait list.\nThe group admin will review your request to join.");
+
+          dialog.Dialog.alert(stringMsg);
+
+          break;
+
+        default:
+          // Not possible at this time
+          break;
+      
+        }
+
 
         break;
 

@@ -466,12 +466,85 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
      * @param groupName {String}
      *   The name of the group
      * 
-     * @param username {String}
-     *   The name of the user trying to join a group
-     * 
+     * @return {aiagallery.dbif.Constants.GroupStatus || Error}
+     *   Return either the users group status constant, or an error. 
      */ 
-    joinGroup : function(groupName, username)
+    joinGroup : function(groupName)
     {
+      var     criteria;
+      var     whoami;
+      var     resultList;
+      var     group; 
+      var     groupData;
+      var     i;
+      var     bUserAdded = false;
+      var     joinStatus; 
+
+      // Get the current user
+      whoami = this.getWhoAmI();
+
+      // Get the group this user is trying to join
+      criteria = 
+        {
+          type  : "element",
+          field : "name",
+          value : groupName
+        };
+
+      resultList = liberated.dbif.Entity.query("aiagallery.dbif.ObjGroup",
+                                               criteria);
+      
+       // Should be one and only one group
+       if (resultList.length != 1)
+       {
+         // Object does not exist
+         var warnString = "Group does not exist";
+ 
+         error.setCode(1);
+         error.setMessage(warnString);
+         throw error;
+       } 
+
+       group = resultList[0]; 
+       groupData = group.getData();
+
+       // If the user is on the requested user list then add the user as
+       // a memeber of the group, else add them to the requested user list.
+       for (i = 0; i < groupData.requestedUsers.length; i++)
+       {
+         if (groupData.requestedUsers[i] == whoami.id)
+         {
+           // Remove user from requested user array
+           groupData.requestedUsers.splice(i, 1);
+
+           // Add to user array
+           groupData.users.push(whoami.id); 
+
+           // Set flag to indicate we are all done
+           bUserAdded = true;
+
+           // Set join status 
+           joinStatus = aiagallery.dbif.Constants.GroupStatus.Member;
+ 
+           break;
+         }
+       }
+
+       // If we did not find the user on the requested user array
+       // we must add them to the joiningUsers array
+       if (!bUserAdded)
+       {
+         groupData.joiningUsers.push(whoami.id); 
+
+         // Set join status
+         joinStatus = aiagallery.dbif.Constants.GroupStatus.WaitList; 
+       } 
+
+       // All done, let us bounce
+       group.put();
+
+       return joinStatus;
+       
     },
 
     /**
@@ -1091,6 +1164,8 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
     _turnToMap : function(groupData)
     {
       var     groupMap;
+      var     i;
+      var     whoami; 
 
       // Init group map
       groupMap = 
@@ -1102,7 +1177,8 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
           joiningUsers   : null,
           requestedUsers : null,
           type           : groupData.type, 
-          subType        : groupData.subType
+          subType        : groupData.subType,
+          userStatus     : aiagallery.dbif.Constants.GroupStatus.NonMember
         };
 
       // Convert all user fields from ids to displayNames
@@ -1129,6 +1205,32 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       // Take the owner id and get their display name
       // Should be the first result in the returned array
       groupMap.owner = this._mapIdToDisplayname([groupData.owner])[0];
+
+      // Modify the userStatus field
+      // Get logged in user
+      whoami = this.getWhoAmI();
+
+      // Check if user owns group
+      if(groupData.owner == whoami.id)
+      {
+        groupMap.userStatus = aiagallery.dbif.Constants.GroupStatus.Owner;
+      } 
+      // User on waitlist
+      else if (groupData.joiningUsers.indexOf(whoami.id))
+      {
+        groupMap.userStatus = aiagallery.dbif.Constants.GroupStatus.WaitList;
+      }
+      // User has been requested to join
+      else if (groupData.requestedUsers.indexOf(whoami.id))
+      {
+        groupMap.userStatus = aiagallery.dbif.Constants.GroupStatus.Requested;
+      }
+      // User is a member of this group
+      else if (groupData.users.indexOf(whoami.id))
+      {
+        groupMap.userStatus = aiagallery.dbif.Constants.GroupStatus.Member;
+      }
+      // Already set to nonmemeber status so no need to do anything else 
 
       return groupMap; 
     }

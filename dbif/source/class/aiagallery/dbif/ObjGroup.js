@@ -56,10 +56,13 @@ qx.Class.define("aiagallery.dbif.ObjGroup",
         /** User ids of visitors associated with this group. */
         "users" : "StringArray",
 
-        /** User ids of visitors the admin has requested. */
+        /** User ids of visitors the admin has requested to join,
+	 *  and have not made an active attempt to join, by joining
+	 *  the joiningUsers array. */
         "requestedUsers" : "StringArray",
 
-        /** User ids of visitors waiting to join this group. */
+        /** User ids of visitors waiting to join this group, 
+	 * but are not on the  requested user array. */
         "joiningUsers" : "StringArray",
 
         /** The type of a group as defined in dbif.constants.GroupTypes*/

@@ -104,13 +104,13 @@ qx.Class.define("aiagallery.dbif.Constants",
       "root"
     ],
 
-    /** Status of a user in realtion to a group */
+    /** Status of a user in relation to a group */
     GroupStatus :
     {
       NonMember : 0,
       WaitList  : 1,
       Requested : 2,
-      Memeber   : 3, 
+      Member    : 3, 
       Owner     : 4
     },
 
