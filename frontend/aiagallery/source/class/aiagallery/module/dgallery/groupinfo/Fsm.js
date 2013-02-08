@@ -134,7 +134,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Fsm",
                          "aiagallery.features",
                          "getGroup",
                          [
-                           module.getUserData("groupName")
+                           module.getUserData("groupName"), true
                          ]);
 
           // When we get the result, we'll need to know what type of request

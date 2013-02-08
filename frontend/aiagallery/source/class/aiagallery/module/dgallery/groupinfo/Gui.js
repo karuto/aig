@@ -32,21 +32,21 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
       var             canvas;
       var             outerCanvas = module.canvas;
       var             scrollContainer;
+      var             listLayout;
+ 
+      var             label; 
 
       // Wrap layout in scroller
       outerCanvas.setLayout(new qx.ui.layout.VBox());
       scrollContainer = new qx.ui.container.Scroll();
       outerCanvas.add(scrollContainer, { flex : 1 });
 
-      canvas = new qx.ui.container.Composite(new qx.ui.layout.VBox()); 
+      canvas = new qx.ui.container.Composite(new qx.ui.layout.HBox(10)); 
       scrollContainer.add(canvas, { flex : 1 });
 
       // Will hold the group info
       this.groupLayout 
         = new qx.ui.container.Composite(new qx.ui.layout.VBox(20));
-      
-      canvas.add(this.groupLayout); 
-      canvas.add(new qx.ui.core.Spacer(0, 20));
 
       // Button to join group
       this.joinGroupBtn = new qx.ui.form.Button(this.tr("Join Group")); 
@@ -63,8 +63,67 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
       fsm.addObject("joinBtn", 
          this.joinGroupBtn, "main.fsmUtils.disable_during_rpc");    
 
-      canvas.add(this.joinGroupBtn);     
+      // We will add this button later
+      //this.groupLayout.add(this.joinGroupBtn);
 
+      canvas.add(this.groupLayout); 
+      canvas.add(new qx.ui.core.Spacer(20));   
+
+      // Sidebar to hold apps made by members of the group
+      listLayout = new qx.ui.container.Composite(new qx.ui.layout.VBox);
+
+      // Bump the list down a bit
+      listLayout.add(new qx.ui.core.Spacer(0, 70)); 
+
+      label = new qx.ui.basic.Label(this.tr("Apps by Group Members"));
+      label.setFont("bold");
+      listLayout.add(label);
+
+      this.byGroup = new qx.ui.list.List();
+      this.byGroup.set(
+        {
+          itemHeight : 130,
+          width      : 400,
+          height     : 600, 
+          labelPath  : "title",
+          iconPath   : "image1",
+          delegate   :
+          {
+            createItem : function()
+            {
+              return new aiagallery.widget.SearchResult("byAuthor");
+            },
+            
+            bindItem : function(controller, item, id) 
+            {
+              [
+                "uid",
+                "image1",
+                "title",
+                "numLikes",
+                "numDownloads",
+                "numViewed",
+                "numComments",
+                "displayName"
+              ].forEach(
+                function(name)
+                {
+                  controller.bindProperty(name, name, null, item, id);
+                });
+            },
+
+            configureItem : qx.lang.Function.bind(
+              function(item) 
+              {
+                // Listen for clicks on the title or image, to view the app
+                item.addListener("viewApp", fsm.eventListener, fsm);
+              },
+              this)
+          }
+        });
+
+      listLayout.add(this.byGroup); 
+      canvas.add(listLayout);
     },
 
     
@@ -94,6 +153,8 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
 
       var             warnString; 
       var             stringMsg; 
+      var             who;
+      var             model;
 
       // We can ignore aborted requests.
       if (response.type == "aborted")
@@ -138,7 +199,16 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
  
         group = response.data.result;
 
-        // FIXME: remove some options if the user is not logged in
+        // Remove some options if the user is not logged in
+        who = qx.core.Init.getApplication().getUserData("whoAmI");
+        
+        if(who.getIsAnonymous())
+        {
+          this.joinGroupBtn.setLabel(this.tr("Login to join")); 
+
+          // Disable button
+          this.joinGroupBtn.setEnabled(false);
+        }
 
         // Add all the detail of the group to the canvas
         font = qx.theme.manager.Font.getInstance().resolve("bold").clone();
@@ -217,7 +287,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
             //appearance : "widget",
             readOnly   : true,
             wrap       : true,
-            maxWidth      : 450,
+            width      : 350,
             height     : 100   
           }
         );
@@ -288,8 +358,8 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
            }
          ,this);
 
-         // Add remaining names 
-         this.groupLayout.add(layout);
+        // Add remaining names 
+        this.groupLayout.add(layout);
 
         // Based on the status of the user in relation to the group
         // modify the join group button
@@ -329,6 +399,13 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
           break;
         }
 
+        // Update sidebar with apps made by members of this group
+        model = qx.data.marshal.Json.createModel(group.groupApps);
+        this.byGroup.setModel(model);
+
+        // Add joining button
+        this.groupLayout.add(this.joinGroupBtn);
+
         break;
 
       case "joinGroup":
@@ -365,7 +442,6 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
           break;
       
         }
-
 
         break;
 

@@ -573,7 +573,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
             this.callRpc(fsm,
                          "aiagallery.features",
                          "getGroup",
-                         [ name ]
+                         [ name, false ]
                          );
 
           // When we get the result, we'll need to know what type of request

@@ -23,7 +23,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
 
     this.registerService("aiagallery.features.getGroup",
                          this.getGroup,
-                         [ "groupName" ]);
+                         [ "groupName", "bGetApps" ]);
 
     this.registerService("aiagallery.features.getUserGroups",
                          this.getUserGroups,
@@ -361,16 +361,20 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
      * @param error {Error}
      *   The error object
      * 
+     * @param bGetApps {Boolean}
+     *   If true get the apps made by members of this group
+     * 
      * @return {Map || Error}
      *   A map of data related to a group. This includes the list of users
      *   associated with the group, the apps they have produced, a
      *   description of the group, and the users waiting to join the group. 
      */ 
-    getGroup : function(groupName, error)
+    getGroup : function(groupName, bGetApps, error)
     {
       var      criteria;
       var      resultList;
       var      group; 
+      var      groupMap;
 
       criteria = 
         {
@@ -393,8 +397,15 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       } 
 
       group = resultList[0]; 
+      groupMap = this._turnToMap(group); 
 
-      return this._turnToMap(group); 
+      if (bGetApps)
+      {
+        // Get the apps user members have made
+        groupMap["groupApps"] = this._getMemberApps(group); 
+      }
+
+      return groupMap;
     },
 
     /**
@@ -1233,6 +1244,81 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       // Already set to nonmemeber status so no need to do anything else 
 
       return groupMap; 
+    },
+
+    /**
+     * Get the apps the members of the group have made
+     * 
+     * @param groupData {ObjGroup}
+     *   The group data
+     * 
+     * @return {Array}
+     *   An array of the apps the members of a group have made. 
+     * 
+     */
+    _getMemberApps : function(groupData)
+    {
+
+      var     appArray = [];
+
+      // Take each id in the user array and get their apps 
+      groupData.users.forEach(
+        function(user)
+        {
+          var     criteria;
+          var     queryResult; 
+          var     resultList;
+          var     displayName;   
+
+          criteria = 
+            {
+              type : "op",
+              method : "and",
+              children : 
+              [
+                {
+                  type: "element",
+                  field: "owner",
+                  value: user
+                },
+                {
+                  type: "element",
+                  field: "status",
+                  value: aiagallery.dbif.Constants.Status.Active
+                }
+              ]
+            };
+
+          queryResult = liberated.dbif.Entity.query(
+                        "aiagallery.dbif.ObjAppData",
+                        criteria);
+
+          criteria = 
+            {
+              type  : "element",
+              field : "id",
+              value : user
+            }; 
+         
+          resultList = 
+             liberated.dbif.Entity.query("aiagallery.dbif.ObjVisitors", 
+                                         criteria);
+
+          displayName = resultList[0].displayName; 
+
+          // Replace owner id with owner name
+          queryResult.forEach(
+            function(app)
+            {
+              app.displayName = displayName || "<>";    
+              delete app.owner;     
+
+              appArray.push(app);      
+            });
+        }
+      );
+
+      return appArray; 
     }
   }
 }); 
