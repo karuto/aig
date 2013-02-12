@@ -1272,6 +1272,15 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
     {
 
       var     appArray = [];
+      var     requestedFields;
+
+      requestedFields = {
+        uid         : "uid",
+        owner       : "owner",
+        image1      : "image1",
+        title       : "title",
+        displayName : "displayName"
+      }; 
 
       // Take each id in the user array and get their apps 
       groupData.users.forEach(
@@ -1325,10 +1334,19 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
               app.displayName = displayName || "<>";    
               delete app.owner;     
 
-              appArray.push(app);      
+              appArray.push(app);
+
+              // Trim unneeded app info
+              aiagallery.dbif.MApps._requestedFields(app, requestedFields);
+
+              // Remove the owner field
+              delete app.owner;      
             });
         }
       );
+
+      
+
 
       return appArray; 
     }

@@ -33,15 +33,19 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
       var             outerCanvas = module.canvas;
       var             scrollContainer;
       var             listLayout;
+      var             groupAppsLayout;
  
+      // Gui releated
       var             label; 
+      var             font; 
+      var             scroller; 
 
       // Wrap layout in scroller
       outerCanvas.setLayout(new qx.ui.layout.VBox());
       scrollContainer = new qx.ui.container.Scroll();
       outerCanvas.add(scrollContainer, { flex : 1 });
 
-      canvas = new qx.ui.container.Composite(new qx.ui.layout.HBox(10)); 
+      canvas = new qx.ui.container.Composite(new qx.ui.layout.VBox(10)); 
       scrollContainer.add(canvas, { flex : 1 });
 
       // Will hold the group info
@@ -49,7 +53,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
         = new qx.ui.container.Composite(new qx.ui.layout.VBox(20));
 
       // Button to join group
-      this.joinGroupBtn = new qx.ui.form.Button(this.tr("Join Group")); 
+      this.joinGroupBtn = new qx.ui.form.Button(this.tr("Request Membership")); 
 
       this.joinGroupBtn.addListener("execute", fsm.eventListener, fsm);
       this.joinGroupBtn.set(
@@ -65,64 +69,46 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
 
       // We will add this button later
 
-      canvas.add(this.groupLayout); 
-      canvas.add(new qx.ui.core.Spacer(20));   
-
-      // Sidebar to hold apps made by members of the group
-      listLayout = new qx.ui.container.Composite(new qx.ui.layout.VBox);
-
-      // Bump the list down a bit
-      listLayout.add(new qx.ui.core.Spacer(0, 70)); 
-
-      label = new qx.ui.basic.Label(this.tr("Apps by Group Members"));
-      label.setFont("bold");
-      listLayout.add(label);
-
-      this.byGroup = new qx.ui.list.List();
-      this.byGroup.set(
+      groupAppsLayout = new qx.ui.layout.VBox();
+      groupAppsLayout.set(
         {
-          itemHeight : 130,
-          width      : 400,
-          height     : 600, 
-          labelPath  : "title",
-          iconPath   : "image1",
-          delegate   :
-          {
-            createItem : function()
-            {
-              return new aiagallery.widget.SearchResult("byAuthor");
-            },
-            
-            bindItem : function(controller, item, id) 
-            {
-              [
-                "uid",
-                "image1",
-                "title",
-                "numLikes",
-                "numDownloads",
-                "numViewed",
-                "numComments",
-                "displayName"
-              ].forEach(
-                function(name)
-                {
-                  controller.bindProperty(name, name, null, item, id);
-                });
-            },
-
-            configureItem : qx.lang.Function.bind(
-              function(item) 
-              {
-                // Listen for clicks on the title or image, to view the app
-                item.addListener("viewApp", fsm.eventListener, fsm);
-              },
-              this)
-          }
+          alignX : "center"
+        });
+      this.groupApps = new qx.ui.container.Composite(groupAppsLayout);
+      this.groupApps.set(
+        {
+          decorator : "home-page-ribbon",
+          padding   : 20
         });
 
-      listLayout.add(this.byGroup); 
-      canvas.add(listLayout);
+      font = qx.theme.manager.Font.getInstance().resolve("bold").clone();
+      font.setSize(20);
+
+      this.groupAppsHeader = new qx.ui.basic.Label();
+      this.groupAppsHeader.set(
+        {
+          font  : font, 
+          decorator : "home-page-header"
+        });
+      this.groupApps.add(this.groupAppsHeader);
+      
+      // slide bar of Newest Apps
+      scroller = new qx.ui.container.Scroll();
+      this.groupApps.add(scroller);
+      
+      // Scroll container can hold only a single child. Create that child.
+      this.groupAppsContainer =
+        new qx.ui.container.Composite(new qx.ui.layout.HBox(0));
+      this.groupAppsContainer.set(
+          {
+            height : 210
+          });
+      scroller.add(this.groupAppsContainer, {flex : 1});
+     
+      // we will add this later     
+
+      canvas.add(this.groupLayout); 
+      this.canvas = canvas; 
     },
 
     
@@ -285,12 +271,34 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
             //appearance : "widget",
             readOnly   : true,
             wrap       : true,
-            width      : 350,
+            maxWidth      : 350,
             height     : 100   
           }
         );
 
         this.groupLayout.add(guiObject); 
+
+        // Type info
+        layout = new qx.ui.container.Composite(new qx.ui.layout.HBox());
+
+        label = new qx.ui.basic.Label(this.tr("Type: "));
+        label.setFont("bold");
+        layout.add(label);
+
+        label = new qx.ui.basic.Label(group.type);
+        layout.add(label);
+
+        if(group.subType)
+        {
+          label = new qx.ui.basic.Label(this.tr("Subtype: "));
+          label.setFont("bold");
+          layout.add(label);
+
+          label = new qx.ui.basic.Label(group.subType);
+          layout.add(label);
+        }
+
+        this.groupLayout.add(layout); 
 
         // Members
         label = new qx.ui.basic.Label(this.tr("Members: "));
@@ -397,12 +405,51 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
           break;
         }
 
-        // Update sidebar with apps made by members of this group
-        model = qx.data.marshal.Json.createModel(group.groupApps);
-        this.byGroup.setModel(model);
+        // Update layout with apps made by members of this group
+        if (group.groupApps.length > 0) 
+        {
+           // Set header
+           this.groupAppsHeader.
+               setValue(this.tr("This group has ") + group.groupApps.length
+                       + " apps"); 
 
-        // Add joining button
+           for(var i = 0; i < group.groupApps.length; i++)
+           {
+             // If this isn't the first one
+             if (i > 0)
+             {
+               // Then add a spacer between the previous one and this one
+               this.groupAppsContainer.add(new qx.ui.core.Spacer(10));
+             }
+
+             // Add the thumbnail for this app
+             var appLiked = group.groupApps[i];
+             var appThumbLiked = 
+               new aiagallery.widget.SearchResult("homeRibbon", appLiked);
+             this.groupAppsContainer.add(appThumbLiked);
+
+             // Associate the app data with the UI widget so it can be passed
+             // in the click event callback
+             appThumbLiked.setUserData("App Data", appLiked);
+         
+             // Fire an event specific to this application, no friendly name.
+             appThumbLiked.addListener(
+               "click", 
+               function(e)
+               {
+                 fsm.fireImmediateEvent(
+                   "authoredAppClick", 
+                   this, 
+                   e.getCurrentTarget().getUserData("App Data"));
+               });             
+           }  
+         }
+
+        // Add join button
         this.groupLayout.add(this.joinGroupBtn);
+ 
+        // Add group app scroller
+        this.canvas.add(this.groupApps, {flex : 1});
 
         break;
 
