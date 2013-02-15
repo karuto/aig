@@ -17,6 +17,8 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
 
   members :
   {
+    __flagItListener : null,
+
     /**
      * Build the raw graphical user interface.
      *
@@ -107,6 +109,35 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
      
       // we will add this later     
 
+      // Flag a user for having inappropriate content
+      this.flagItLabel = new qx.ui.basic.Label(this.tr("Flag this Group"));
+      font = qx.theme.manager.Font.getInstance().resolve("bold").clone();
+      font.set(
+        {
+          color      : "#75940c",     // android-green-dark
+          decoration : "underline"
+        });
+
+      this.flagItLabel.set(
+        {
+          maxHeight   : 30,
+          textColor   : null, 
+          font        : font, 
+          toolTipText : this.tr("Flag this Group")
+        });
+
+      // Pop a flag window on click
+      this.__flagItListener = this.flagItLabel.addListener(
+        "click",
+        function(e)
+        {
+           var win = new aiagallery.widget.FlagPopUp(
+              aiagallery.dbif.Constants.FlagType.Group, this);
+
+           win.show();          
+        },
+        this);
+
       canvas.add(this.groupLayout); 
       this.canvas = canvas; 
     },
@@ -158,7 +189,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
         {
         case 1:
         case 2:
-          warnString = this.tr("Group does not exist"); 
+          warnString = this.tr("Group does not exist");  
           break;
 
         default:
@@ -209,6 +240,10 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
             font   : font
           }
         );
+
+        // Save group name as user data so the flag it widget
+        // can retrieve it later
+        this.setUserData("groupname", group.name);
 
         this.groupLayout.add(label); 
         this.groupLayout.add(new qx.ui.core.Spacer(20)); 
@@ -383,6 +418,8 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
 
           this.groupLayout.add(label);
 
+          // Show the button if the owner has made the group's join 
+          // type private. 
           bShowBtn = true;  
           break;
 
@@ -462,6 +499,9 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
         // Add group app scroller
         this.canvas.add(this.groupApps, {flex : 1});
 
+        // Allow users to flag this group for bad content 
+        this.canvas.add(this.flagItLabel);         
+
         break;
 
       case "joinGroup":
@@ -471,7 +511,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
         switch (result)
         {
         case aiagallery.dbif.Constants.GroupStatus.Member:
-          this.joinGroupBtn.setLabel(this.tr("Already Joined")); 
+          this.joinGroupBtn.setLabel(this.tr("Joined")); 
 
           // Disable button
           this.joinGroupBtn.setEnabled(false);
@@ -501,8 +541,36 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
 
         break;
 
+      case "flagGroup":
+        this._clearFlagListener();
+
+        // Replace the label
+        this.flagItLabel.set(
+          {
+            value     : this.tr("Flagged as inappropriate."),
+            font      : "default",
+            textColor : "black"
+          });
+
+        // Reset the cursor
+        this.flagItLabel.setCursor("default");
+
       default:
         throw new Error("Unexpected request type: " + requestType);
+      }
+    },
+
+    /** 
+     * Private helper function to clear the flag listener 
+     * from the flagIt label. 
+     * */
+    _clearFlagListener : function() 
+    {
+      // Remove the listener.
+      if (this.__flagItListener !== null)
+      {
+        this.flagItLabel.removeListenerById(this.__flagItListener);
+        this.__flagItListener = null;
       }
     }
   }

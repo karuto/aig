@@ -61,16 +61,16 @@ qx.Mixin.define("aiagallery.dbif.MFlags",
      *   This is the string that is the treeId of the comment. If an app was 
      *   flagged input a null
      * 
-     * @param username{String}
-     *   This is the string that is the username of the user whose profile is
-     *   being flagged
+     * @param name{String}
+     *   This is the string name of either the username being flagged or the
+     *   group being flagged
      * 
      * @return {Integer || Status}
      *   This is the value of the status of the application 
      *   (Banned  : 0, Pending : 1, Active  : 2)
      */
     flagIt : function(flagType, explanationInput, appId, 
-                      commentId, username, error)
+                      commentId, name, error)
     {
 
       var            appObj;
@@ -86,6 +86,8 @@ qx.Mixin.define("aiagallery.dbif.MFlags",
       var            maxFlags = aiagallery.dbif.Constants.MAX_FLAGGED;
       var            statusVals = aiagallery.dbif.Constants.Status;
       var            flagTypeVal = aiagallery.dbif.Constants.FlagType;
+
+      var            resultList; 
 
       // Check what type of element has been flagged.
       switch (flagType)
@@ -325,11 +327,11 @@ qx.Mixin.define("aiagallery.dbif.MFlags",
         {
           type  : "element",
           field : "displayName",
-          value : username
+          value : name
         }; 
         
         // Check to ensure name is unique
-        var resultList = 
+        resultList = 
           liberated.dbif.Entity.query("aiagallery.dbif.ObjVisitors", 
                                       criteria);                             
 
@@ -338,7 +340,7 @@ qx.Mixin.define("aiagallery.dbif.MFlags",
         {
           error.setCode(2);
           error.setMessage("The display name you are "
-                           + "trying to flag: \"" + username +
+                           + "trying to flag: \"" + name +
                            "\" cannot be found."); 
 
           return error;
@@ -405,19 +407,104 @@ qx.Mixin.define("aiagallery.dbif.MFlags",
           data.explanation = explanationInput;
  
           // put the new flag on the database
-          liberated.dbif.Entity.asTransaction(
-            function()
-            {
-              newFlag.put();
-            });
+          newFlag.put();
         }
 
         return true;
 
 
+      case flagTypeVal.Group: // A group  was flagged
+        // Check that this group exists
+        criteria = 
+        {
+          type  : "element",
+          field : "displayName",
+          value : name
+        }; 
+        
+        // Check to ensure name is unique
+        resultList = 
+          liberated.dbif.Entity.query("aiagallery.dbif.ObjGroup", 
+                                      criteria);                             
+
+        // Should return one and only one username     
+        if (resultList.length != 1) 
+        {
+          error.setCode(2);
+          error.setMessage("The group you are "
+                           + "trying to flag: \"" + name +
+                           "\" cannot be found."); 
+
+          return error;
+        } else {
+            var groupOwnerId = resultList[0].owner; 
+        }
+
+        // User cannot flag their own profile 
+        if (groupOwnerId == visitorId)
+        {
+          error.setCode(2);
+          error.setMessage("You cannot flag your own group!"); 
+
+          return error; 
+        }
+
+        // Construct query criteria for "flags of this group by current visitor
+        criteria = 
+          {
+            type : "op",
+            method : "and",
+            children : 
+            [
+              {
+                type  : "element",
+                field : "groupName",
+                value : name
+              },
+              {
+                type  : "element",
+                field : "visitor",
+                value : visitorId
+              },
+              {
+                type  : "element",
+                field : "type",
+                value : aiagallery.dbif.Constants.FlagType.Group
+              }              
+            ]
+          };
+
+        // Query for the flags of this app by the current visitor
+        // (an array, which should have length zero or one).
+        flagsList = liberated.dbif.Entity.query("aiagallery.dbif.ObjFlags",
+                                                criteria,
+                                                null);
+
+        // Only change things if the visitor 
+        // has not already flagged this profile
+        if (flagsList.length === 0)
+        {
+          // initialize the new flag to be put on the database
+          newFlag = new aiagallery.dbif.ObjFlags();
+
+          // store the new flags data
+          var data = newFlag.getData();
+
+          data.type = aiagallery.dbif.Constants.FlagType.Group;
+          data.comment = null;
+          data.visitor = visitorId;
+          data.groupName = name; 
+          data.explanation = explanationInput;
+ 
+          // put the new flag on the database
+          newFlag.put();
+        }
+
+        return true;
+
       default:
         error.setCode(3);
-        error.setMessage("unknown flag type.");
+        error.setMessage("Unknown Flag Type.");
         return error;
       } 
 
@@ -629,6 +716,7 @@ qx.Mixin.define("aiagallery.dbif.MFlags",
         resultMap.Apps = this._getAppFlags(error);
         resultMap.Profiles = this._getProfileFlags(error);
         resultMap.Comments = this._getCommentFlags(error);
+        resultMap.Group = this._getGroupFlags(error);
 
         return resultMap; 
 
@@ -640,6 +728,9 @@ qx.Mixin.define("aiagallery.dbif.MFlags",
 
       case aiagallery.dbif.Constants.FlagType.Comment:
         return this._getCommentFlags(error);
+
+      case aiagallery.dbif.Constants.FlagType.Group:
+        return this._getGroupFlags(error);
 
       default:
         // Type unrecognized, this is an error
@@ -657,6 +748,9 @@ qx.Mixin.define("aiagallery.dbif.MFlags",
 
    /**
     * Helper function to get all the flags associated with comments
+    * 
+    * @param error {Error}
+    *   The error object
     * 
     * @return {Array}
     *   An array containing all the ObjFlag objects related to comments
@@ -724,6 +818,9 @@ qx.Mixin.define("aiagallery.dbif.MFlags",
    /**
     * Helper function to get all the flags associated with apps
     * 
+    * @param error {Error}
+    *   The error object
+    * 
     * @return {Array}
     *   An array containing all the ObjFlag objects related to apps
     */
@@ -773,6 +870,9 @@ qx.Mixin.define("aiagallery.dbif.MFlags",
    /**
     * Helper function to get all the flags associated with profiles
     * 
+    * @param error {Error}
+    *   The error object
+    * 
     * @return {Array}
     *   An array containing all the ObjFlag objects related to profiles
     */
@@ -788,6 +888,37 @@ qx.Mixin.define("aiagallery.dbif.MFlags",
           type: "element",
           field: "type",
           value: aiagallery.dbif.Constants.FlagType.Profile
+        };
+
+      // Issue a query for all flagged user profiles
+      resultList = liberated.dbif.Entity.query("aiagallery.dbif.ObjFlags", 
+                                               criteria,
+                                               null);
+
+      return resultList; 
+    },
+
+   /**
+    * Helper function to get all the flags associated with groups
+    * 
+    * @param error {Error}
+    *   The error object
+    * 
+    * @return {Array}
+    *   An array containing all the ObjFlag objects related to groups
+    */
+    _getGroupFlags : function (error)
+    {
+      var      criteria;
+      var      resultList;
+
+      // Do a particular search to retrieve all the active flags
+      // for this flag type
+      criteria =
+        {
+          type: "element",
+          field: "type",
+          value: aiagallery.dbif.Constants.FlagType.Group
         };
 
       // Issue a query for all flagged user profiles

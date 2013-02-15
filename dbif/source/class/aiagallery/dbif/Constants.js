@@ -84,7 +84,8 @@ qx.Class.define("aiagallery.dbif.Constants",
     {
       App     : 0,
       Comment : 1,
-      Profile : 2
+      Profile : 2,
+      Group   : 3
     },
 
     /** Mapping of Group Join Type to value */
@@ -98,7 +99,9 @@ qx.Class.define("aiagallery.dbif.Constants",
     FlagTypeToName :
     [
       "App", 
-      "Comment"
+      "Comment",
+      "Profile",
+      "Group"
     ],
 
     /** List of dissalowed usernames */

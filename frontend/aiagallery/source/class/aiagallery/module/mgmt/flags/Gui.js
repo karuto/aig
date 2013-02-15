@@ -34,6 +34,7 @@ qx.Class.define("aiagallery.module.mgmt.flags.Gui",
       var             appScroller; 
       var             profileScroller; 
       var             commentScroller; 
+      var             groupScroller;
       var             vBox; 
 
       this.fsm = fsm; 
@@ -47,7 +48,7 @@ qx.Class.define("aiagallery.module.mgmt.flags.Gui",
       mainScrollContainer.add(canvas, { flex : 1}); 
 
       // Create title label
-      label = new qx.ui.basic.Label("Flagged Comments");
+      label = new qx.ui.basic.Label(this.tr("Flagged Comments"));
       canvas.add(label);        
 
       // Create the scroller to hold all of the comments
@@ -61,7 +62,7 @@ qx.Class.define("aiagallery.module.mgmt.flags.Gui",
       commentScroller.add(this.commentsScrollContainer);
 
       // Show flagged apps 
-      label = new qx.ui.basic.Label("Flagged Apps");
+      label = new qx.ui.basic.Label(this.tr("Flagged Apps"));
       canvas.add(label);     
 
       // Create the scroller to hold all of the apps
@@ -78,10 +79,10 @@ qx.Class.define("aiagallery.module.mgmt.flags.Gui",
       canvas.add(new qx.ui.core.Spacer(25)); 
 
       // Show flagged profiles
-      label = new qx.ui.basic.Label("Flagged Profiles");
+      label = new qx.ui.basic.Label(this.tr("Flagged Profiles"));
       canvas.add(label);  
 
-      // Create the scroller to hold all of the apps
+      // Create the scroller to hold all of the profile flags
       profileScroller = new qx.ui.container.Scroll();
       canvas.add(profileScroller, {flex : 1}); 
 
@@ -90,6 +91,23 @@ qx.Class.define("aiagallery.module.mgmt.flags.Gui",
       this.profileScrollContainer = 
         new qx.ui.container.Composite(vBox);
       profileScroller.add(this.profileScrollContainer);
+
+      // Get some space inbetween these two
+      canvas.add(new qx.ui.core.Spacer(25)); 
+
+      // Show flagged profiles
+      label = new qx.ui.basic.Label(this.tr("Flagged Groups"));
+      canvas.add(label);  
+
+      // Create the scroller to hold all of the profile flags
+      groupScroller = new qx.ui.container.Scroll();
+      canvas.add(groupScroller, {flex : 1}); 
+
+      // The Scroller may contain only one container, so create that container.
+      vBox = new qx.ui.layout.VBox();     
+      this.groupScrollContainer = 
+        new qx.ui.container.Composite(vBox);
+      groupScroller.add(this.groupScrollContainer);
 
     },
    
@@ -376,6 +394,105 @@ qx.Class.define("aiagallery.module.mgmt.flags.Gui",
 
             this.commentsScrollContainer.add(label);
           }
+        }
+
+        // Add group flags if we need to 
+        if (result.Groups.length != 0)
+        {
+          // Ensure the scroller is clean
+          this.groupScrollContainer.removeAll(); 
+
+          // For each group result add a layout to the container
+          result.Groups.forEach(function(obj)
+            {
+
+              // Flag Layouts         
+              vBoxTotal 
+                = new qx.ui.container.Composite(new qx.ui.layout.VBox(10));  
+
+              hBoxData 
+                = new qx.ui.container.Composite(new qx.ui.layout.HBox(10));
+
+              hBoxBtns
+                = new qx.ui.container.Composite(new qx.ui.layout.HBox(10)); 
+
+              // Add App Data
+              label = new qx.ui.basic.Label("Group name: " + obj.groupName);
+              hBoxData.add(label);
+
+              label = new qx.ui.basic.Label("Reason: " + obj.explanation);
+              hBoxData.add(label);
+
+              // Add Buttons
+              button = new qx.ui.form.Button(this.tr("Keep"));
+              button.setUserData("name", obj.groupName);
+
+              button.addListener(
+                "click",
+                function(e)
+                {
+                  // Fire immediate event
+                  this.fsm.fireImmediateEvent(
+                    "keepGroup", this, e.getTarget());
+                }, this); 
+
+              hBoxBtns.add(button); 
+
+              button = new qx.ui.form.Button(this.tr("Delete"));
+              button.setUserData("name", obj.groupName);
+
+              button.addListener(
+                "click",
+                function(e)
+                {
+                  var name = e.getTarget().getUserData("name"); 
+
+                  dialog.Dialog.confirm(
+                    this.tr("Really Delete this Group?"),
+                    function(result)
+                    {
+                      if (result)
+                      {                   
+                        // Fire immediate event
+                        this.fsm.fireImmediateEvent(
+                          "deleteGroup", this, name);
+                      }
+                    }, this);
+                }, this); 
+
+              hBoxBtns.add(button); 
+
+              button = new qx.ui.form.Button(this.tr("Go To Group"));
+              button.setUserData("name", obj.groupName);
+
+              button.addListener(
+                "click",
+                function(e)
+                {
+                  var name;
+
+                  username = e.getTarget().getUserData("name");
+
+                  aiagallery.module.dgallery.groupinfo.GroupInfo
+                    .addGroupView(name);             
+                }); 
+
+              hBoxBtns.add(button); 
+
+              // Add both layouts to main layout
+              vBoxTotal.add(hBoxData); 
+              vBoxTotal.add(hBoxBtns);
+
+              // Save some identifying info about this layout obj
+              vBoxTotal.setUserData("name", obj.groupName);
+
+              this.groupScrollContainer.add(vBoxTotal); 
+               
+              // Add space between apps
+              this.groupScrollContainer.add(new qx.ui.core.Spacer(10));
+
+            }
+          ,this);
         }
 
         break;

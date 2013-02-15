@@ -76,6 +76,10 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Fsm",
           "authoredAppClick" :
             "Transition_Idle_to_Idle_via_authoredAppClick",
 
+          // User is flagging group
+          "flagGroup" : 
+             "Transition_Idle_to_AwaitRpcResult_via_flagGroup",  
+
           // When we get an appear event, retrieve the category tags list. We
           // only want to do it the first time, though, so we use a predicate
           // to determine if it's necessary.
@@ -211,6 +215,48 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Fsm",
           aiagallery.module.dgallery.appinfo.AppInfo.addAppView(item.uid, 
                                                                item.title);
 
+        }
+      });
+      
+      state.addTransition(trans);
+
+      trans = new qx.util.fsm.Transition(
+        "Transition_Idle_to_AwaitRpcResult_via_flagProfile",
+      {
+        "nextState" : "State_AwaitRpcResult",
+
+        "context" : this,
+
+        "ontransition" : function(fsm, event)
+        {
+          var             groupname;
+          var             reason;
+          var             map;
+          
+          // Get the data map
+          map = event.getData();
+          
+          // Break out the map
+          groupname = map.groupname;
+          reason = map.reason; 
+
+          var request =
+            this.callRpc(fsm,
+                         "aiagallery.features",
+                         "flagIt",
+                         [ 
+                           // flag type: 3 = user
+                           aiagallery.dbif.Constants.FlagType.Group,     
+                           reason,  // reason
+                           null,
+                           null, 
+                           groupname // String of the user's name
+                         ]);
+
+
+          // When we get the result, we'll need to know what type of request
+          // we made.
+          request.setUserData("requestType", "flagGroup");
         }
       });
       
