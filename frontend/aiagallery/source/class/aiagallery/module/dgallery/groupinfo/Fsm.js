@@ -221,7 +221,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Fsm",
       state.addTransition(trans);
 
       trans = new qx.util.fsm.Transition(
-        "Transition_Idle_to_AwaitRpcResult_via_flagProfile",
+        "Transition_Idle_to_AwaitRpcResult_via_flagGroup",
       {
         "nextState" : "State_AwaitRpcResult",
 
@@ -245,7 +245,6 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Fsm",
                          "aiagallery.features",
                          "flagIt",
                          [ 
-                           // flag type: 3 = user
                            aiagallery.dbif.Constants.FlagType.Group,     
                            reason,  // reason
                            null,

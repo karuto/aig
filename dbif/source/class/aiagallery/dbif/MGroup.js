@@ -385,6 +385,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       var      resultList;
       var      group; 
       var      groupMap;
+      var      flagsList; 
 
       criteria = 
         {
@@ -414,6 +415,42 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       {
         // Get the apps user members have made
         groupMap["groupApps"] = this._getMemberApps(group);
+
+        // Also determine if the user has flagged this group
+       // Construct query criteria for "flags of this group by current visitor
+        criteria = 
+          {
+            type : "op",
+            method : "and",
+            children : 
+            [
+              {
+                type  : "element",
+                field : "groupName",
+                value : groupName
+              },
+              {
+                type  : "element",
+                field : "visitor",
+                value : this.getWhoAmI().id
+
+              },
+              {
+                type  : "element",
+                field : "type",
+                value : aiagallery.dbif.Constants.FlagType.Group
+              }              
+            ]
+          };
+
+        // Query for the flags of this app by the current visitor
+        // (an array, which should have length zero or one).
+        flagsList = liberated.dbif.Entity.query("aiagallery.dbif.ObjFlags",
+                                                criteria,
+                                                null);
+
+
+        groupMap["bFlag"] = flagsList.length != 0; 
       }
 
       return groupMap;
@@ -1029,6 +1066,10 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       }
 
       group.removeSelf();
+
+      // Remove any flags this group may have had
+      this.clearGroupFlags(groupData.name, error);
+
       return true; 
     },
 

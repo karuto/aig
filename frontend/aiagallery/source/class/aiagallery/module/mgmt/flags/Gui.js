@@ -126,6 +126,8 @@ qx.Class.define("aiagallery.module.mgmt.flags.Gui",
       var             fsm = module.fsm;
       var             response = rpcRequest.getUserData("rpc_response");
       var             requestType = rpcRequest.getUserData("requestType");
+      var             map; 
+
       var             result;
       var             childList; 
       var             i;
@@ -137,7 +139,8 @@ qx.Class.define("aiagallery.module.mgmt.flags.Gui",
       var             hBoxData;
       var             hBoxBtns;
       var             label; 
-      var              button; 
+      var             button; 
+      var             groupName; 
 
       // We can ignore aborted requests.
       if (response.type == "aborted")
@@ -471,7 +474,7 @@ qx.Class.define("aiagallery.module.mgmt.flags.Gui",
                 {
                   var name;
 
-                  username = e.getTarget().getUserData("name");
+                  name = e.getTarget().getUserData("name");
 
                   aiagallery.module.dgallery.groupinfo.GroupInfo
                     .addGroupView(name);             
@@ -556,7 +559,7 @@ qx.Class.define("aiagallery.module.mgmt.flags.Gui",
         // Look through the profileScroller 
         // remove all profile flags with the same profile name
         // of the flag we just cleared
-        result = response.data.result;
+        result = 
 
         childList = this.profileScrollContainer.getChildren();
          
@@ -639,6 +642,30 @@ qx.Class.define("aiagallery.module.mgmt.flags.Gui",
         // Add a module for the specified app
         aiagallery.module.dgallery.appinfo.AppInfo.addAppView(result.app.uid, 
                                                               result.app.title);
+
+        break; 
+
+      case "keepGroup":
+      case "deleteGroup":
+
+        // Look through the group Scroller 
+        // remove all group flags with the same name
+        // of the flag we just cleared
+        result = rpcRequest.getUserData("name");
+
+        childList = this.groupScrollContainer.getChildren();
+         
+        for (i = 0; i < childList.length; i++)
+        {
+          groupName = childList[i].getUserData("name");
+
+          // If the object has the same uid as the flags we just cleared
+          // remove it from the layout
+          if (groupName == result) 
+          {
+            this.groupScrollContainer.remove(childList[i]);
+          }
+        }
 
         break; 
 

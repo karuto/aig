@@ -42,6 +42,9 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
       var             font; 
       var             scroller; 
 
+      // Attach fsm to the page
+      this.fsm = fsm; 
+
       // Wrap layout in scroller
       outerCanvas.setLayout(new qx.ui.layout.VBox());
       scrollContainer = new qx.ui.container.Scroll();
@@ -191,6 +194,10 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
         case 2:
           warnString = this.tr("Group does not exist");  
           break;
+
+        case 3:
+          warnString = this.tr("You cannot flag your own group");
+          break; 
 
         default:
           warnString = this.tr("Unknown error relating to pulling group info"); 
@@ -500,7 +507,24 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
         this.canvas.add(this.groupApps, {flex : 1});
 
         // Allow users to flag this group for bad content 
-        this.canvas.add(this.flagItLabel);         
+        this.canvas.add(this.flagItLabel);  
+
+        if(group.bFlag)
+        {
+          // If the user has flagged this ap before disable the flagit button
+          this._clearFlagListener();
+
+          // Replace the label
+          this.flagItLabel.set(
+            {
+              value     : this.tr("Flagged as inappropriate."),
+              font      : "default",
+              textColor : "black"
+            });
+
+          // Reset the cursor
+          this.flagItLabel.setCursor("default");
+        }       
 
         break;
 
@@ -554,6 +578,8 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
 
         // Reset the cursor
         this.flagItLabel.setCursor("default");
+
+        break; 
 
       default:
         throw new Error("Unexpected request type: " + requestType);

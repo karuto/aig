@@ -87,6 +87,12 @@ qx.Class.define("aiagallery.module.mgmt.flags.Fsm",
 
           // Event is called directly from a comment
           "visitComment" : "Transition_Idle_to_AwaitRpcResult_via_visitComment",
+
+          // Keep a flagged group
+          "keepGroup" : "Transition_Idle_to_AwaitRpcResult_via_keepGroup",
+
+          // Delete a flagged group
+          "deleteGroup" : "Transition_Idle_to_AwaitRpcResult_via_deleteGroup",
     
           // When we get an appear event, retrieve the category tags list. We
           // only want to do it the first time, though, so we use a predicate
@@ -446,6 +452,92 @@ qx.Class.define("aiagallery.module.mgmt.flags.Fsm",
         }
       });
 
+      state.addTransition(trans);
+
+      /*
+       * Transition: Idle to AwaitRpcResult
+       *
+       * Cause: User clicked on keep button for a group in mgmt page 
+       *
+       * Action:
+       *  Keep a group that has been flagged
+       */
+
+      trans = new qx.util.fsm.Transition(
+        "Transition_Idle_to_AwaitRpcResult_via_keepGroup",
+      {
+        "nextState" : "State_AwaitRpcResult",
+
+        "context" : this,
+
+        "ontransition" : function(fsm, event)
+        {
+          var     request;  
+          var     name;  
+          var     map; 
+          
+          // Get the data map
+          map = event.getData();
+          
+          // Break out the map
+          name = map.getUserData("name");
+
+          // Change status of selected comment back to viewable
+          request =
+             this.callRpc(fsm,
+                          "aiagallery.features",
+                          "clearGroupFlags",
+                          [name]);
+
+          // When we get the result, we'll need to know what type of request
+          // we made.
+          request.setUserData("requestType", "keepGroup");
+          request.setUserData("name", name);
+
+        }
+      });
+      
+      state.addTransition(trans);
+
+      /*
+       * Transition: Idle to AwaitRpcResult
+       *
+       * Cause: User clicked on delete button for a group in mgmt page 
+       *
+       * Action:
+       *  Delete an existing group
+       */
+
+      trans = new qx.util.fsm.Transition(
+        "Transition_Idle_to_AwaitRpcResult_via_deleteGroup",
+      {
+        "nextState" : "State_AwaitRpcResult",
+
+        "context" : this,
+
+        "ontransition" : function(fsm, event)
+        {
+          var     request;  
+          var     name; 
+          
+          // Get the data map
+          name = event.getData();
+        
+         // Remove the group
+         request =
+            this.callRpc(fsm,
+                         "aiagallery.features",
+                         "mgmtDeleteGroup",
+                         [name]);
+
+          // When we get the result, we'll need to know what type of request
+          // we made.
+          request.setUserData("requestType", "deleteGroup");
+          request.setUserData("name", name); 
+
+        }
+      });
+      
       state.addTransition(trans);
 
       /*

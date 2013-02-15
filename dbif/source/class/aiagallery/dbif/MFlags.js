@@ -35,6 +35,10 @@ qx.Mixin.define("aiagallery.dbif.MFlags",
                          this.clearProfileFlagsWithId,
                          [ "id" ]);
 
+    this.registerService("aiagallery.features.clearGroupFlags",
+                         this.clearGroupFlags,
+                         [ "name" ]);
+
     this.registerService("aiagallery.features.getFlags",
                          this.getFlags,
                          [ "flagType" ]);
@@ -418,7 +422,7 @@ qx.Mixin.define("aiagallery.dbif.MFlags",
         criteria = 
         {
           type  : "element",
-          field : "displayName",
+          field : "name",
           value : name
         }; 
         
@@ -441,14 +445,15 @@ qx.Mixin.define("aiagallery.dbif.MFlags",
         }
 
         // User cannot flag their own profile 
+/* DISABLE FOR TESTING
         if (groupOwnerId == visitorId)
         {
-          error.setCode(2);
+          error.setCode(3);
           error.setMessage("You cannot flag your own group!"); 
 
           return error; 
         }
-
+*/ 
         // Construct query criteria for "flags of this group by current visitor
         criteria = 
           {
@@ -594,6 +599,9 @@ qx.Mixin.define("aiagallery.dbif.MFlags",
      *   Cannot use appId so chance exists user could change name before this
      *   function finishes. 
      * 
+     * @param error {Error}
+     *   The error object
+     * 
      * @return displayName {String}
      *   The displayName we just cleared of all flags
      */
@@ -629,8 +637,8 @@ qx.Mixin.define("aiagallery.dbif.MFlags",
          userId = resultList[0].id; 
        }
 
-       // Delete the user
-       this.clearProfileFlagsWithId(userId); 
+       // Delete the user flags that exist 
+       this.clearProfileFlagsWithId(userId, error); 
 
        // Let the user know flags removed
        this.logMessage(displayName, "All flags removed");  
@@ -644,8 +652,11 @@ qx.Mixin.define("aiagallery.dbif.MFlags",
      * 
      * @param id {Integer}
      *   The visitor's id
+     * 
+     * @param error {Error}
+     *   The error object
      */
-     clearProfileFlagsWithId : function(id)
+     clearProfileFlagsWithId : function(id, error)
      {
 
        liberated.dbif.Entity.asTransaction(
@@ -673,6 +684,52 @@ qx.Mixin.define("aiagallery.dbif.MFlags",
              }
            });
        });
+
+     },
+
+    /**
+     * Remove group flags
+     * 
+     * @param name {String}
+     *   The name of the group we are clearing flags of
+     * 
+     * @param error {Error}
+     *   The error object
+     * 
+     * @retrun {String}
+     *   The string name of the group we just cleared of flags
+     */
+     clearGroupFlags : function(name, error)
+     {
+
+       liberated.dbif.Entity.asTransaction(
+         function()
+         {
+           // Remove all Flags objects referencing this group
+           liberated.dbif.Entity.query("aiagallery.dbif.ObjFlags", 
+                                        {
+                                         type  : "element",
+                                         field : "groupName",
+                                         value : name
+                                       }).forEach(
+           function(result)
+           {
+             var             obj;
+              
+              // Get this Flags object
+             obj = new aiagallery.dbif.ObjFlags(result.uid);
+               
+             // Assuming it exists (it had better!)...
+             if (! obj.getBrandNew())
+             {
+               // ... then remove this object
+               obj.removeSelf();
+             }
+           });
+       });
+
+       // We were succesful 
+       return name; 
 
      },
 
@@ -710,13 +767,14 @@ qx.Mixin.define("aiagallery.dbif.MFlags",
           {
             Apps     : null,
             Profiles : null,
-            Comments : null
+            Comments : null, 
+            Groups   : null
           };
 
         resultMap.Apps = this._getAppFlags(error);
         resultMap.Profiles = this._getProfileFlags(error);
         resultMap.Comments = this._getCommentFlags(error);
-        resultMap.Group = this._getGroupFlags(error);
+        resultMap.Groups = this._getGroupFlags(error);
 
         return resultMap; 
 
@@ -741,7 +799,8 @@ qx.Mixin.define("aiagallery.dbif.MFlags",
 
       // Unreachable code section
       error.setCode(2);
-      error.setMessage("Reached unreachable code section in getFlags, impressive."); 
+      error.setMessage("Reached unreachable code section in getFlags, "
+		       + "impressive."); 
       throw error;
       
     },
@@ -925,12 +984,10 @@ qx.Mixin.define("aiagallery.dbif.MFlags",
       resultList = liberated.dbif.Entity.query("aiagallery.dbif.ObjFlags", 
                                                criteria,
                                                null);
+
+      // Remove unneded fields
       resultList.forEach(function(obj)
-        {
-          // Replace profileId with flagged users name 
-          obj.profileId = 
-            aiagallery.dbif.MVisitors._getDisplayName(obj.profileId, error);
-          
+        {          
           // Remove the visitor field
           delete obj.visitor;
         });
