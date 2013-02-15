@@ -269,6 +269,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
           var             description;
           var             groupType; 
           var             subGroupType;
+          var             joinType; 
 
           // Get values from gui
           name = fsm.getObject("groupNameField").getValue();
@@ -296,13 +297,18 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
             subGroupType = null; 
           }
 
+          // How users will be allowed to join
+          joinType = fsm.getObject("userJoinRadioButtonGroup")
+                       .getSelection()[0].getUserData("enum"); 
+
+
           // Issue the remote procedure call to execute the query
           request =
             this.callRpc(fsm,
                          "aiagallery.features",
                          "addOrEditGroup",
                          [ name, description, 
-                           groupType, subGroupType]
+                           groupType, subGroupType, joinType]
                          );
 
           // When we get the result, we'll need to know what type of request
@@ -626,7 +632,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
           { 
             // Bad request no users to work with
             warnString = "You must make a group first before"
-			 + " requesting users for it";
+                         + " requesting users for it";
 
             dialog.Dialog.warning(warnString); 
 

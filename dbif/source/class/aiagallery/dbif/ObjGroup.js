@@ -25,7 +25,8 @@ qx.Class.define("aiagallery.dbif.ObjGroup",
           "joiningUsers"    : [],
           "requestedUsers"  : [],
           "type"            : null,
-          "subType"         : null
+          "subType"         : null,
+          "joinType"        : aiagallery.dbif.Constants.JoinType.Public
         });
     }
 
@@ -69,8 +70,10 @@ qx.Class.define("aiagallery.dbif.ObjGroup",
         "type" : "String",
 
         /** The subtype of a group as defined in dbif.constants.GroupTypes */
-        "subType" : "String"
+        "subType" : "String",
 
+        /** How users will be allowed to join, correlates to JoinType enum */
+        "joinType" : "Integer"
       };
 
     var canonicalize = 

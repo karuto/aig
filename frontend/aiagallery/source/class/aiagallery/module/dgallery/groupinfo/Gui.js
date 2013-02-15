@@ -141,6 +141,8 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
       var             who;
       var             model;
 
+      var             bShowBtn = false; 
+
       // We can ignore aborted requests.
       if (response.type == "aborted")
       {
@@ -290,6 +292,8 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
 
         if(group.subType)
         {
+          layout.add(new qx.ui.core.Spacer(10)); 
+
           label = new qx.ui.basic.Label(this.tr("Subtype: "));
           label.setFont("bold");
           layout.add(label);
@@ -373,11 +377,13 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
         {
         case aiagallery.dbif.Constants.GroupStatus.Requested:
           // Pop message
-          stringMsg = this.tr("The admin of this group has requested you to join, to complete this proccess click the \"Join Group\" button");
+          stringMsg = this.tr("The admin of this group has requested you to join, to complete this proccess click the \"Request Membership\" button");
 
           label = new qx.ui.basic.Label(stringMsg); 
 
           this.groupLayout.add(label);
+
+          bShowBtn = true;  
           break;
 
         case aiagallery.dbif.Constants.GroupStatus.WaitList:
@@ -395,7 +401,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
 
           break;
         case aiagallery.dbif.Constants.GroupStatus.Owner:
-          this.joinGroupBtn.setLabel(this.tr("Own Group")); 
+          this.joinGroupBtn.setLabel(this.tr("Group Owner")); 
 
           // Disable button
           this.joinGroupBtn.setEnabled(false);
@@ -445,9 +451,14 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
            }  
          }
 
-        // Add join button
-        this.groupLayout.add(this.joinGroupBtn);
- 
+        // Add join button only if the admin has allowed user to join
+        // Unless the user has been requested to join
+        if (group.joinType == aiagallery.dbif.Constants.JoinType.Public
+            || bShowBtn)
+        {
+          this.groupLayout.add(this.joinGroupBtn);
+        }
+
         // Add group app scroller
         this.canvas.add(this.groupApps, {flex : 1});
 

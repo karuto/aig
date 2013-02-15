@@ -76,6 +76,9 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
      * @param subGroupType {String || null}
      *   The sub type this group is
      * 
+     * @param joinType {Enum}
+     *   The way joining will be handled for the group 
+     * 
      * @param error {Error}
      *   The error object
      * 
@@ -84,7 +87,8 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
      * 
      */
     addOrEditGroup : function(groupName, description, 
-                              groupType, subGroupType, error)
+                              groupType, subGroupType,
+                              joinType, error)
     {
       var         whoami;
       var         criteria; 
@@ -111,6 +115,9 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
         // Assign group type
         groupData.type = groupType;
 
+        // Join Type
+        groupData.joinType = joinType; 
+
         if (subGroupType)
         {
           groupData.subType = subGroupType;
@@ -133,6 +140,9 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
 
         // Assign group type
         groupData.type = groupType;
+
+        // Join Type
+        groupData.joinType = joinType; 
 
         if (subGroupType)
         {
@@ -399,10 +409,11 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       group = resultList[0]; 
       groupMap = this._turnToMap(group); 
 
+      // Will only be true for call from the group info fsm
       if (bGetApps)
       {
         // Get the apps user members have made
-        groupMap["groupApps"] = this._getMemberApps(group); 
+        groupMap["groupApps"] = this._getMemberApps(group);
       }
 
       return groupMap;
@@ -1201,6 +1212,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
           requestedUsers : null,
           type           : groupData.type, 
           subType        : groupData.subType,
+          joinType       : groupData.joinType, 
           userStatus     : aiagallery.dbif.Constants.GroupStatus.NonMember
         };
 

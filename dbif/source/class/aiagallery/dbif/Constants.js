@@ -87,6 +87,13 @@ qx.Class.define("aiagallery.dbif.Constants",
       Profile : 2
     },
 
+    /** Mapping of Group Join Type to value */
+    JoinType :
+    {
+      Public  : 0,
+      Private : 1 
+    },
+
     /** Reverse mapping of FlagType values to names */
     FlagTypeToName :
     [

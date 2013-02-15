@@ -236,15 +236,28 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
             text : [searchValue]
           }; 
 
-          // Initiate a search
+          // Switch to find apps page
           aiagallery.main.Gui.getInstance().selectModule(
           {
-            page  : aiagallery.main.Constant.PageName.FindApps,
-            query : qx.lang.Json.stringify(query)
+            page  : aiagallery.main.Constant.PageName.FindApps
+            //query : qx.lang.Json.stringify(query)          
           });
+
+          var timer = qx.util.TimerManager.getInstance();
+
+          timer.start(function(userData, timerId)
+            {
+              // Execute search 
+              aiagallery.module.dgallery.findapps.Gui.getInstance().setQuery(
+                qx.lang.Json.stringify(query));
+            },
+            0,
+            this,
+            null,
+            500);
+
         }, 
       this);
-
       // Allow 'Enter' to fire a search
       command = new qx.ui.core.Command("Enter");
       this.searchButton.setCommand(command);

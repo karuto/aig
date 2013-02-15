@@ -236,6 +236,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       var             requestListDataArray; 
       var             translatedTxt; 
       var             eduTypeRadioButtonGroup;
+      var             userJoinRadioButtonGroup;
       var             radioButton;
       var             scrollContainer;
 
@@ -573,6 +574,28 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       this.fsm.addObject("approveAllGroupUser", 
          button, "main.fsmUtils.disable_during_rpc");
 
+      // Radio buttons to allow owner to 
+      // disable users from joining by themselves
+      userJoinRadioButtonGroup = new qx.ui.form.RadioButtonGroup();
+
+      translatedTxt = this.tr("Allow Any User to Request To Join");
+      radioButton = new qx.ui.form.RadioButton(translatedTxt);
+      radioButton
+        .setUserData("enum", aiagallery.dbif.Constants.JoinType.Public);
+      userJoinRadioButtonGroup.add(radioButton); 
+
+      translatedTxt = this.tr("Allow Only Requested Users To Join");
+      radioButton = new qx.ui.form.RadioButton(translatedTxt);
+      radioButton
+        .setUserData("enum", aiagallery.dbif.Constants.JoinType.Private);
+      userJoinRadioButtonGroup.add(radioButton); 
+
+      // Need to be able to access the radiobuttons on the fsm
+      this.fsm.addObject("userJoinRadioButtonGroup", 
+        userJoinRadioButtonGroup, "main.fsmUtils.disable_during_rpc");  
+
+      vBoxBtns.add(userJoinRadioButtonGroup); 
+
       // Add button layout to layout
       userHBox.add(vBoxBtns); 
 
@@ -762,6 +785,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       var             groupUsersField = fsm.getObject("groupUsersField"); 
       var             eduTypeRadioButtonGroup = fsm.getObject("eduTypeRadioButtonGroup");
       var             groupTypeBox = fsm.getObject("groupTypeBox"); 
+      var             userJoinRadioButtonGroup = fsm.getObject("userJoinRadioButtonGroup");
 
       // We can ignore aborted requests.
       if (response.type == "aborted")
@@ -848,7 +872,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
               }
             }          
 
-            // If there is a subtype selec it
+            // If there is a subtype select it
             if(group.subType)
             {
               children = eduTypeRadioButtonGroup.getChildren(); 
@@ -871,6 +895,19 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
             this.userController.setModel(userMemberDataArray); 
             this.waitListController.setModel(userWaitList);
             this.requestListController.setModel(userRequestList); 
+
+            // Select join type
+            children = userJoinRadioButtonGroup.getChildren();
+            for (i = 0; i < children.length; i++)
+            {
+              if(children[i].getUserData("enum") == group.joinType)
+              {
+                userJoinRadioButtonGroup.setSelection([children[i]]);
+                break;
+              }
+            } 
+
+            
           }, this);
 
 
