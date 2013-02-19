@@ -415,8 +415,7 @@ qx.Mixin.define("aiagallery.dbif.MDbifCommon",
       //
       // MGroup
       //
-      case "addOrEditGroup":
-      case "getGroup":
+      case "addOrEditGroup":      
       case "getUserGroups":
       case "joinGroup": 
       case "approveUsers":   
@@ -431,6 +430,7 @@ qx.Mixin.define("aiagallery.dbif.MDbifCommon",
         return aiagallery.dbif.MDbifCommon._deepPermissionCheck(methodName);
 
       case "groupSearch":
+      case "getGroup":
         return true; // Allowed for all users 
 
       default:

@@ -37,8 +37,13 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
 
       // Layouts
       var             btnLayout; 
-
       var             scrollContainer; 
+
+      // Check if user is anonymous or not
+      var             whoami; 
+
+      // Holds the pages we need to create
+      var             pageArray;
 
       // Need to access the fsm from other functions
       this.fsm = fsm; 
@@ -59,19 +64,30 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
 
       canvas.add(this.__radioView); 
 
+      // Get current user
+      whoami = qx.core.Init.getApplication().getUserData("whoAmI");
+
       // Create the pages
-      [
+      pageArray = [
         {
           field  : "__containerBrowse",
           label  : this.tr("Browse and Join Groups"),
           custom : this._browseGroups
-        },
+        }
+      ];
+
+      // Only create the managment page if the user is not anon
+      if (!whoami.getIsAnonymous())
+      { 
+        pageArray.push(
         {
           field  : "__containerManage",
           label  : this.tr("Create and Manage Groups"),
           custom : this._manageGroups
-        }
-      ].forEach(
+        }); 
+      }
+
+      pageArray.forEach(
         function(pageInfo)
         {
           var             layout;

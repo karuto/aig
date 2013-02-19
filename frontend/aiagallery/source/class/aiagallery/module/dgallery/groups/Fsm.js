@@ -191,6 +191,17 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
 
         "predicate" : function(fsm, event)
         {
+          var       whoami; 
+
+          // Do not take take this transition if the user
+          // is anon
+          whoami = qx.core.Init.getApplication().getUserData("whoAmI");
+
+          if (whoami.getIsAnonymous())
+          {
+            return null;
+          }
+
           // Have we already been here before?
           if (fsm.getUserData("noUpdate"))
           {

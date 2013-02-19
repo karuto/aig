@@ -232,6 +232,16 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
 
           // Disable button
           this.joinGroupBtn.setEnabled(false);
+
+          this._clearFlagListener(); 
+
+          this.flagItLabel.set(
+          {
+            value     : this.tr("Login to flag this group."),
+        
+            font      : "default",
+            textColor : "black"
+          });
         }
 
         // Add all the detail of the group to the canvas
@@ -511,7 +521,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
 
         if(group.bFlag)
         {
-          // If the user has flagged this ap before disable the flagit button
+          // If the user has flagged this app before disable the flagit button
           this._clearFlagListener();
 
           // Replace the label
