@@ -218,7 +218,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
 
         "ontransition" : function(fsm, event)
         {
-         var    request;
+          var    request;
 
           // Get all the groups a user owns if any
           // Issue the remote procedure call to execute the query
@@ -295,13 +295,13 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
  
           // Group Type
           groupType = fsm.getObject("groupTypeBox")
-                        .getSelection()[0].getLabel().__txt;
+                        .getSelection()[0].getLabel().toString();
 
           if (groupType == aiagallery.dbif.Constants.GroupTypes.Educational)
           {
             // Set the subgroup type
             subGroupType = fsm.getObject("eduTypeRadioButtonGroup")
-                             .getSelection()[0].getLabel().__txt; 
+                             .getSelection()[0].getLabel().toString(); 
           } 
           else 
           {
@@ -711,6 +711,9 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
 
         "ontransition" : function(fsm, event)
         {
+          // Disable enter key firing search on exit
+          var searchButton = fsm.getObject("searchBtn");
+          searchButton.getCommand().setEnabled(false);
         }
       });
 

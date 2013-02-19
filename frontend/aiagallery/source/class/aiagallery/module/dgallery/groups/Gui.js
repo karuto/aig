@@ -149,6 +149,8 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       var      searchButton; 
       var      label; 
 
+      var      command; 
+
       // Create a search bar to search for groups
       layout = new qx.ui.layout.HBox();
       layout.setSpacing(5);      
@@ -174,8 +176,8 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
          searchButton, "main.fsmUtils.disable_during_rpc");      
 
       // Allow 'Enter' to fire a search
-      //command = new qx.ui.core.Command("Enter");
-      //this.searchButton.setCommand(command);
+      command = new qx.ui.core.Command("Enter");
+      searchButton.setCommand(command);
 
       // Add label, button. and search text field to layout
       searchLayout.add(label); 
@@ -213,6 +215,17 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
 
       // Add to layout
       container.add(this.groupContainer, {flex : 1}); 
+
+      // Label to be shown if there are no search results      
+      this.__noResultsLabel =
+        new qx.ui.basic.Label(this.tr("No results found")); 
+      font = qx.theme.manager.Font.getInstance().resolve("bold").clone();;
+      font.setSize(18);
+      this.__noResultsLabel.setFont(font);
+      
+      // Start out hidden
+      this.__noResultsLabel.hide(); 
+      container.add(this.__noResultsLabel);
       
     },
 
@@ -1175,6 +1188,20 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
         // Clear search field before populating it
         this.groupContainer.removeAll();
  
+        // If there are no search results display message
+        if (result.length == 0)
+        {
+          this.groupContainer.exclude(); 
+
+          // Show no results label
+          this.__noResultsLabel.show(); 
+        }
+        else 
+        {
+          this.groupContainer.show(); 
+          this.__noResultsLabel.hide(); 
+        }
+
         // Array to hold all group layouts
         var groupArray = [];
 
