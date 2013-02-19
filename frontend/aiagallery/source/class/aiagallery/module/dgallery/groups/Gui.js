@@ -146,14 +146,16 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
 
       // GUI Objects
       var      searchTextField;
-      var      searchButton; 
+      var      searchButton;
+      var      browseByButton;
+      var      typeSelectBox;
+      var      subTypeSelectBox;  
       var      label; 
 
       var      command; 
 
       // Create a search bar to search for groups
-      layout = new qx.ui.layout.HBox();
-      layout.setSpacing(5);      
+      layout = new qx.ui.layout.HBox(5);     
       searchLayout = new qx.ui.container.Composite(layout);
 
       // Description label
@@ -188,7 +190,73 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       container.add(searchLayout); 
 
       // Browse categories 
-    
+      layout = new qx.ui.layout.HBox(5);     
+      searchLayout = new qx.ui.container.Composite(layout);
+   
+      label = new qx.ui.basic.Label(this.tr("Browse by type"));
+      searchLayout.add(label);
+      searchLayout.add(new qx.ui.core.Spacer(5)); 
+
+      typeSelectBox = new qx.ui.form.SelectBox();
+
+      typeSelectBox.add(new qx.ui.form.ListItem(this.tr("General"))); 
+      typeSelectBox.add(new qx.ui.form.ListItem(this.tr("Educational"))); 
+
+      // We'll be receiving events on the object so save its friendly name
+      this.fsm.addObject("typeSelect", 
+         typeSelectBox, "main.fsmUtils.disable_during_rpc");   
+
+      // Update the subtype select box on changes
+      typeSelectBox.addListener("changeSelection",
+        function(e)
+        {
+          subTypeSelectBox.removeAll();
+
+          if (e.getData()[0].getLabel().toString() == "General")
+          {
+            subTypeSelectBox.add(
+              new qx.ui.form.ListItem(this.tr("No Options"))); 
+          }
+          else 
+          {
+            subTypeSelectBox.add(
+              new qx.ui.form.ListItem(this.tr("K-8"))); 
+            subTypeSelectBox.add(
+              new qx.ui.form.ListItem(this.tr("High School"))); 
+            subTypeSelectBox.add(
+              new qx.ui.form.ListItem(this.tr("College / University"))); 
+          }           
+        }
+        , this); 
+
+      searchLayout.add(typeSelectBox);      
+
+      // Options added on change to typeSelectBox 
+      subTypeSelectBox = new qx.ui.form.SelectBox();
+
+      // Default option 
+      subTypeSelectBox.add(
+        new qx.ui.form.ListItem(this.tr("No Options"))); 
+
+      // We'll be receiving events on the object so save its friendly name
+      this.fsm.addObject("subTypeSelect", 
+         subTypeSelectBox, "main.fsmUtils.disable_during_rpc");
+
+      searchLayout.add(subTypeSelectBox);
+
+      browseByButton = new qx.ui.form.Button(this.tr("Search"));
+      browseByButton.addListener("execute", this.fsm.eventListener, this.fsm);
+
+      // We'll be receiving events on the object so save its friendly name
+      this.fsm.addObject("browseBtn", 
+         browseByButton, "main.fsmUtils.disable_during_rpc");      
+
+      searchLayout.add(new qx.ui.core.Spacer(20)); 
+      searchLayout.add(browseByButton);
+
+      container.add(new qx.ui.core.Spacer(0, 20));
+      container.add(searchLayout); 
+
       // Create the container to hold all the group objects
       this.groupContainer = new qx.ui.form.List();
       this.groupContainer.set(
@@ -1183,6 +1251,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
         break; 
 
       case "groupSearch":
+      case "browseSearch": 
         result = response.data.result;
 
         // Clear search field before populating it

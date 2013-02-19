@@ -56,6 +56,10 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
     this.registerService("aiagallery.features.groupSearch",
                          this.groupSearch,
                          [ "query" ]);
+
+    this.registerService("aiagallery.features.browseSearch",
+                         this.browseSearch,
+                         [ "type", "subType" ]);
   },
 
   members :
@@ -926,17 +930,19 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
      * @param query {String}
      *   The search query
      * 
-     * @return {Array}
-     *   An array of group objects that satisfy the search
+     * @param error {Error}
+     *   The error object
+     * 
+     * @return {Array || Error}
+     *   An array of group objects that satisfy the search 
+     *   or the error object.
      */
-    groupSearch : function (query)
+    groupSearch : function (query, error )
     {
       var        criteria;
       var        whoami;
       var        resultList; 
       var        returnList = []; 
-
-      // FIXME MAKE USUSABLE FOR ANON USER 
 
       // Get logged in user
       whoami = this.getWhoAmI();
@@ -1015,6 +1021,75 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       , this);
 
       return returnList; 
+    },
+
+    /** 
+     * Browse for groups of a certain type
+     * 
+     * @param type {String}
+     *   The type of group we are searching for
+     * 
+     * @param subType {Null || String}
+     *   The optional subgroup to look for
+     * 
+     * @param error {Error}
+     *   The error object
+     * 
+     * @return {Array || Error}
+     *   An array of groups that match the critiera 
+     *   or the error object
+     */
+    browseSearch : function(type, subType, error)
+    {
+      var       criteria;
+      var       resultList;
+      var       returnArray = [];
+
+      // If we were given a subtype
+      if (subType)
+      {
+        criteria = 
+          {
+            type : "op",
+            method : "and",
+            children : 
+            [
+              {
+                type: "element",
+                field: "type",
+                value: type
+              },
+              {
+                type: "element",
+                field: "subType",
+                value: subType 
+              }
+            ]
+          };
+      }
+      else 
+      {
+        criteria =
+          {
+            type  : "element",
+            field : "type",
+            value : type
+          }; 
+      }
+
+      resultList = liberated.dbif.Entity.query("aiagallery.dbif.ObjGroup",
+                                               criteria);
+
+      // Convert to map and push to return array
+      resultList.forEach(
+        function(group)
+        {
+          returnArray.push(this._turnToMap(group));
+        }
+      , this);
+
+      return returnArray;
+
     },
 
     /**
@@ -1397,9 +1472,6 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
             });
         }
       );
-
-      
-
 
       return appArray; 
     }

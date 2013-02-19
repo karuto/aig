@@ -86,6 +86,8 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
             // Browse Buttons
             "searchBtn" : "Transition_Idle_to_AwaitRpcResult_via_groupSearch",
 
+            "browseBtn" : "Transition_Idle_to_AwaitRpcResult_via_browseSearch",
+
             // Management Buttons
             "saveBtn" : "Transition_Idle_to_AwaitRpcResult_via_save", 
 
@@ -133,16 +135,16 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
 
         "predicate" : function(fsm, event)
         {
-          if(fsm.getObject("searchTextField")
-                   .getValue().trim().length != 0)
+          if(fsm.getObject("searchTextField").getValue() == null ||
+             fsm.getObject("searchTextField").getValue().trim().length == 0)
           { 
-            // Accept
-            return true;
+            // Ignore, search is empty
+            return null;
           }
           else 
           {
-            // Ignore search it is empty 
-            return null; 
+            // Accept 
+            return true; 
           }
         },
 
@@ -166,6 +168,54 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
           // When we get the result, we'll need to know what type of request
           // we made.
           request.setUserData("requestType", "groupSearch");
+
+        }
+      });
+
+      state.addTransition(trans);
+
+      /*
+       * Transition: Idle to AwaitRpcResult
+       *
+       * Cause: User excuted a search for a particular group type
+       *
+       * Action:
+       *  Get and return groups of this name
+       */
+      trans = new qx.util.fsm.Transition(
+        "Transition_Idle_to_AwaitRpcResult_via_browseSearch",
+      {
+        "nextState" : "State_AwaitRpcResult",
+
+        "context" : this,
+
+        "ontransition" : function(fsm, event)
+        {
+          var             request;
+          var             type;
+          var             subType;
+
+          // Get values from gui
+          type = fsm.getObject("typeSelect").getSelection()[0]
+                   .getLabel().toString();
+                  
+          if (type != "General")
+          {
+            subType = fsm.getObject("subTypeSelect").getSelection()[0]
+                        .getLabel().toString(); 
+          }
+
+          // Issue the remote procedure call to execute the query
+          request =
+            this.callRpc(fsm,
+                         "aiagallery.features",
+                         "browseSearch",
+                         [ type, subType ]
+                         );
+
+          // When we get the result, we'll need to know what type of request
+          // we made.
+          request.setUserData("requestType", "browseSearch");
 
         }
       });

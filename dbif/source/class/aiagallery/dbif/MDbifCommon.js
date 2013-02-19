@@ -431,6 +431,7 @@ qx.Mixin.define("aiagallery.dbif.MDbifCommon",
 
       case "groupSearch":
       case "getGroup":
+      case "browseSearch": 
         return true; // Allowed for all users 
 
       default:
