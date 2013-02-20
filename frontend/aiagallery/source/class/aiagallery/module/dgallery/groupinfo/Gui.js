@@ -223,6 +223,9 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
  
         group = response.data.result;
 
+        // If we are reloading the same page make sure the layout is clean
+        this.groupLayout.removeAll(); 
+
         // Remove some options if the user is not logged in
         who = qx.core.Init.getApplication().getUserData("whoAmI");
         
@@ -472,6 +475,9 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
            this.groupAppsHeader.
                setValue(this.tr("This group has ") + group.groupApps.length
                        + " apps"); 
+
+           // On reloads ensure container is clean
+           this.groupAppsContainer.removeAll(); 
 
            for(var i = 0; i < group.groupApps.length; i++)
            {

@@ -115,7 +115,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Fsm",
         "nextState" : "State_AwaitRpcResult",
 
         "context" : this,
-
+/*
         "predicate" : function(fsm, event)
         {
           // Have we already been here before?
@@ -131,7 +131,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Fsm",
           // Accept this transition
           return true;
         },
-
+*/
         "ontransition" : function(fsm, event)
         {
           var     request; 
