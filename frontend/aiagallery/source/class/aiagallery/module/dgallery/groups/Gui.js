@@ -192,7 +192,10 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       // Browse categories 
       layout = new qx.ui.layout.HBox(5);     
       searchLayout = new qx.ui.container.Composite(layout);
-   
+
+      // Add spacer to line up search buttons 
+      searchLayout.add(new qx.ui.core.Spacer(157)); 
+
       label = new qx.ui.basic.Label(this.tr("Browse by type"));
       searchLayout.add(label);
       searchLayout.add(new qx.ui.core.Spacer(5)); 
@@ -214,11 +217,15 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
 
           if (e.getData()[0].getLabel().toString() == "General")
           {
-            subTypeSelectBox.add(
-              new qx.ui.form.ListItem(this.tr("No Options"))); 
+            //subTypeSelectBox.add(
+              //new qx.ui.form.ListItem(this.tr("No Options"))); 
+
+            subTypeSelectBox.hide();
           }
           else 
           {
+            subTypeSelectBox.show();
+
             subTypeSelectBox.add(
               new qx.ui.form.ListItem(this.tr("K-8"))); 
             subTypeSelectBox.add(
@@ -233,15 +240,19 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
 
       // Options added on change to typeSelectBox 
       subTypeSelectBox = new qx.ui.form.SelectBox();
+      subTypeSelectBox.setWidth(160); 
 
       // Default option 
-      subTypeSelectBox.add(
-        new qx.ui.form.ListItem(this.tr("No Options"))); 
+      //subTypeSelectBox.add(
+        //new qx.ui.form.ListItem(this.tr("No Options"))); 
+
+      // Start out hidden
+      subTypeSelectBox.hide();
 
       // We'll be receiving events on the object so save its friendly name
       this.fsm.addObject("subTypeSelect", 
          subTypeSelectBox, "main.fsmUtils.disable_during_rpc");
-
+      
       searchLayout.add(subTypeSelectBox);
 
       browseByButton = new qx.ui.form.Button(this.tr("Search"));
@@ -254,7 +265,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       searchLayout.add(new qx.ui.core.Spacer(20)); 
       searchLayout.add(browseByButton);
 
-      container.add(new qx.ui.core.Spacer(0, 20));
+      container.add(new qx.ui.core.Spacer(0, 20));      
       container.add(searchLayout); 
 
       // Create the container to hold all the group objects
