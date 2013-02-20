@@ -330,6 +330,8 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
           var     email; 
           var     msgBody; 
           var     subject;
+          var     siteUrl;
+          var     urlFragment; 
 
           // Get the user's email
           criteria =
@@ -345,9 +347,14 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
           // Should only be one result
           email = ids[0].email;
  
+          siteUrl = "http://mit-appinventor-gallery.appspot.com/#page";
+          urlFragment = "=GroupInfo&groupname=" + groupName; 
+
+          siteUrl += encodeURIComponent(urlFragment); 
+
           msgBody = "You have been invited to join the " + groupName + ".\n" 
-                    + "To join to the group page at: ADD IN GROUP PAGE"
-                    + "and click \"Join Group\" ";
+                    + "To join to the group page at: " + siteUrl 
+                    + " and click \"Join Group\" ";
 
           subject = "MIT AIG Invitation to Join " + groupName + " Group";
 
