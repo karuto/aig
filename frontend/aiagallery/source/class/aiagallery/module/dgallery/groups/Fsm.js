@@ -99,8 +99,14 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
             "approveGroupUser" :
               "Transition_Idle_to_AwaitRpcResult_via_approveGroupUser",   
 
-            "removeGroupUsers" :
-              "Transition_Idle_to_AwaitRpcResult_via_removeGroupUsers", 
+            "removeGroupUsersMember" :
+              "Transition_Idle_to_AwaitRpcResult_via_removeGroupUsersMember", 
+
+            "removeGroupUsersWaitList" :
+              "Transition_Idle_to_AwaitRpcResult_via_removeGroupUsersWaitList", 
+
+            "removeGroupUsersInvite" :
+              "Transition_Idle_to_AwaitRpcResult_via_removeGroupUsersInvite", 
 
             "requestBtn" :
               "Transition_Idle_to_AwaitRpcResult_via_requestUsers"
@@ -520,13 +526,14 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
       /*
        * Transition: Idle to AwaitRpcResult
        *
-       * Cause: User clicked approve user remove button
+       * Cause: User clicked approve user remove button for 
+       *        a member
        *
        * Action:
        *  Remove a user from the group
        */
       trans = new qx.util.fsm.Transition(
-        "Transition_Idle_to_AwaitRpcResult_via_removeGroupUsers",
+        "Transition_Idle_to_AwaitRpcResult_via_removeGroupUsersMember",
       {
         "nextState" : "State_AwaitRpcResult",
 
@@ -558,6 +565,57 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
               usersToRemoveMap.users.push(sel.getLabel()); 
             }
           );
+        
+          // Issue the remote procedure call to execute the query
+          request =
+            this.callRpc(fsm,
+                         "aiagallery.features",
+                         "removeGroupUsers",
+                         [ name, usersToRemoveMap ]
+                         );
+
+          // When we get the result, we'll need to know what type of request
+          // we made.
+          request.setUserData("requestType", "removeGroupUsers");
+
+        }
+      });
+
+      state.addTransition(trans);
+
+      /*
+       * Transition: Idle to AwaitRpcResult
+       *
+       * Cause: User clicked approve user remove button for a
+       *        wait list user
+       *
+       * Action:
+       *  Remove a user from the group
+       */
+      trans = new qx.util.fsm.Transition(
+        "Transition_Idle_to_AwaitRpcResult_via_removeGroupUsersWaitList",
+      {
+        "nextState" : "State_AwaitRpcResult",
+
+        "context" : this,
+
+        "ontransition" : function(fsm, event)
+        {
+          var             request;
+          var             name;
+          var             selection;
+          var             usersToRemoveMap;
+
+          usersToRemoveMap = 
+            {
+              users     : [],
+              waitList  : [],
+              requested : []        
+            };
+
+          // Get values from gui
+          name = fsm.getObject("groupNameList")
+                   .getSelection()[0].getLabel();
 
           selection = fsm.getObject("groupWaitList").getSelection();
 
@@ -567,6 +625,57 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
               usersToRemoveMap.waitList.push(sel.getLabel()); 
             }
           );
+
+          // Issue the remote procedure call to execute the query
+          request =
+            this.callRpc(fsm,
+                         "aiagallery.features",
+                         "removeGroupUsers",
+                         [ name, usersToRemoveMap ]
+                         );
+
+          // When we get the result, we'll need to know what type of request
+          // we made.
+          request.setUserData("requestType", "removeGroupUsers");
+
+        }
+      });
+
+      state.addTransition(trans);
+
+      /*
+       * Transition: Idle to AwaitRpcResult
+       *
+       * Cause: User clicked approve user remove button for
+       *        an invited user
+       *
+       * Action:
+       *  Remove a user from the group
+       */
+      trans = new qx.util.fsm.Transition(
+        "Transition_Idle_to_AwaitRpcResult_via_removeGroupUsersInvite",
+      {
+        "nextState" : "State_AwaitRpcResult",
+
+        "context" : this,
+
+        "ontransition" : function(fsm, event)
+        {
+          var             request;
+          var             name;
+          var             selection;
+          var             usersToRemoveMap;
+
+          usersToRemoveMap = 
+            {
+              users     : [],
+              waitList  : [],
+              requested : []        
+            };
+
+          // Get values from gui
+          name = fsm.getObject("groupNameList")
+                   .getSelection()[0].getLabel();
 
           selection = fsm.getObject("groupRequestList").getSelection();
 

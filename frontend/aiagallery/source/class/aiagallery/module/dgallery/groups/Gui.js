@@ -320,7 +320,12 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       var             newBtn; 
       var             saveBtn;
       var             deleteBtn;
-      var             requestBtn;   
+      var             requestBtn;
+      var             removeBtnMember;
+      var             removeBtnWaitList;
+      var             removeBtnRequest; 
+      var             approveAllBtn; 
+      var             approveUsersBtn;    
       var             button; 
 
       var             groupNameField;
@@ -623,76 +628,36 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
         groupNameList, "main.fsmUtils.disable_during_rpc");     
 
       // Reinit vbox to hold btns for user management 
-      layout = new qx.ui.layout.VBox();
-      layout.setSpacing(10);      
+      layout = new qx.ui.layout.VBox(10);  
       vBoxBtns = new qx.ui.container.Composite(layout);
 
       // Space the buttons down by one by adding a spacer
       vBoxBtns.add(new qx.ui.basic.Label()); 
 
       // Create a remove user button
-      button = new qx.ui.form.Button(this.tr("Remove User(s)"));
-      button.set(
+      removeBtnMember = new qx.ui.form.Button(this.tr("Remove Members(s)"));
+      removeBtnMember.set(
       {
-        maxHeight : 30,
-        enabled   : false
+        maxHeight : 30
       });
-      vBoxBtns.add(button);
-      button.addListener("execute", this.fsm.eventListener, this.fsm);
+      vBoxBtns.add(removeBtnMember);
+      removeBtnMember.addListener("execute", this.fsm.eventListener, this.fsm);
 
       // We'll be receiving events on the object so save its friendly name
-      this.fsm.addObject("removeGroupUsers", 
-         button, "main.fsmUtils.disable_during_rpc");
-
-      // Button to approve a user from the wait list 
-      button = new qx.ui.form.Button(this.tr("Approve User"));
-      button.set(
-      {
-        maxHeight : 24,
-        enabled   : false
-      });
-      vBoxBtns.add(button);
-      button.addListener(
-        "click",
-        function(e)
-        {
-          // Fire immediate event
-          this.fsm.fireImmediateEvent(
-            "approveGroupUser", this, e.getTarget());
-        }, this); 
-
-      button.addListener("execute", this.fsm.eventListener, this.fsm);
-
-      // We'll be receiving events on the object so save its friendly name
-      this.fsm.addObject("approveGroupUser", 
-         button, "main.fsmUtils.disable_during_rpc");
-
-      // Button to approve a user from the wait list 
-      button = new qx.ui.form.Button(this.tr("Approve All"));
-      button.set(
-      {
-        maxHeight : 24,
-        enabled   : false
-      });
-      vBoxBtns.add(button);
-
-      button.addListener("execute", this.fsm.eventListener, this.fsm);
-
-      // We'll be receiving events on the object so save its friendly name
-      this.fsm.addObject("approveAllGroupUser", 
-         button, "main.fsmUtils.disable_during_rpc");
+      this.fsm.addObject("removeGroupUsersMember", 
+         removeBtnMember, "main.fsmUtils.disable_during_rpc");
 
       // Radio buttons to allow owner to 
       // disable users from joining by themselves
       userJoinRadioButtonGroup = new qx.ui.form.RadioButtonGroup();
 
-      translatedTxt = this.tr("Allow Any User to Request To Join");
+      translatedTxt = this.tr("Anyone may request to join");
       radioButton = new qx.ui.form.RadioButton(translatedTxt);
       radioButton
         .setUserData("enum", aiagallery.dbif.Constants.JoinType.Public);
       userJoinRadioButtonGroup.add(radioButton); 
 
-      translatedTxt = this.tr("Allow Only Requested Users To Join");
+      translatedTxt = this.tr("Invite-only");
       radioButton = new qx.ui.form.RadioButton(translatedTxt);
       radioButton
         .setUserData("enum", aiagallery.dbif.Constants.JoinType.Private);
@@ -705,12 +670,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       vBoxBtns.add(userJoinRadioButtonGroup); 
 
       // Add button layout to layout
-      userHBox.add(vBoxBtns); 
-
-      // Group box showing users waiting and requesting to join
-      userGroupBox = new qx.ui.groupbox.GroupBox("User Management");
-      userGroupBox.setLayout(new qx.ui.layout.HBox());
-      userGroupBox.setContentPadding(5);     
+      userHBox.add(vBoxBtns);   
 
       // Track users who belong to the group
       listLayout = new qx.ui.container.Composite(new qx.ui.layout.VBox);
@@ -721,7 +681,11 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       groupUsersList = new qx.ui.form.List();
       groupUsersList.setWidth(150);
       groupUsersList.addListener("changeSelection", 
-        this.fsm.eventListener, this.fsm);
+        function(e)
+        {
+          removeBtnMember.setEnabled(e.getData().length != 0);
+        }
+      );
 
       // Create friendly name to get it from the FSM
       this.fsm.addObject("groupUsersList", 
@@ -742,18 +706,85 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
 
       // Add to layout
       listLayout.add(groupUsersList);
-      userGroupBox.add(listLayout);
+      userHBox.add(listLayout); 
+
+      // Reinit vbox to hold btns for wait list management 
+      layout = new qx.ui.layout.VBox(10);  
+      vBoxBtns = new qx.ui.container.Composite(layout);
+
+      vBoxBtns.add(new qx.ui.core.Spacer(0, 20)); 
+
+      // Create a remove user button
+      removeBtnWaitList = new qx.ui.form.Button(this.tr("Remove Pending User(s)"));
+      removeBtnWaitList.set(
+      {
+        maxHeight : 30
+      });
+      removeBtnWaitList.addListener("execute", this.fsm.eventListener, this.fsm);
+
+      // We'll be receiving events on the object so save its friendly name
+      this.fsm.addObject("removeGroupUsersWaitList", 
+         removeBtnWaitList, "main.fsmUtils.disable_during_rpc");
+
+      vBoxBtns.add(removeBtnWaitList); 
+
+      // Button to approve a user from the wait list 
+      approveUsersBtn = new qx.ui.form.Button(this.tr("Approve User(s)"));
+      approveUsersBtn.set(
+      {
+        maxHeight : 24
+      });
+      vBoxBtns.add(approveUsersBtn);
+
+      approveUsersBtn.addListener(
+        "click",
+        function(e)
+        {
+          // Fire immediate event
+          this.fsm.fireImmediateEvent(
+            "approveGroupUser", this, e.getTarget());
+        }, this); 
+
+      approveUsersBtn.addListener("execute", this.fsm.eventListener, this.fsm);
+
+      // We'll be receiving events on the object so save its friendly name
+      this.fsm.addObject("approveGroupUser", 
+         approveUsersBtn, "main.fsmUtils.disable_during_rpc");
+
+      // Button to approve a user from the wait list 
+      approveAllBtn = new qx.ui.form.Button(this.tr("Approve All"));
+      approveAllBtn.set(
+      {
+        maxHeight : 24
+      });
+      vBoxBtns.add(approveAllBtn);
+
+      approveAllBtn.addListener("execute", this.fsm.eventListener, this.fsm);
+
+      // We'll be receiving events on the object so save its friendly name
+      this.fsm.addObject("approveAllGroupUser", 
+         approveAllBtn, "main.fsmUtils.disable_during_rpc");
+
+      // Add button layout to Hbox
+      userHBox.add(vBoxBtns); 
 
       // Track users who are on the group waitList
       listLayout = new qx.ui.container.Composite(new qx.ui.layout.VBox);
 
-      label = new qx.ui.basic.Label(this.tr("Wait List"));
+      label = new qx.ui.basic.Label(this.tr("Pending Joins"));
       listLayout.add(label);
 
       groupWaitList = new qx.ui.form.List();
       groupWaitList.setWidth(150);
       groupWaitList.addListener("changeSelection", 
-        this.fsm.eventListener, this.fsm);
+        function(e)
+        {
+          var    bOn = e.getData().length != 0;
+
+          approveUsersBtn.setEnabled(bOn);
+          removeBtnWaitList.setEnabled(bOn);
+        }
+      );
 
       // Create friendly name to get it from the FSM
       this.fsm.addObject("groupWaitList", 
@@ -771,18 +802,43 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
 
       // Add to layout 
       listLayout.add(groupWaitList);
-      userGroupBox.add(listLayout);
+      userHBox.add(listLayout); 
+
+      // Reinit vbox to hold btns for wait list management 
+      layout = new qx.ui.layout.VBox(10);  
+      vBoxBtns = new qx.ui.container.Composite(layout);
+      vBoxBtns.add(new qx.ui.core.Spacer(0, 20)); 
+
+      // Create a remove user button
+      removeBtnRequest = new qx.ui.form.Button(this.tr("Remove Invite(s)"));
+      removeBtnRequest.set(
+      {
+        maxHeight : 30
+      });
+      removeBtnRequest.addListener("execute", this.fsm.eventListener, this.fsm);
+
+      // We'll be receiving events on the object so save its friendly name
+      this.fsm.addObject("removeGroupUsersInvite", 
+         removeBtnRequest, "main.fsmUtils.disable_during_rpc");
+
+      vBoxBtns.add(removeBtnRequest); 
+      userHBox.add(vBoxBtns); 
 
       // Track users who are on the group waitList
       listLayout = new qx.ui.container.Composite(new qx.ui.layout.VBox);
 
-      label = new qx.ui.basic.Label(this.tr("Requested List"));
+      label = new qx.ui.basic.Label(this.tr("Outstanding Invites"));
       listLayout.add(label);
-
       groupRequestList = new qx.ui.form.List();
       groupRequestList.setWidth(150);
       groupRequestList.addListener("changeSelection", 
-        this.fsm.eventListener, this.fsm);
+        function(e)
+        {
+          // Only turn on if something is selected
+          var    bOn = e.getData().length != 0;
+          removeBtnRequest.setEnabled(bOn);
+        }
+      );
 
       // Create friendly name to get it from the FSM
       this.fsm.addObject("groupRequestList", 
@@ -800,19 +856,17 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
 
       // Add to layout 
       listLayout.add(groupRequestList);
-      userGroupBox.add(listLayout);
-      userHBox.add(userGroupBox); 
-
+      userHBox.add(listLayout); 
+ 
       // Layout to hold the request user section
-      requestLayout = new qx.ui.container.Composite(new qx.ui.layout.HBox(10));
+      requestLayout = new qx.ui.container.Composite(new qx.ui.layout.HBox(10)); 
 
       // Create a request button
-      requestBtn = new qx.ui.form.Button(this.tr("Request Users"));
+      requestBtn = new qx.ui.form.Button(this.tr("Invite User(s)"));
       requestBtn.set(
       {
         maxHeight : 24,
-        width     : 150,
-        enabled   : false
+        width     : 100
       });
       requestLayout.add(requestBtn);
       requestBtn.addListener("execute", this.fsm.eventListener, this.fsm);
@@ -825,7 +879,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       layout =  new qx.ui.container.Composite(new qx.ui.layout.VBox(10));    
 
       // Create a label for describing the textfield
-      label =  new qx.ui.basic.Label(this.tr("Request the Following Users (seperate by comma):"));
+      label =  new qx.ui.basic.Label(this.tr("Invite the Following Users (seperate by comma):"));
       layout.add(label);
          
       // Create a textfield to request specific users
@@ -833,7 +887,8 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       groupUsersField.set(
       {
         maxWidth     : 350,
-        maxHeight    : 350
+        maxHeight    : 350,
+        liveUpdate   : true 
         //maxLength    : aiagallery.dbif.Constants.FieldLength.Group
       });
 
@@ -844,6 +899,17 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       // Create friendly name to get it from the FSM
       this.fsm.addObject("groupUsersField", 
          groupUsersField,"main.fsmUtils.disable_during_rpc"); 
+
+      // Turn on invite button only if something is in the field
+      groupUsersField.addListener("changeValue", 
+        function(e)
+        {
+          // Only turn on if something is selected
+          var    bOn = e.getData().length != 0;
+          requestBtn.setEnabled(bOn);
+        }
+      );
+
 
       // Outer canvas holds the layouts that comprise the
       // management gui
@@ -895,24 +961,26 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       var             groupTypeBox = fsm.getObject("groupTypeBox"); 
       var             userJoinRadioButtonGroup = fsm.getObject("userJoinRadioButtonGroup");
 
+      // Buttons from the gui to enable/disable
+      var             requestBtn = fsm.getObject("requestBtn");
+      var             removeBtnMember = fsm.getObject("removeGroupUsersMember");
+      var             removeBtnWaitList = fsm.getObject("removeGroupUsersWaitList");
+      var             removeBtnRequest = fsm.getObject("removeGroupUsersInvite");
+      var             approveAllBtn = fsm.getObject("approveAllGroupUser");
+      var             approveUsersBtn = fsm.getObject("approveGroupUser");
+
       // We can ignore aborted requests.
       if (response.type == "aborted")
       {
           return;
       }
 
-      // Errors with code 1 will be handled specially 
-      if (response.type == "failed" && response.data.code != 1)
-      {
-        // FIXME: Add the failure to the cell editor window rather than alert
-        alert("Async(" + response.id + ") exception: " + response.data);
-        return;
-      } 
-      else if (response.data.code == 1 ||
-               response.data.code == 2 ||
-               response.data.code == 3 ||
-               response.data.code == 4 ||
-               response.data.code == 5 )
+      // Errors with special codes will be handled specially 
+      if (response.type == "failed" && (response.data.code == 1 ||
+          response.data.code == 2 ||
+          response.data.code == 3 ||
+          response.data.code == 4 ||
+          response.data.code == 5 ))
       {
         // Special error
         warnString = "";
@@ -947,6 +1015,12 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
         dialog.Dialog.warning(warnString);
         return;
       }
+      else if (response.type == "failed")
+      {
+        // FIXME: Add the failure to the cell editor window rather than alert
+        alert("Async(" + response.id + ") exception: " + response.data);
+        return;
+      } 
 
       // Successful RPC request.
       // Dispatch to the appropriate handler, depending on the request type
@@ -954,6 +1028,14 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       {
       // Browse Groups
       case "appear":
+        // Ensure correct buttons are disabled 
+        requestBtn.setEnabled(false);
+        removeBtnMember.setEnabled(false);
+        removeBtnWaitList.setEnabled(false);
+        removeBtnRequest.setEnabled(false);
+        approveAllBtn.setEnabled(false);
+        approveUsersBtn.setEnabled(false);
+
         groupList = response.data.result;
 
         groupList.forEach(
