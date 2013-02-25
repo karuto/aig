@@ -360,11 +360,6 @@ qx.Class.define("aiagallery.widget.mystuff.Detail",
         sourceFilePopup.show();
     }, this);
         
-    // ********* beta002 end *********
-
-        
-
-    // ********* beta002 end *********
 
 
     
@@ -392,8 +387,7 @@ qx.Class.define("aiagallery.widget.mystuff.Detail",
 
 
 
-    // ********* beta002 start *********
-    // Objective: add app upload instructions.
+    // Add app upload instructions.
 
     // Create a temporary container for a spacer, a label, and a spacer
     tempContainer = new qx.ui.container.Composite(new qx.ui.layout.HBox());
