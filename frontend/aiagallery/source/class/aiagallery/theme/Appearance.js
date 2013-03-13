@@ -19,7 +19,7 @@ qx.Theme.define("aiagallery.theme.Appearance",
         var useCSS = qx.core.Environment.get("css.gradient.linear") &&
           qx.core.Environment.get("css.borderradius");
         return {
-          decorator : useCSS ? "tabview-pane-css" : "tabview-pane",
+          // decorator : useCSS ? "tabview-pane-css" : "tabview-pane",
           minHeight : 0,
 
           marginBottom : states.barBottom ? -1 : 0,
@@ -37,7 +37,7 @@ qx.Theme.define("aiagallery.theme.Appearance",
       style : function(states)
       {
         return {
-          decorator : "pagepane-top",
+          // decorator : "pagepane-top",
           backgroundColor : "white",
           margin : 10
         };

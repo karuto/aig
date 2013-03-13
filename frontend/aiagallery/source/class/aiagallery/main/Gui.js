@@ -70,7 +70,7 @@ qx.Class.define("aiagallery.main.Gui",
         o = new qx.ui.layout.VBox();
         o.set(
           {
-            spacing       : 10
+            spacing       : 0
           });
         application = new qx.ui.container.Composite(o);
         this.getApplicationRoot().add(application, { edge : 0 });
