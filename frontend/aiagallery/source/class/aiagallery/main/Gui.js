@@ -219,7 +219,7 @@ qx.Class.define("aiagallery.main.Gui",
         application.add(header);
 
         // Create the page pane
-        pagePane = new qx.ui.container.Composite(new qx.ui.layout.VBox(10));
+        pagePane = new qx.ui.container.Composite(new qx.ui.layout.VBox(0));
         pagePane.set(
           {
             appearance : "pagepane"

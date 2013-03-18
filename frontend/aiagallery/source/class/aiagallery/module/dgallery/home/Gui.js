@@ -170,6 +170,7 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
       var homepageBG = new qx.ui.decoration.Background();
       homepageBG.setBackgroundImage("aiagallery/hpbg.png");
       innerCanvas.setDecorator(homepageBG);
+      innerCanvas.addEventListener();
 
       // Put in some welcoming text
       text = 
@@ -193,9 +194,7 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
       this.welcomingLabel.set(
         {
           value        : text,
-          rich         : true,
-          width        : 434,
-          height       : 300      
+          rich         : true     
         });
 
       innerCanvas.add(this.welcomingLabel);
@@ -344,7 +343,7 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
       innerCanvas.add(newsLabel);
 
       // Inner canvas contains intro text and search box
-      vbox.add(innerCanvas); 
+      canvas.add(innerCanvas); 
 /*
       // Add a top spacer
       vbox.add(new qx.ui.core.Spacer(), { flex : 1 });
