@@ -148,13 +148,13 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
       hbox = new qx.ui.container.Composite(new qx.ui.layout.HBox());
       
       // Add a left spacer to center the welcome text
-      o = new qx.ui.core.Spacer();
+/*      o = new qx.ui.core.Spacer();
       o.set(
         {
           minWidth     : 20
         });
       hbox.add(o, { flex : 1 });
-
+*/
       // Create a vbox to vertically center the introductory text
       vbox = new qx.ui.container.Composite(new qx.ui.layout.VBox());
       hbox.add(vbox);
@@ -168,21 +168,24 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
 
       // Add background
       var homepageBG = new qx.ui.decoration.Background();
-      homepageBG.setBackgroundImage("aiagallery/hpbg.png");
+      homepageBG.setBackgroundImage("aiagallery/hpbgbig.png");
       innerCanvas.setDecorator(homepageBG);
-      innerCanvas.addEventListener();
-
+      // innerCanvas.setMarginLeft(200);
+/*
+      innerCanvas.addEventListener("appear", function(e){
+        qx.bom.element.Style.set(this.getElement(), "backgroundPosition", "rightTop");});
+*/
       // Put in some welcoming text
       text = 
         [
-          "<div style='padding:0 30px 0 0;'>",
+          "<div style='padding:0 0px 0 0;'>",
           "<div style='text-align:center;'>",
           "<h2>",
-          "Welcome to the <br/>MIT App Inventor Community Gallery!",
+          "Welcome to the MIT App Inventor Community Gallery!",
           "</h2>",
           "</div>",
 
-          "<div style='font-size:larger; font-weight:bold; padding:6px;'>",
+          "<div style='text-align:center; font-size:larger; font-weight:bold; padding:6px; margin: 0 auto;'>",
           "<b>",
           "<ul><li>Check out mobile apps from all over the world!<br/></li>",
           "<li>Download App Inventor blocks and learn to program!<br/></li>",
@@ -194,7 +197,8 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
       this.welcomingLabel.set(
         {
           value        : text,
-          rich         : true     
+          rich         : true,
+          width        : 900
         });
 
       innerCanvas.add(this.welcomingLabel);
@@ -322,7 +326,7 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
       // News like text 
       text = 
         [
-          "<div style='padding:0 30px 0 0;'>",
+          "<div style='padding:0 0px 0 0;'>",
           "<div style='padding:12px 10px; background:rgba(255,255,255,0.5);'>",
           "<br><b> New! Check out the winners of the ",
 	  "<a href='#page%3DContest' >2012 MIT App Inventor App Contest </a> -- you can download the source code for all apps! Congratulations to all the winners and noted apps!", 
@@ -336,9 +340,7 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
         {
           font         : font, 
           value        : text,
-          rich         : true,
-          width        : 434,
-          height       : 150
+          rich         : true
         });
       innerCanvas.add(newsLabel);
 
@@ -389,6 +391,88 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
         });
       hbox.add(o, { flex : 1 });
 */
+
+      // Newest Apps section
+      var newestAppsLayout = new qx.ui.layout.VBox();
+      newestAppsLayout.set(
+        {
+          alignX : "center"
+        });
+      var newestApps = new qx.ui.container.Composite(newestAppsLayout);
+      newestApps.set(
+        {
+          decorator : "home-page-ribbon",
+          padding   : 20,
+          width     : 600
+        });
+
+      // Newest Apps heading
+      var newestAppsHeader = new qx.ui.basic.Label();
+      newestAppsHeader.set(
+        {
+          value : "Newest Apps",
+          font  : font,
+          decorator : "home-page-header"
+        });
+      newestApps.add(newestAppsHeader);
+      
+      // slide bar of Newest Apps
+      scroller = new qx.ui.container.Scroll();
+      newestApps.add(scroller);
+      
+      // Scroll container can hold only a single child. Create that child.
+      this.newestAppsContainer =
+        new qx.ui.container.Composite(new qx.ui.layout.HBox(0));
+      this.newestAppsContainer.set(
+          {
+            height : 210
+          });
+      scroller.add(this.newestAppsContainer);
+      
+      // add Newest Apps section to the page
+      vbox.add(newestApps);
+
+      // Most Liked Apps section
+      var likedAppsLayout = new qx.ui.layout.VBox();
+      likedAppsLayout.set(
+        {
+          alignX : "center"
+        });
+      var likedApps = new qx.ui.container.Composite(likedAppsLayout);
+      likedApps.set(
+        {
+          decorator : "home-page-ribbon",
+          padding   : 20,
+          width     : 600
+        });
+
+      // Liked Apps heading
+      var likedAppsHeader = new qx.ui.basic.Label();
+      likedAppsHeader.set(
+        {
+          value : "Most Liked Apps",
+          font  : font,
+          decorator : "home-page-header"
+        });
+      likedApps.add(likedAppsHeader);
+      
+      // slide bar of liked Apps
+      scroller = new qx.ui.container.Scroll();
+      likedApps.add(scroller);
+      
+      // Scroll container can hold only a single child. Create that child.
+      this.likedAppsContainer =
+        new qx.ui.container.Composite(new qx.ui.layout.HBox());
+      this.likedAppsContainer.set(
+          {
+            height : 210
+          });
+      scroller.add(this.likedAppsContainer);
+      
+      // add Liked Apps section to the page
+      vbox.add(likedApps);
+
+
       // Featured Apps section
       var featuredAppsLayout = new qx.ui.layout.VBox();
       featuredAppsLayout.set(
@@ -428,83 +512,7 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
       // Add the top hbox to the page
       canvas.add(hbox);
 
-      // Newest Apps section
-      var newestAppsLayout = new qx.ui.layout.VBox();
-      newestAppsLayout.set(
-        {
-          alignX : "center"
-        });
-      var newestApps = new qx.ui.container.Composite(newestAppsLayout);
-      newestApps.set(
-        {
-          decorator : "home-page-ribbon",
-          padding   : 20
-        });
 
-      // Newest Apps heading
-      var newestAppsHeader = new qx.ui.basic.Label();
-      newestAppsHeader.set(
-        {
-          value : "Newest Apps",
-          font  : font,
-          decorator : "home-page-header"
-        });
-      newestApps.add(newestAppsHeader);
-      
-      // slide bar of Newest Apps
-      scroller = new qx.ui.container.Scroll();
-      newestApps.add(scroller);
-      
-      // Scroll container can hold only a single child. Create that child.
-      this.newestAppsContainer =
-        new qx.ui.container.Composite(new qx.ui.layout.HBox(0));
-      this.newestAppsContainer.set(
-          {
-            height : 210
-          });
-      scroller.add(this.newestAppsContainer);
-      
-      // add Newest Apps section to the page
-      canvas.add(newestApps);
-
-      // Most Liked Apps section
-      var likedAppsLayout = new qx.ui.layout.VBox();
-      likedAppsLayout.set(
-        {
-          alignX : "center"
-        });
-      var likedApps = new qx.ui.container.Composite(likedAppsLayout);
-      likedApps.set(
-        {
-          decorator : "home-page-ribbon",
-          padding   : 20
-        });
-
-      // Liked Apps heading
-      var likedAppsHeader = new qx.ui.basic.Label();
-      likedAppsHeader.set(
-        {
-          value : "Most Liked Apps",
-          font  : font,
-          decorator : "home-page-header"
-        });
-      likedApps.add(likedAppsHeader);
-      
-      // slide bar of liked Apps
-      scroller = new qx.ui.container.Scroll();
-      likedApps.add(scroller);
-      
-      // Scroll container can hold only a single child. Create that child.
-      this.likedAppsContainer =
-        new qx.ui.container.Composite(new qx.ui.layout.HBox());
-      this.likedAppsContainer.set(
-          {
-            height : 210
-          });
-      scroller.add(this.likedAppsContainer);
-      
-      // add Liked Apps section to the page
-      canvas.add(likedApps);
     },
 
 
