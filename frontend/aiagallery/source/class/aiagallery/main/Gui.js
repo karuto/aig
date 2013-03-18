@@ -224,6 +224,14 @@ qx.Class.define("aiagallery.main.Gui",
           {
             appearance : "pagepane"
           });
+        // Android-green line
+        o = new qx.ui.container.Composite();
+        o.set(
+          {
+            height    : 1,
+            backgroundColor : "#a5c43c"
+          });
+        pagePane.add(o);
         application.add(pagePane, { flex : 1 });
 
         // Create a horizontal box for the page hierarchy and right-justified

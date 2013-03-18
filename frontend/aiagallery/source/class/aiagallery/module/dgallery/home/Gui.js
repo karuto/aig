@@ -217,6 +217,7 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
       layout = new qx.ui.layout.HBox();
       layout.setSpacing(5);      
       searchLayout = new qx.ui.container.Composite(layout);
+      searchLayout.setAlignX("center");
 
       searchTextField = new qx.ui.form.TextField;
       searchTextField.setWidth(300); 
@@ -263,6 +264,7 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
       layout = new qx.ui.layout.HBox();
       layout.setSpacing(5);   
       var tagCloudLayout = new qx.ui.container.Composite(layout);
+      tagCloudLayout.setAlignX("center");
 
       // An array of pre-filled tagcloud texts, before actual mechanism's done
       var tagTexts = ["tag1", "Comics", "Entertainment", "*Featured*", "dave"];
@@ -327,7 +329,7 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
       text = 
         [
           "<div style='padding:0 0px 0 0;'>",
-          "<div style='padding:12px 10px; background:rgba(255,255,255,0.5);'>",
+          "<div style='padding:12px 10px; background:rgba(255,255,255,0.5); text-align: center;'>",
           "<br><b> New! Check out the winners of the ",
 	  "<a href='#page%3DContest' >2012 MIT App Inventor App Contest </a> -- you can download the source code for all apps! Congratulations to all the winners and noted apps!", 
           "</div><br/>",
@@ -432,6 +434,16 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
       // add Newest Apps section to the page
       vbox.add(newestApps);
 
+      o = new qx.ui.core.Spacer();
+      o.set(
+        {
+          minHeight     : 10
+        });
+      vbox.add(o, { flex : 1 });
+
+
+
+
       // Most Liked Apps section
       var likedAppsLayout = new qx.ui.layout.VBox();
       likedAppsLayout.set(
@@ -505,6 +517,13 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
             // height : 420
           });
       featuredApps.add(this.featuredAppsContainer);
+
+      o = new qx.ui.core.Spacer();
+      o.set(
+        {
+          minWidth     : 10
+        });
+      hbox.add(o, { flex : 1 });
       
       // add Featured Apps section to the top hbox
       hbox.add(featuredApps);
