@@ -72,7 +72,7 @@ qx.Class.define("aiagallery.widget.SearchResult",
       grid.setColumnAlign(0, "center", "middle");
       grid.setRowFlex(1, 1);
 
-      size = format == "homeRibbon" ? 220 : 320;
+      size = format == "homeRibbon" ? 220 : 120;
 
       // This one needs a background color to separate the slidebar items
       this.set(
@@ -364,11 +364,8 @@ qx.Class.define("aiagallery.widget.SearchResult",
         case "searchResults":
         case "homeRibbon":
         case "byAuthor":
-          size = 100;
-          break;
-          
         case "featured":
-          size = 300;
+          size = 100;
           break;
 
         case "appInfo":
@@ -408,7 +405,7 @@ qx.Class.define("aiagallery.widget.SearchResult",
         case "homeRibbon":
         case "featured":
           textAlign = "center";
-          size = 200;
+          size = 150;
           break;
 
         case "searchResults":

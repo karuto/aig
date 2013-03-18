@@ -419,7 +419,7 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
         new qx.ui.container.Composite(new qx.ui.layout.HBox());
       this.featuredAppsContainer.set(
           {
-            height : 420
+            // height : 420
           });
       featuredApps.add(this.featuredAppsContainer);
       

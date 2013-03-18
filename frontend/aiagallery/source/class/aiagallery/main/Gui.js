@@ -778,7 +778,7 @@ qx.Class.define("aiagallery.main.Gui",
         hbox.add(new qx.ui.core.Spacer(10, 10), { flex : 2 });
 
         // Add the hbox to the application
-        application.add(hbox);
+        //application.add(hbox);
 
         }
       // Get the page hierarchy
