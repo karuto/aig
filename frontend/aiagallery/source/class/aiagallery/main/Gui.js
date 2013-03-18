@@ -73,13 +73,29 @@ qx.Class.define("aiagallery.main.Gui",
             spacing       : 0
           });
         application = new qx.ui.container.Composite(o);
-        this.getApplicationRoot().add(application, { edge : 0 });
+        application.set(
+          { 
+/*            left: "10%",
+            right: "10%",
+*/            backgroundColor: "white"
+          });
+        application.setWidth(800);
+
+        // create a composite for the whole document
+        var globalComposite = new qx.ui.container.Composite();
+        this.getApplicationRoot().add(globalComposite, {left: 0, right: 0, top: 0, bottom: 0});
+        globalComposite.setLayout(new qx.ui.layout.HBox());
+
+        globalComposite.add(new qx.ui.core.Spacer(), {flex: 1});
+        globalComposite.add(application, { edge : 0 });
+        globalComposite.add(new qx.ui.core.Spacer(), {flex: 1});
 
         // Create a horizontal box layout for the title
         header = new qx.ui.container.Composite(new qx.ui.layout.HBox(6));
         header.set(
           {
-            height          : 40
+            height          : 40,
+            backgroundColor : "#FFFFFF"
           });
 
         // Add the logo to the header

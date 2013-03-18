@@ -39,6 +39,7 @@ qx.Theme.define("aiagallery.theme.Appearance",
         return {
           // decorator : "pagepane-top",
           backgroundColor : "white",
+          width : 100,
           margin : 10
         };
       }

@@ -399,7 +399,7 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
       var featuredApps = new qx.ui.container.Composite(featuredAppsLayout);
       featuredApps.set(
         {
-          width     : 700,
+          width     : 300,
           decorator : "home-page-ribbon",
           padding   : 20
         });
