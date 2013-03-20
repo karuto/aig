@@ -211,8 +211,6 @@ qx.Class.define("aiagallery.module.dgallery.appinfo.Gui",
       vbox.add(this.sidebarLabel);
 
 
-
-
       // Create the main layout for tag container
       var mainLayout = new qx.ui.layout.VBox();
       mainLayout.setSpacing(10);
@@ -606,6 +604,7 @@ qx.Class.define("aiagallery.module.dgallery.appinfo.Gui",
           this.butAddComment.destroy();
           this.butCancelComment.destroy(); 
           this.textNewComment.destroy(); 
+          this.commentCountLabel.destroy();
 
           // Disable flag and likeit buttons
           this.searchResult.getChildControl("likeIt").set(
