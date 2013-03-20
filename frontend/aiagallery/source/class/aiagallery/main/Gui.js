@@ -224,6 +224,7 @@ qx.Class.define("aiagallery.main.Gui",
           {
             appearance : "pagepane"
           });
+
         // Android-green line
         o = new qx.ui.container.Composite();
         o.set(
@@ -232,6 +233,7 @@ qx.Class.define("aiagallery.main.Gui",
             backgroundColor : "#a5c43c"
           });
         pagePane.add(o);
+
         application.add(pagePane, { flex : 1 });
 
         // Create a horizontal box for the page hierarchy and right-justified
@@ -288,6 +290,16 @@ qx.Class.define("aiagallery.main.Gui",
         mainTabs.getChildControl("bar").exclude();
 
         pagePane.add(mainTabs, { flex : 1 });
+
+        // Android-green line
+        o = new qx.ui.container.Composite();
+        o.set(
+          {
+            height    : 1,
+            backgroundColor : "#a5c43c"
+          });
+        pagePane.add(o);
+
 
         // Make the tab view globally accessible
         qx.core.Init.getApplication().setUserData("mainTabs", mainTabs);

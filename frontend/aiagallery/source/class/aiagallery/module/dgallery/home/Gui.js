@@ -198,7 +198,7 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
         {
           value        : text,
           rich         : true,
-          width        : 900
+          width        : 850
         });
 
       innerCanvas.add(this.welcomingLabel);
@@ -211,16 +211,17 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
         qx.theme.manager.Font.getInstance().resolve("bold").clone();
       font.setSize(16);
 
+      searchLabel.setMarginLeft(300);
       searchLabel.setFont(font);
       innerCanvas.add(searchLabel);
 
       layout = new qx.ui.layout.HBox();
       layout.setSpacing(5);      
       searchLayout = new qx.ui.container.Composite(layout);
-      searchLayout.setAlignX("center");
+      searchLayout.setMarginLeft(250);
 
       searchTextField = new qx.ui.form.TextField;
-      searchTextField.setWidth(300); 
+      searchTextField.setWidth(250); 
 
       this.searchButton = new qx.ui.form.Button(this.tr("Search"));
 
@@ -264,7 +265,7 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
       layout = new qx.ui.layout.HBox();
       layout.setSpacing(5);   
       var tagCloudLayout = new qx.ui.container.Composite(layout);
-      tagCloudLayout.setAlignX("center");
+      tagCloudLayout.setMarginLeft(250);
 
       // An array of pre-filled tagcloud texts, before actual mechanism's done
       var tagTexts = ["tag1", "Comics", "Entertainment", "*Featured*", "dave"];
@@ -437,7 +438,7 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
       o = new qx.ui.core.Spacer();
       o.set(
         {
-          minHeight     : 10
+          minHeight     : 20
         });
       vbox.add(o, { flex : 1 });
 
