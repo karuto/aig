@@ -20,6 +20,8 @@ qx.Class.define("aiagallery.widget.mystuff.Detail",
     var             form;
     var             formRendered;
     var             categoryList;
+    var             groupMap; 
+    var             groupEntries; 
     var             currentTags;
     var             tempContainer;
     var             required;
@@ -36,6 +38,14 @@ qx.Class.define("aiagallery.widget.mystuff.Detail",
     // Retrieve the list of categories, at least one of which must be selected
     categoryList =
       qx.core.Init.getApplication().getRoot().getUserData("categories");
+
+    // Get the group map
+    groupMap =
+      qx.core.Init.getApplication().getRoot().getUserData("groups");
+
+    // Get the group map
+    groupEntries =
+      qx.core.Init.getApplication().getRoot().getUserData("groupEntries");
 
     // Use the canvas layout for ourself (which will contain only the hBox)
     this.setLayout(new qx.ui.layout.Canvas());
@@ -147,7 +157,24 @@ qx.Class.define("aiagallery.widget.mystuff.Detail",
     this.categoryController = new qx.data.controller.List(
       new qx.data.Array(categoryList), o);
     this.lstCategories = o;
-    
+
+    // Create a multi-selection list and add the group info to it.
+    o = new qx.ui.form.List();
+    o.set(
+      {
+        tabIndex      : 3,
+        width         : 150,
+        height        : 100,
+        selectionMode : "multi",
+        required      : false
+      });
+    //o.addListener("changeSelection", this._changeGroups, this);
+    form.add(o, "Groups", null, "groups", null,
+             { row : 8, column : 0, rowSpan : 5 });
+
+    this.groupController = new qx.data.controller.List(
+      new qx.data.Array(groupEntries), o);
+
     // Tag to add
     o = new qx.ui.form.TextField();
     o.set(

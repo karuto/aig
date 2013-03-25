@@ -24,6 +24,7 @@ qx.Class.define("aiagallery.dbif.ObjGroup",
           "users"           : [],
           "joiningUsers"    : [],
           "requestedUsers"  : [],
+          "ascApps"         : [], 
           "type"            : null,
           "subType"         : null,
           "joinType"        : aiagallery.dbif.Constants.JoinType.Public
@@ -65,6 +66,9 @@ qx.Class.define("aiagallery.dbif.ObjGroup",
         /** User ids of visitors waiting to join this group, 
 	 * but are not on the  requested user array. */
         "joiningUsers" : "StringArray",
+
+        /** String array of appids that users want added to the group */
+        "ascApps" : "StringArray", 
 
         /** The type of a group as defined in dbif.constants.GroupTypes*/
         "type" : "String",

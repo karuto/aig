@@ -260,6 +260,7 @@ qx.Class.define("aiagallery.module.dgallery.myapps.Gui",
       var             data;
       var             prop;
       var             availableProperties;
+      var             groupEntries = []; 
 
       // We can ignore aborted requests.
       if (response.type == "aborted")
@@ -285,6 +286,22 @@ qx.Class.define("aiagallery.module.dgallery.myapps.Gui",
         // Save the category list in a known place, for later access
         this.getApplicationRoot().setUserData("categories",
                                               response.data.result.categories);
+
+        // Do the same with the group names/owners
+        this.getApplicationRoot().setUserData("groups",
+                                              response.data.result.groups);
+
+        // Create an array of group entries to display
+        response.data.result.groups.forEach(
+          function(group)
+          {
+            groupEntries.push(group["entry"]);
+          } 
+        );
+
+        // Save for later use
+        this.getApplicationRoot().setUserData("groupEntries",
+                                              groupEntries);
 
 /*
         // Add a test entry with no image or source file name

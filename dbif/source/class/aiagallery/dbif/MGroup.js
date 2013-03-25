@@ -60,6 +60,10 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
     this.registerService("aiagallery.features.browseSearch",
                          this.browseSearch,
                          [ "type", "subType" ]);
+
+    this.registerService("aiagallery.features.associateApp",
+                         this.associateApp,
+                         [ "groupName", "appId" ]);
   },
 
   members :
@@ -132,6 +136,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
 
         // Prep empty arrays
         groupData.joiningUsers = []; 
+        groupData.ascApps = []; 
       } 
       else if (groupData.owner == whoami.id)
       {
@@ -169,16 +174,16 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
         return error;
       }
 
-       // Write updated or new group to db
-       group.put(); 
+      // Write updated or new group to db
+      group.put(); 
 
-       returnMap = this._turnToMap(groupData);
+      returnMap = this._turnToMap(groupData);
              
-       // Set update bit
-       returnMap.update = bUpdate; 
+      // Set update bit
+      returnMap.update = bUpdate; 
 
-       // Clean up the return data
-       return returnMap; 
+      // Clean up the return data
+      return returnMap; 
     },
 
     /**
@@ -397,6 +402,14 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       var      group; 
       var      groupMap;
       var      flagsList; 
+      var      requestedFields; 
+
+      requestedFields = {
+        uid         : "uid",
+        image1      : "image1",
+        title       : "title",
+        displayName : "displayName"
+      }; 
 
       criteria = 
         {
@@ -428,7 +441,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
         groupMap["groupApps"] = this._getMemberApps(group);
 
         // Also determine if the user has flagged this group
-       // Construct query criteria for "flags of this group by current visitor
+        // Construct query criteria for "flags of this group by current visitor
         criteria = 
           {
             type : "op",
@@ -462,6 +475,57 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
 
 
         groupMap["bFlag"] = flagsList.length != 0; 
+      }
+
+      // Get the apps associated with this group 
+      if (true)
+      {
+        // Prep map array
+        groupMap["ascApps"] = []; 
+
+        // Get asc. appIds
+        group.ascApps.forEach(
+          function(appId)
+          {
+            var    app;
+            var    displayName;
+
+            // Search for and push app to map
+            app  = new aiagallery.dbif.ObjAppData(appId);
+            groupMap["ascApps"].push(app);
+            
+          }
+        );
+
+        // For each app in the ascApps array
+        // strip out unneeded info and replace owner id with username
+        groupMap["ascApps"].forEach(
+          function(app)
+          {
+            var    displayName;
+            var    nameSearchResults;
+
+            criteria = 
+              {
+                type  : "element",
+                field : "id",
+                value : app.owner
+              }; 
+         
+            nameSearchResults = 
+               liberated.dbif.Entity.query("aiagallery.dbif.ObjVisitors", 
+                                           criteria);
+
+            displayName = resultList[0].displayName; 
+
+            app.displayName = displayName || "<>";    
+
+            // Trim unneeded app info
+            aiagallery.dbif.MApps._requestedFields(app, requestedFields);
+
+          }
+        );
+
       }
 
       return groupMap;
@@ -1099,6 +1163,72 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
 
     },
 
+   /**
+    *  Associate an app a user owns with a group a user is part of 
+    * 
+    * @param groupName {String}
+    *   The name of the group
+    * 
+    * @param groupOwnerId {String}
+    *   The group owner id
+    * 
+    * @param appId {String}
+    *   The ip of the app to be associated
+    * 
+    * @param error {Error}
+    *   The error object
+    */
+    associateApp : function(groupName, groupOwnerId,  appId, error)
+    {
+      var     whoami;
+      var     app;
+      var     appData; 
+      var     warnString; 
+      var     group;
+      var     groupData; 
+
+      // Check that the user owns this app
+      // Get logged in user
+      whoami = this.getWhoAmI();
+
+      // Get app object
+      app = new aiagallery.dbif.ObjAppData(appId);
+
+      // Retrieve the data
+      appData = app.getData();
+
+      if(whoami.id != appData.owner)
+      {
+        warnString = "User associating app that they do not own.";
+
+        error.setCode(1);
+        error.setMessage(warnString);
+        return error;
+      }
+
+      // Check that the user is part of the group they
+      // Get group obj
+      group = new aiagallery.dbif.ObjGroup(groupName, whoami.id);
+      groupData = group.getData(); 
+      
+      // Are they trying to associate the app with a group 
+      // they are not part of
+      if(group.users.indexOf(whoami.id) == -1)
+      {
+        warnString = "User associating app with a group"
+		     + " they are not part of. ";
+
+        error.setCode(2);
+        error.setMessage(warnString);
+        return error;
+      } 
+
+      // Add appid to associate apps array
+      groupData.ascApps.push(appId); 
+
+      return true; 
+    },
+
     /**
      * Delete a group
      * 
@@ -1333,6 +1463,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
           users          : null,
           joiningUsers   : null,
           requestedUsers : null,
+          ascApps        : null, 
           type           : groupData.type, 
           subType        : groupData.subType,
           joinType       : groupData.joinType, 
@@ -1411,7 +1542,6 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
 
       requestedFields = {
         uid         : "uid",
-        owner       : "owner",
         image1      : "image1",
         title       : "title",
         displayName : "displayName"
@@ -1466,16 +1596,12 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
           queryResult.forEach(
             function(app)
             {
-              app.displayName = displayName || "<>";    
-              delete app.owner;     
-
-              appArray.push(app);
+              app.displayName = displayName || "<>";       
 
               // Trim unneeded app info
-              aiagallery.dbif.MApps._requestedFields(app, requestedFields);
+              aiagallery.dbif.MApps._requestedFields(app, requestedFields); 
 
-              // Remove the owner field
-              delete app.owner;      
+              appArray.push(app);
             });
         }
       );

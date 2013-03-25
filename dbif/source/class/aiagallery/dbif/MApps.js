@@ -1722,6 +1722,8 @@ qx.Mixin.define("aiagallery.dbif.MApps",
       var             owners;
       var             email;
       var             displayName;
+      var             groupList;
+      var             cleanGroupList = []; 
 
       // Get the current user
       whoami = this.getWhoAmI();
@@ -1856,8 +1858,41 @@ qx.Mixin.define("aiagallery.dbif.MApps",
       // They want only the tag value to be returned
       categoryNames = categories.map(function() { return arguments[0].value; });
 
+      // Create the criteria for a search of groups the user is a part of
+      criteria =
+        {
+          type  : "element",
+          field : "users",
+          value : whoami.id 
+        };
+      
+      // Issue a query for category tags
+      groupList = liberated.dbif.Entity.query("aiagallery.dbif.ObjGroup", 
+                                               criteria);
+
+      // Only return the group name and the owner's name 
+      groupList.forEach(
+        function(group)
+        {
+          var    visitor;
+          var    visitorData;
+
+          // Get the display name of the owner of this group
+          visitor = new aiagallery.dbif.ObjVisitors(group.owner);
+          visitorData = visitor.getData();
+
+          cleanGroupList.push({name  : group.name,
+                               owner : visitorData.displayName,
+                               entry :  group.name + "  by " + visitorData.displayName});
+
+        }
+      );
+      
+
       // We've built the whole list. Return it.
-      return { apps : appList, categories : categoryNames };
+      return { apps       : appList, 
+               categories : categoryNames, 
+               groups     : cleanGroupList};
     },
     
     /**
