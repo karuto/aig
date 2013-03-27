@@ -2217,6 +2217,9 @@ qx.Mixin.define("aiagallery.dbif.MSimData",
       },
       "group" :
       {
+      },
+      "appAsc" :
+      {
       }  
     }
   }

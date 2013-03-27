@@ -218,7 +218,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       // Check for existence and ownership
       try
       {
-        group = this._checkExistenceAndOwnership(groupName);
+        group = this.__checkExistenceAndOwnership(groupName);
         groupData = group.getData(); 
       } 
       catch (x)
@@ -714,7 +714,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       // Check for existence and ownership
       try
       {
-        group = this._checkExistenceAndOwnership(groupName);
+        group = this.__checkExistenceAndOwnership(groupName);
         groupData = group.getData(); 
       } 
       catch (x)
@@ -868,7 +868,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       // Check for existence and ownership
       try
       {
-        group = this._checkExistenceAndOwnership(groupName);
+        group = this.__checkExistenceAndOwnership(groupName);
         groupData = group.getData(); 
       } 
       catch (x)
@@ -949,7 +949,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       // Check for existence and ownership
       try
       {
-        group = this._checkExistenceAndOwnership(groupName);
+        group = this.__checkExistenceAndOwnership(groupName);
         groupData = group.getData(); 
       } 
       catch (x)
@@ -1277,7 +1277,13 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
         return error; 
       }
 
-      group.removeSelf();
+      // Do deletion of AppAsc objects and group in a transaction
+      liberated.dbif.Entity.asTransaction(
+        function()
+        {
+          this._deleteAppAscGroup(group.name);
+          group.removeSelf();
+        }, this);
 
       // Remove any flags this group may have had
       this.clearGroupFlags(groupData.name, error);
@@ -1403,7 +1409,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
      *   ObjGroup if it exists and is owned by the user,
      *     an error otherwise.
      */
-    _checkExistenceAndOwnership : function(groupName, error)
+    __checkExistenceAndOwnership : function(groupName, error)
     {
       var     whoami;
       var     group;

@@ -352,7 +352,8 @@ qx.Class.define("aiagallery.module.dgallery.myapps.Gui",
                 "numViewed", 
                 "numComments", 
                 "tags", 
-                "sourceFileName"
+                "sourceFileName",
+                "groupAsc"
               ];
             
             // Get a new app element to display this app's data

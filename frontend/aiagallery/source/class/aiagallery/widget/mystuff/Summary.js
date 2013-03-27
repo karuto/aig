@@ -231,7 +231,8 @@ qx.Class.define("aiagallery.widget.mystuff.Summary",
             maxWidth  : width
           });
         this._addAt(control, 7);
-        break;
+        break;  
+
       }
 
       return control || this.base(arguments, id);
@@ -354,6 +355,7 @@ qx.Class.define("aiagallery.widget.mystuff.Summary",
     {
       this.getChildControl("numComments").setValue(String(value));
     }
+
   },
   
   defer : function(statics)

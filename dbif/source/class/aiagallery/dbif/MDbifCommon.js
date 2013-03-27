@@ -24,7 +24,8 @@ qx.Mixin.define("aiagallery.dbif.MDbifCommon",
     aiagallery.dbif.MDbMgmt,
     aiagallery.dbif.MSystem,
     aiagallery.dbif.MPermissionGroup,
-    aiagallery.dbif.MGroup
+    aiagallery.dbif.MGroup,
+    aiagallery.dbif.MAppAsc
   ],
 
   construct : function()

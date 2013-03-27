@@ -1620,6 +1620,9 @@ qx.Mixin.define("aiagallery.dbif.MApps",
               }
             });
       
+          // Remove all AppAsc objects
+          this._deleteAppAscApp(appObj.uid); 
+
           // Delete the app
           appObj.removeSelf();
 
@@ -1819,6 +1822,18 @@ qx.Mixin.define("aiagallery.dbif.MApps",
               delete app["owner"];
             }
 
+            // Get a list of all the groups this app is associated with
+            // Add this list to the app map
+            criteria = 
+              {
+                type  : "element",
+                field : "app",
+                value : app["uid"]
+              };
+
+            app["groupAsc"] = liberated.dbif.Entity.query("aiagallery.dbif.ObjAppAsc",
+                                                          criteria);
+
             // Do special App Engine processing to scale images
             if (liberated.dbif.Entity.getCurrentDatabaseProvider() ==
                 "appengine")
@@ -1866,7 +1881,7 @@ qx.Mixin.define("aiagallery.dbif.MApps",
           value : whoami.id 
         };
       
-      // Issue a query for category tags
+      // Issue a query for groups the user is a member of 
       groupList = liberated.dbif.Entity.query("aiagallery.dbif.ObjGroup", 
                                                criteria);
 
@@ -1881,18 +1896,22 @@ qx.Mixin.define("aiagallery.dbif.MApps",
           visitor = new aiagallery.dbif.ObjVisitors(group.owner);
           visitorData = visitor.getData();
 
-          cleanGroupList.push({name  : group.name,
+          cleanGroupList.push({
+                               name  : group.name,
                                owner : visitorData.displayName,
-                               entry :  group.name + "  by " + visitorData.displayName});
+                               entry : group.name + "  by " + visitorData.displayName
+                               });
 
         }
       );
       
 
       // We've built the whole list. Return it.
-      return { apps       : appList, 
+      return {
+               apps       : appList, 
                categories : categoryNames, 
-               groups     : cleanGroupList};
+               groups     : cleanGroupList
+             };
     },
     
     /**

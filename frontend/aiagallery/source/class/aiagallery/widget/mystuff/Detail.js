@@ -20,7 +20,6 @@ qx.Class.define("aiagallery.widget.mystuff.Detail",
     var             form;
     var             formRendered;
     var             categoryList;
-    var             groupMap; 
     var             groupEntries; 
     var             currentTags;
     var             tempContainer;
@@ -39,11 +38,7 @@ qx.Class.define("aiagallery.widget.mystuff.Detail",
     categoryList =
       qx.core.Init.getApplication().getRoot().getUserData("categories");
 
-    // Get the group map
-    groupMap =
-      qx.core.Init.getApplication().getRoot().getUserData("groups");
-
-    // Get the group map
+    // Get the group entries 
     groupEntries =
       qx.core.Init.getApplication().getRoot().getUserData("groupEntries");
 
@@ -174,7 +169,7 @@ qx.Class.define("aiagallery.widget.mystuff.Detail",
 
     this.groupController = new qx.data.controller.List(
       new qx.data.Array(groupEntries), o);
-
+ 
     // Tag to add
     o = new qx.ui.form.TextField();
     o.set(
@@ -774,7 +769,13 @@ qx.Class.define("aiagallery.widget.mystuff.Detail",
     {
       check : "String",
       apply : "_applyImage1"
-    }
+    },
+
+    groupAsc :
+    {
+      check : "Array",
+      apply : "_applyGroupAsc"
+    }  
   },
 
   members :
@@ -918,6 +919,43 @@ qx.Class.define("aiagallery.widget.mystuff.Detail",
       this._model.image1 = value;
       this.fiImage1.setValue(value);
     },
+
+    _applyGroupAsc : function(value, old)
+    {
+
+      var    groupList;
+      var    groupEntryList;
+      var    selectionArray = [];
+
+      // Get the group map
+      groupList =
+        qx.core.Init.getApplication().getRoot().getUserData("groups");
+
+      groupEntryList =
+        qx.core.Init.getApplication().getRoot().getUserData("groupEntries");
+
+      value.forEach(
+        function(appGroup)
+        {
+          var    i;    
+
+          // Look for a match between appGroup and groupList
+          // If we find a match add the corresponding entry for that group
+          // to the selection array
+          for(i = 0; i < groupList.length; i++)
+          {
+            if(appGroup == groupList[i])
+            {
+              selectionArray.push(groupEntryList[i]); 
+              break;
+            }
+          } 
+
+          // Set selection
+          this.groupController(new qx.data.Array(selectionArray)); 
+        }
+      );
+    }, 
 
      // Create a channel for communication to this client from the server.
      // If a channel exists already we do not need to do this.
