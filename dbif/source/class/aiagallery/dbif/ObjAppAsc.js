@@ -31,10 +31,10 @@ qx.Class.define("aiagallery.dbif.ObjAppAsc",
     var databaseProperties =
       {
         /** UID of the AppData object which was associated with a group */
-        "app" : "Key",
+        "app" : "Integer",
 
         /** Name of group app is associated with */
-        "visitor" : "String"
+        "groupName" : "String"
       };
 
     // Register our property types

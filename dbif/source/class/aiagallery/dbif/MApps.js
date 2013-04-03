@@ -597,6 +597,19 @@ qx.Mixin.define("aiagallery.dbif.MApps",
                                    requestData.uid);
     },
 
+    /**
+     *  Create a new app in the database or edit 
+     *  an existing app.
+     * 
+     * @param uid {String}
+     *   The uid of the existing app object
+     * 
+     * @param attributes {Map}
+     *   A map of app attributes (title, tags, etc)
+     * 
+     * @param error {Error}
+     *   The error object  
+     */
 
     addOrEditApp : function(uid, attributes, error)
     {
@@ -641,7 +654,8 @@ qx.Mixin.define("aiagallery.dbif.MApps",
           "image1",
           "source",
           "sourceFileName",
-          "tags"
+          "tags",
+          "groupAsc"
         ];
       var             requiredFields =
         [
@@ -841,13 +855,35 @@ qx.Mixin.define("aiagallery.dbif.MApps",
                 }
                 break;
 
+              case "groupAsc":
+                // For each group asc specified
+                // create a new appAsc object
+                attributes.groupAsc.forEach(
+                  function(group)
+                  {
+                    var name;
+
+                    // Get group name
+                    name = group.split("by")[0].trim();                     
+
+                    this.associateAppWithGroup(uid, name, error);
+                  }
+
+                ,this);
+                
+
+                // Clean up possible orphaned appAsc Objects
+                this.cleanOrphanedAppAscObjects(attributes.groupAsc, uid, error); 
+                
+                break;
+
               default:
                 // Replace what's in the db entry
                 appData[field] = attributes[field];
                 break;
               }
             }
-          });
+          }, this);
 
         // If tags were specified, did we find at least one category tag?
         if (attributes.tags && ! bHasCategory)
@@ -2536,7 +2572,7 @@ qx.Mixin.define("aiagallery.dbif.MApps",
             if (owners.length == 0)
             { 
               app["displayName"] = "DELETED";
-            } else {	  
+            } else {      
               app["displayName"] = owners[0].displayName || "<>";
             }
           }
@@ -2598,7 +2634,7 @@ qx.Mixin.define("aiagallery.dbif.MApps",
             if (owners.length == 0)
             { 
               app["displayName"] = "DELETED";
-            } else {	  
+            } else {      
               app["displayName"] = owners[0].displayName || "<>";
             }
           }
@@ -2710,7 +2746,7 @@ qx.Mixin.define("aiagallery.dbif.MApps",
           if (owners.length == 0)
           { 
             app.displayName = "DELETED";
-          } else {	  
+          } else {        
             app.displayName = owners[0].displayName || "<>";
           }
           
@@ -3032,12 +3068,12 @@ qx.Mixin.define("aiagallery.dbif.MApps",
         // Only use memcache if we are on Google App Engine.
         if (liberated.dbif.Entity.getCurrentDatabaseProvider() == "appengine")
         {
-	      value = syncCache.get(key_flag);
-	      if (value == null) {
-	        flagCache = true; // true: we need to cache this search
-	      } else {
-		flagList = JSON.parse(value);
-	      }
+              value = syncCache.get(key_flag);
+              if (value == null) {
+                flagCache = true; // true: we need to cache this search
+              } else {
+                flagList = JSON.parse(value);
+              }
 
         } else { // make the database call normally if we are not running on app engine
           
@@ -3087,12 +3123,12 @@ qx.Mixin.define("aiagallery.dbif.MApps",
         // Only use memcache if we are on Google App Engine.
         if (liberated.dbif.Entity.getCurrentDatabaseProvider() == "appengine")
         {
-	      value = syncCache.get(key_byauthor);
-	      if (value == null) {
-	        byAuthorCache = true; // true: we need to cache this search
-	      } else {
-		ret.byAuthor = JSON.parse(value);
-	      }
+              value = syncCache.get(key_byauthor);
+              if (value == null) {
+                byAuthorCache = true; // true: we need to cache this search
+              } else {
+                ret.byAuthor = JSON.parse(value);
+              }
 
         } else { // make the database call normally if we are not running on app engine
           // Query for those apps          
@@ -3202,12 +3238,12 @@ qx.Mixin.define("aiagallery.dbif.MApps",
         // Only use memcache if we are on Google App Engine.
         if (liberated.dbif.Entity.getCurrentDatabaseProvider() == "appengine")
         {
-	      value = syncCache.get(key_comments);
-	      if (value == null) {
-	        commentsCache = true; // true: we need to cache this search
-	      } else {
-		ret.comments = JSON.parse(value);
-	      }
+              value = syncCache.get(key_comments);
+              if (value == null) {
+                commentsCache = true; // true: we need to cache this search
+              } else {
+                ret.comments = JSON.parse(value);
+              }
 
         } else { // make the database call normally if we are not running on app engine
           
@@ -3267,12 +3303,12 @@ qx.Mixin.define("aiagallery.dbif.MApps",
         // Only use memcache if we are on Google App Engine.
         if (liberated.dbif.Entity.getCurrentDatabaseProvider() == "appengine")
         {
-	      value = syncCache.get(key_commentsflag);
-	      if (value == null) {
-	        commentsFlagCache = true; // true: we need to cache this search
-	      } else {
-		commentFlagList = JSON.parse(value);
-	      }
+              value = syncCache.get(key_commentsflag);
+              if (value == null) {
+                commentsFlagCache = true; // true: we need to cache this search
+              } else {
+                commentFlagList = JSON.parse(value);
+              }
 
         } else { // make the database call normally if we are not running on app engine
           // Query for those comments          

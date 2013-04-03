@@ -13,7 +13,11 @@ qx.Mixin.define("aiagallery.dbif.MAppAsc",
   {
     this.registerService("aiagallery.features.associateAppWithGroup",
                          this.associateAppWithGroup,
-                         [ "appId", "groupName" ]);
+                         [ "appId", "groupName", "error" ]);
+
+    this.registerService("aiagallery.features.cleanOrphanedAppAscObjects",
+                         this.cleanOrphanedAppAscObjects,
+                         [ "currentAscList", "uid", "error" ]);
   },
 
   members :
@@ -54,7 +58,7 @@ qx.Mixin.define("aiagallery.dbif.MAppAsc",
           [
             {
               type  : "element",
-              field : "user",
+              field : "users",
               value : whoami.id
             },
             {
@@ -81,19 +85,114 @@ qx.Mixin.define("aiagallery.dbif.MAppAsc",
       } 
 
       // User is a member of this group
-      // create a new AppAsc object for this association
-      appAsc = new aiagallery.dbif.ObjAppAsco(appId);
-      appAscData = appAsc.getData(); 
+      // See if this association already exists
+      criteria = 
+        {
+          type : "op",
+          method : "and",
+          children : 
+          [
+            {
+              type  : "element",
+              field : "app",
+              value : appId
+            },
+            {
+              type  : "element",
+              field : "groupName",
+              value : groupName
+            }
+          ]
+        };
 
-      // New AppAsc set fields 
-      if(appAsc.getBrandNew())
+      resultList = liberated.dbif.Entity.query("aiagallery.dbif.ObjAppAsc",
+                                              criteria,
+                                              null);
+
+      // Must create new association if the list is empty/invalid
+      if (resultList.length === 0)
       {
+      
+        // create a new AppAsc object for this association
+        appAsc = new aiagallery.dbif.ObjAppAsc();
+        appAscData = appAsc.getData(); 
+
+        appAscData.app = appId; 
         appAscData.groupName = groupName;
+
+        // Save object
+        appAsc.put();
       }
 
-      // Else nothing else to do 
- 
       return true;
+    },
+
+    /**
+     * Clean up any orphaned AppAsc objects based on the list
+     * of current associations.
+     * 
+     * @param currentAscList {Array}
+     *   Array of group to app associations this app has
+     * 
+     * @param uid {Integer}
+     *   UID of the app groups would be associated with 
+     * 
+     * @param error {Error}
+     *   The error object
+     */
+    cleanOrphanedAppAscObjects : function(currentAscList, uid, error)
+    {
+      var       criteria;
+      var       resultList;
+      var       groupNames = [];
+ 
+      // Construct list of group names
+      currentAscList.forEach(
+        function(group)
+        {
+          groupNames.push(group.split("by")[0].trim());
+        }
+      );
+
+      // User is a member of this group
+      // See if this association already exists
+      criteria = 
+        {
+          type  : "element",
+          field : "app",
+          value : uid
+        }; 
+
+      resultList = liberated.dbif.Entity.query("aiagallery.dbif.ObjAppAsc",
+                                              criteria,
+                                              null);
+
+      // For each appAsc object we find releated to this app
+      // check to make sure it is current with the list 
+      // of current app associations.
+      resultList.forEach(
+        function(appAsc)
+        {
+          var obj; 
+
+          // This appAsc object references a groupName which
+          // the app is no longer part of, delete this object
+          if (groupNames.indexOf(appAsc.groupName) == -1)
+          {
+            // Get this AppAsc object
+            obj = new aiagallery.dbif.ObjAppAsc(appAsc.uid);
+              
+            // Assuming it exists (it had better!)...
+            if (! obj.getBrandNew())
+            {
+              // ... then remove this object
+              obj.removeSelf();
+            }
+
+          }
+        }
+      );
+
     },
 
     /**
@@ -125,7 +224,7 @@ qx.Mixin.define("aiagallery.dbif.MAppAsc",
           var             obj;
               
           // Get this AppAsc object
-          obj = new aiagallery.dbif.ObjLikes(result.app);
+          obj = new aiagallery.dbif.ObjAppAsc(result.uid);
               
           // Assuming it exists (it had better!)...
           if (! obj.getBrandNew())
@@ -167,7 +266,7 @@ qx.Mixin.define("aiagallery.dbif.MAppAsc",
           var             obj;
               
           // Get this AppAsc object
-          obj = new aiagallery.dbif.ObjLikes(result.app);
+          obj = new aiagallery.dbif.ObjAppAsc(result.app);
               
           // Assuming it exists (it had better!)...
           if (! obj.getBrandNew())

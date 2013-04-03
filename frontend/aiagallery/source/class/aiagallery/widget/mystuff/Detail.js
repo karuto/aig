@@ -163,12 +163,13 @@ qx.Class.define("aiagallery.widget.mystuff.Detail",
         selectionMode : "multi",
         required      : false
       });
-    //o.addListener("changeSelection", this._changeGroups, this);
+    o.addListener("changeSelection", this._changeGroups, this);
     form.add(o, "Groups", null, "groups", null,
              { row : 8, column : 0, rowSpan : 5 });
 
     this.groupController = new qx.data.controller.List(
       new qx.data.Array(groupEntries), o);
+    this.lstGroup = o; 
  
     // Tag to add
     o = new qx.ui.form.TextField();
@@ -348,7 +349,7 @@ qx.Class.define("aiagallery.widget.mystuff.Detail",
     tempContainer.add(o);
     o.set(
       {
-	focusable : true
+        focusable : true
       });
     this.sourceFilePrompt = o;
 
@@ -370,9 +371,9 @@ qx.Class.define("aiagallery.widget.mystuff.Detail",
 
     // add a label widget to the popup
     sourceFilePopup.add(new qx.ui.basic.Label().set({ 
-	value: "Please upload the source code (.zip file) for an App Inventor app. To create this file in App Inventor, go to the My Projects page, select the project you want, then  choose 'Other Actions' and select 'Download Source'. Do not open the downloaded zip file but upload it here directly.",
+        value: "Please upload the source code (.zip file) for an App Inventor app. To create this file in App Inventor, go to the My Projects page, select the project you want, then  choose 'Other Actions' and select 'Download Source'. Do not open the downloaded zip file but upload it here directly.",
         rich : true,
-	width: 300 
+        width: 300 
     }));
 
     // bind onClick event for the popup
@@ -428,7 +429,7 @@ qx.Class.define("aiagallery.widget.mystuff.Detail",
     tempContainer.add(o);
     o.set(
       {
-	focusable : true
+        focusable : true
       });
     this.selectImagePrompt = o;
 
@@ -450,9 +451,9 @@ qx.Class.define("aiagallery.widget.mystuff.Detail",
 
     // add a label widget to the popup
     selectImagePopup.add(new qx.ui.basic.Label().set({ 
-	value: "The image you upload will appear on the app's page and all search screens. It will be scaled into a 180*230 image. Typically the image is a screenshot or an icon if you've created one. The file size limit is " + aiagallery.main.Constant.MAX_IMAGE_FILE_SIZE/1024 + " kb.",
+        value: "The image you upload will appear on the app's page and all search screens. It will be scaled into a 180*230 image. Typically the image is a screenshot or an icon if you've created one. The file size limit is " + aiagallery.main.Constant.MAX_IMAGE_FILE_SIZE/1024 + " kb.",
         rich : true,
-	width: 300 
+        width: 300 
     }));
 
     // bind onClick event for the popup
@@ -833,6 +834,22 @@ qx.Class.define("aiagallery.widget.mystuff.Detail",
       this.setTags(tags);
     },
 
+    _changeGroups : function(e)
+    {
+      var             groups = [];
+
+      // Get selected groups
+      this.lstGroup.getSelection().forEach(
+        function(item)
+        {
+          groups.push(item.getLabel()); 
+        },
+      this);
+
+      // Add them to the model
+      this._model.groupAsc = groups; 
+    },
+
     _applyUid : function(value, old)
     {
       this._model.uid = value;
@@ -927,6 +944,9 @@ qx.Class.define("aiagallery.widget.mystuff.Detail",
       var    groupEntryList;
       var    selectionArray = [];
 
+      // Init Model
+      this._model.groupAsc = []; 
+
       // Get the group map
       groupList =
         qx.core.Init.getApplication().getRoot().getUserData("groups");
@@ -944,17 +964,21 @@ qx.Class.define("aiagallery.widget.mystuff.Detail",
           // to the selection array
           for(i = 0; i < groupList.length; i++)
           {
-            if(appGroup == groupList[i])
+            if(appGroup.groupName == groupList[i].name)
             {
               selectionArray.push(groupEntryList[i]); 
+
+              // Add groupAsc to model
+              this._model.groupAsc.push(groupEntryList[i]); 
+
               break;
             }
           } 
 
           // Set selection
-          this.groupController(new qx.data.Array(selectionArray)); 
+          this.groupController.setSelection(new qx.data.Array(selectionArray)); 
         }
-      );
+      , this);
     }, 
 
      // Create a channel for communication to this client from the server.
@@ -1158,6 +1182,9 @@ qx.Class.define("aiagallery.widget.mystuff.Detail",
                                         this._watchForEdits,
                                         this);
         this.lstCategories.addListener("changeSelection",
+                                       this._watchForEdits,
+                                       this);
+        this.lstGroup.addListener("changeSelection",
                                        this._watchForEdits,
                                        this);
         this.butAddTag.addListener("execute",
