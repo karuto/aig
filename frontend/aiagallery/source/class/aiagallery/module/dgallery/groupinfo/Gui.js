@@ -79,8 +79,16 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
         {
           alignX : "center"
         });
+
       this.groupApps = new qx.ui.container.Composite(groupAppsLayout);
       this.groupApps.set(
+        {
+          decorator : "home-page-ribbon",
+          padding   : 20
+        });
+
+      this.groupAscApps = new qx.ui.container.Composite(groupAppsLayout);
+      this.groupAscApps.set(
         {
           decorator : "home-page-ribbon",
           padding   : 20
@@ -92,12 +100,20 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
       this.groupAppsHeader = new qx.ui.basic.Label();
       this.groupAppsHeader.set(
         {
-          font  : font, 
+          font      : font, 
           decorator : "home-page-header"
         });
       this.groupApps.add(this.groupAppsHeader);
+
+      this.groupAscAppsHeader = new qx.ui.basic.Label();
+      this.groupAscAppsHeader.set(
+        {
+          font      : font, 
+          decorator : "home-page-header"
+        });
+      this.groupAscApps.add(this.groupAscAppsHeader);
       
-      // slide bar of Newest Apps
+      // slide bar of Apps made by members of this group
       scroller = new qx.ui.container.Scroll();
       this.groupApps.add(scroller);
       
@@ -109,6 +125,19 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
             height : 210
           });
       scroller.add(this.groupAppsContainer, {flex : 1});
+
+      // slide bar of apps associated with this group
+      scroller = new qx.ui.container.Scroll();
+      this.groupAscApps.add(scroller);
+      
+      // Scroll container can hold only a single child. Create that child.
+      this.groupAscAppsContainer =
+        new qx.ui.container.Composite(new qx.ui.layout.HBox(0));
+      this.groupAscAppsContainer.set(
+          {
+            height : 210
+          });
+      scroller.add(this.groupAscAppsContainer, {flex : 1});
      
       // we will add this later     
 
@@ -466,6 +495,49 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
 
         default:
           break;
+        }
+
+        // Update layout with apps associated with this group
+        if (group.ascApps.length > 0)
+        {
+           // Set header
+           this.groupAscAppsHeader.
+               setValue(this.tr("This group has ") + group.ascApps.length
+                       + " associated apps"); 
+
+           // On reloads ensure container is clean
+           this.groupAscAppsContainer.removeAll(); 
+
+           for(var i = 0; i < group.ascApps.length; i++)
+           {
+             // If this isn't the first one
+             if (i > 0)
+             {
+               // Then add a spacer between the previous one and this one
+               this.groupAscAppsContainer.add(new qx.ui.core.Spacer(10));
+             }
+
+             // Add the thumbnail for this app
+             var appLiked = group.ascAps[i];
+             var appThumbLiked = 
+               new aiagallery.widget.SearchResult("homeRibbon", appLiked);
+             this.groupAscAppsContainer.add(appThumbLiked);
+
+             // Associate the app data with the UI widget so it can be passed
+             // in the click event callback
+             appThumbLiked.setUserData("App Data", appLiked);
+         
+             // Fire an event specific to this application, no friendly name.
+             appThumbLiked.addListener(
+               "click", 
+               function(e)
+               {
+                 fsm.fireImmediateEvent(
+                   "authoredAppClick", 
+                   this, 
+                   e.getCurrentTarget().getUserData("App Data"));
+               });             
+           }  
         }
 
         // Update layout with apps made by members of this group

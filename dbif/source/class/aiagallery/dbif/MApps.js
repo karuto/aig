@@ -873,7 +873,7 @@ qx.Mixin.define("aiagallery.dbif.MApps",
                 
 
                 // Clean up possible orphaned appAsc Objects
-                this.cleanOrphanedAppAscObjects(attributes.groupAsc, uid, error); 
+                this.__cleanOrphanedAppAscObjects(attributes.groupAsc, uid, error); 
                 
                 break;
 

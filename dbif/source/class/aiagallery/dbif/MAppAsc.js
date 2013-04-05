@@ -14,10 +14,6 @@ qx.Mixin.define("aiagallery.dbif.MAppAsc",
     this.registerService("aiagallery.features.associateAppWithGroup",
                          this.associateAppWithGroup,
                          [ "appId", "groupName", "error" ]);
-
-    this.registerService("aiagallery.features.cleanOrphanedAppAscObjects",
-                         this.cleanOrphanedAppAscObjects,
-                         [ "currentAscList", "uid", "error" ]);
   },
 
   members :
@@ -140,7 +136,7 @@ qx.Mixin.define("aiagallery.dbif.MAppAsc",
      * @param error {Error}
      *   The error object
      */
-    cleanOrphanedAppAscObjects : function(currentAscList, uid, error)
+    __cleanOrphanedAppAscObjects : function(currentAscList, uid, error)
     {
       var       criteria;
       var       resultList;

@@ -439,7 +439,6 @@ qx.Mixin.define("aiagallery.dbif.MDbifCommon",
       // MAppAsc
       //
       case "associateAppWithGroup":
-      case "cleanOrphanedAppAscObjects":
         return ! bAnonymous; // Allowed if logged in
 
       default:

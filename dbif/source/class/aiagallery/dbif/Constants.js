@@ -253,8 +253,7 @@ qx.Class.define("aiagallery.dbif.Constants",
       //
       // MAppAsc  
       //
-      "associateAppWithGroup"      : "Associate an app with a group",
-      "cleanOrphanedAppAscObjects" : "Clean up orphaned AppAsc objects"
+      "associateAppWithGroup"      : "Associate an app with a group"
 
     },
 
