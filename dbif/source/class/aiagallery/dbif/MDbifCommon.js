@@ -435,6 +435,13 @@ qx.Mixin.define("aiagallery.dbif.MDbifCommon",
       case "browseSearch": 
         return true; // Allowed for all users 
 
+      //
+      // MAppAsc
+      //
+      case "associateAppWithGroup":
+      case "cleanOrphanedAppAscObjects":
+        return ! bAnonymous; // Allowed if logged in
+
       default:
         // Do not allow access to unrecognized method names
         return false;

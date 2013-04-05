@@ -237,19 +237,25 @@ qx.Class.define("aiagallery.dbif.Constants",
       // 
       // MGroup
       //
-      addOrEditGroup   : "Create/Edit a group a user owns",
-      getGroup         : "Get information about a group",
-      getUserGroups    : "Get the groups a user owns",
-      joinGroup        : "Request to join a group", 
-      approveUsers     : "Approve a user for access to a group",
-      approveAllUsers  : "Approve all waiting users for group access",
-      removeGroupUsers : "Remove a user from group access",
-      deleteGroup      : "Delete a group a user owns", 
-      mgmtDeleteGroup  : "Delete any group (admin only)",
-      groupSearch      : "Look for a group",
-      browseSearch     : "Return groups of a certain type/subtype",
-      requestUsers     : "Request users to join a group"
-     
+      "addOrEditGroup"   : "Create/Edit a group a user owns",
+      "getGroup"         : "Get information about a group",
+      "getUserGroups"    : "Get the groups a user owns",
+      "joinGroup"        : "Request to join a group", 
+      "approveUsers"     : "Approve a user for access to a group",
+      "approveAllUsers"  : "Approve all waiting users for group access",
+      "removeGroupUsers" : "Remove a user from group access",
+      "deleteGroup"      : "Delete a group a user owns", 
+      "mgmtDeleteGroup"  : "Delete any group (admin only)",
+      "groupSearch"      : "Look for a group",
+      "browseSearch"     : "Return groups of a certain type/subtype",
+      "requestUsers"     : "Request users to join a group",
+
+      //
+      // MAppAsc  
+      //
+      "associateAppWithGroup"      : "Associate an app with a group",
+      "cleanOrphanedAppAscObjects" : "Clean up orphaned AppAsc objects"
+
     },
 
     // Group types

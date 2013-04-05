@@ -408,7 +408,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
         uid         : "uid",
         image1      : "image1",
         title       : "title",
-        displayName : "displayName"
+        owner       : "owner"
       }; 
 
       criteria = 
@@ -478,55 +478,66 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       }
 
       // Get the apps associated with this group 
-      if (true)
+      // Prep map array
+      groupMap["ascApps"] = []; 
+
+      criteria = 
+        {
+          type  : "element",
+          field : "groupName",
+          value : groupName
+        };
+
+      resultList = liberated.dbif.Entity.query("aiagallery.dbif.ObjAppAsc",
+                                               criteria,
+                                               null);
+
+      // Get asc. appIds
+      resultList.forEach(
+        function(appAsc)
+        {
+          var    app;
+          var    displayName;
+
+          // Search for and push app to map
+          app  = new aiagallery.dbif.ObjAppData(appAsc.app);
+          groupMap["ascApps"].push(app);
+          
+        }
+      );
+
+      // For each app in the ascApps array
+      // strip out unneeded info and replace owner id with username
+      //groupMap["ascApps"].forEach(
+        //function(app)
+        //{
+      for (var i = 0; i < groupMap["ascApps"].length; i++)
       {
-        // Prep map array
-        groupMap["ascApps"] = []; 
+          var    displayName;
+          var    nameSearchResults;
 
-        // Get asc. appIds
-        group.ascApps.forEach(
-          function(appId)
-          {
-            var    app;
-            var    displayName;
+          groupMap["ascApps"][i] = groupMap["ascApps"][i].getData(); 
 
-            // Search for and push app to map
-            app  = new aiagallery.dbif.ObjAppData(appId);
-            groupMap["ascApps"].push(app);
-            
-          }
-        );
-
-        // For each app in the ascApps array
-        // strip out unneeded info and replace owner id with username
-        groupMap["ascApps"].forEach(
-          function(app)
-          {
-            var    displayName;
-            var    nameSearchResults;
-
-            criteria = 
-              {
-                type  : "element",
-                field : "id",
-                value : app.owner
-              }; 
+          criteria = 
+            {
+              type  : "element",
+              field : "id",
+              value : groupMap["ascApps"][i].owner
+            }; 
          
-            nameSearchResults = 
-               liberated.dbif.Entity.query("aiagallery.dbif.ObjVisitors", 
-                                           criteria);
+          nameSearchResults = 
+             liberated.dbif.Entity.query("aiagallery.dbif.ObjVisitors", 
+                                         criteria);
 
-            displayName = resultList[0].displayName; 
+          displayName = nameSearchResults[0].displayName; 
 
-            app.displayName = displayName || "<>";    
+          groupMap["ascApps"][i].owner = displayName || "<>";   
 
-            // Trim unneeded app info
-            aiagallery.dbif.MApps._requestedFields(app, requestedFields);
+          // Trim unneeded app info
+          aiagallery.dbif.MApps._requestedFields(groupMap["ascApps"][i], requestedFields);
 
-          }
-        );
-
-      }
+        }
+      //);
 
       return groupMap;
     },
