@@ -408,7 +408,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
         uid         : "uid",
         image1      : "image1",
         title       : "title",
-        owner       : "owner"
+        displayName : "displayName"
       }; 
 
       criteria = 
@@ -506,38 +506,32 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
         }
       );
 
-      // For each app in the ascApps array
-      // strip out unneeded info and replace owner id with username
-      //groupMap["ascApps"].forEach(
-        //function(app)
-        //{
       for (var i = 0; i < groupMap["ascApps"].length; i++)
       {
-          var    displayName;
-          var    nameSearchResults;
+        var    displayName;
+        var    nameSearchResults;
 
-          groupMap["ascApps"][i] = groupMap["ascApps"][i].getData(); 
+        groupMap["ascApps"][i] = groupMap["ascApps"][i].getData(); 
 
-          criteria = 
-            {
-              type  : "element",
-              field : "id",
-              value : groupMap["ascApps"][i].owner
-            }; 
+        criteria = 
+          {
+            type  : "element", 
+            field : "id",
+            value : groupMap["ascApps"][i].owner
+          }; 
          
-          nameSearchResults = 
-             liberated.dbif.Entity.query("aiagallery.dbif.ObjVisitors", 
-                                         criteria);
+        nameSearchResults = 
+           liberated.dbif.Entity.query("aiagallery.dbif.ObjVisitors", 
+                                       criteria);
 
-          displayName = nameSearchResults[0].displayName; 
+        displayName = nameSearchResults[0].displayName; 
 
-          groupMap["ascApps"][i].owner = displayName || "<>";   
+        groupMap["ascApps"][i].displayName = displayName || "<>";   
 
-          // Trim unneeded app info
-          aiagallery.dbif.MApps._requestedFields(groupMap["ascApps"][i], requestedFields);
+        // Trim unneeded app info
+        aiagallery.dbif.MApps._requestedFields(groupMap["ascApps"][i], requestedFields);
 
-        }
-      //);
+      }
 
       return groupMap;
     },

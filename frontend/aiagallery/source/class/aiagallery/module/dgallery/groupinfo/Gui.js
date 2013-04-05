@@ -87,6 +87,12 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
           padding   : 20
         });
 
+      groupAppsLayout = new qx.ui.layout.VBox();
+      groupAppsLayout.set(
+        {
+          alignX : "center"
+        });
+
       this.groupAscApps = new qx.ui.container.Composite(groupAppsLayout);
       this.groupAscApps.set(
         {
@@ -518,7 +524,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
              }
 
              // Add the thumbnail for this app
-             var appLiked = group.ascAps[i];
+             var appLiked = group.ascApps[i];
              var appThumbLiked = 
                new aiagallery.widget.SearchResult("homeRibbon", appLiked);
              this.groupAscAppsContainer.add(appThumbLiked);
@@ -590,6 +596,9 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
         {
           this.groupLayout.add(this.joinGroupBtn);
         }
+
+        // Add associated apps scroller
+        this.canvas.add(this.groupAscApps, {flex : 1});
 
         // Add group app scroller
         this.canvas.add(this.groupApps, {flex : 1});
