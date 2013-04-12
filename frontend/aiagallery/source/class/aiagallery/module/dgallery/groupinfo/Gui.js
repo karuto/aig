@@ -68,6 +68,26 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
         }
       );
 
+      // Button to pop asc apps window
+      this.ascAppPopupBtn = new qx.ui.form.Button(this.tr("Associate Apps")); 
+
+      // Open window on execute
+      this.ascAppPopupBtn.addListener(
+        "execute", 
+        function(e)
+        {
+          // Create popup
+          this._ascAppPopup(this.ownedAppList, this.ascAppList); 
+
+        }, this);
+
+      this.ascAppPopupBtn.set(
+        {
+          maxWidth : 160,
+          maxHeight : 60
+        }
+      );
+
       // We'll be receiving events on the object so save its friendly name
       fsm.addObject("joinBtn", 
          this.joinGroupBtn, "main.fsmUtils.disable_during_rpc");    
@@ -257,6 +277,10 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
       case "appear":
  
         group = response.data.result;
+
+        // Save the user's apps and asc app
+        this.ownedAppList = group.userApps;
+        this.ascAppList = group.userAscApps;
 
         // If we are reloading the same page make sure the layout is clean
         this.groupLayout.removeAll(); 
@@ -484,6 +508,9 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
           // Disable button
           this.joinGroupBtn.setEnabled(false);
 
+          // Enable asc. app popup
+          this.ascAppPopupBtn.setEnabled(false); 
+
           break;
         case aiagallery.dbif.Constants.GroupStatus.Member:
           this.joinGroupBtn.setLabel(this.tr("Already Joined")); 
@@ -491,12 +518,19 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
           // Disable button
           this.joinGroupBtn.setEnabled(false);
 
+          // Enable asc. app popup
+          this.ascAppPopupBtn.setEnabled(true); 
+
           break;
         case aiagallery.dbif.Constants.GroupStatus.Owner:
           this.joinGroupBtn.setLabel(this.tr("Group Owner")); 
 
-          // Disable button
+          // Disable join button
           this.joinGroupBtn.setEnabled(false);
+
+          // Enable asc. app popup
+          this.ascAppPopupBtn.setEnabled(true); 
+
           break;
 
         default:
@@ -595,6 +629,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
             || bShowBtn)
         {
           this.groupLayout.add(this.joinGroupBtn);
+          this.groupLayout.add(this.ascAppPopupBtn);
         }
 
         // Add associated apps scroller
@@ -695,6 +730,107 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
         this.flagItLabel.removeListenerById(this.__flagItListener);
         this.__flagItListener = null;
       }
+    },
+
+    /**
+     * Create a popup dialog to allow a user to associate 
+     * an app with this group they are a memeber of.
+     * 
+     * @param ownedAppList {Array}
+     *   An array containg all the apps a user owns
+     * 
+     * @param ascAppList {Array}
+     *   An array of all the apps this particular user has
+     *   associated with this group 
+     */
+    _ascAppPopup : function(ownedAppList, ascAppList)
+    {
+
+      var     instrLabel; 
+      var     win;
+      var     appList; 
+      var     dataArray;
+      var     selectionList = [];
+      var     appChildren; 
+      var     i;
+
+      win = new qx.ui.window.Window(this.tr("Associate Apps with Group"));
+
+      // Set properties
+      win.set(
+        {
+          maxWidth : 400,
+          layout   : new qx.ui.layout.VBox(30)
+        }
+      );
+
+      // Add instructions
+      instrLabel = new qx.ui.basic.Label(this.tr("Associate an app with this group."));
+
+      win.add(instrLabel);
+
+      // Create a list to show the apps a user owns 
+      appList = new qx.ui.form.List(); 
+      appList.set(
+        {
+          width         : 300,
+          height        : 500, 
+          selectionMode : "multi"
+        }
+      );
+
+      // Add each owned app to the list 
+      ownedAppList.forEach(
+        function(app)
+        {
+          var listItem; 
+
+          listItem = new qx.ui.form.ListItem(app.title);
+          listItem.setUserData("appId", app.uid); 
+
+          appList.add(listItem);
+        }
+      );
+
+      // For each app on the list see if the user has already associated it
+      // with this group 
+      appChildren = appList.getChildren();
+         
+      appChildren.forEach(
+        function(listItem)
+        {
+          for(var i = 0; i < ascAppList.length; i++)
+          {
+            if(listItem.getUserData("appId") == ascAppList[i].app)
+            {
+              selectionList.push(listItem);
+
+              // No need to look further
+              break;
+            }
+
+          }
+        }
+      );
+
+      // Set Selection
+      if (selectionList.length != 0)
+      {
+        appList.setSelection(selectionList); 
+      }
+
+      //dataArray = new qx.data.Array(ownedAppList);
+      // Controller for list
+      //this.ascAppController = new qx.data.controller.List(dataArray, appList);
+
+      win.add(appList); 
+
+      // Add ok button
+
+      // Add cancel button
+
+      win.open();
+
     }
   }
 });

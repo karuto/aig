@@ -404,6 +404,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       var      groupMap;
       var      flagsList; 
       var      requestedFields; 
+      var      twoFields; 
 
       requestedFields = {
         uid         : "uid",
@@ -530,7 +531,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
 
         displayName = nameSearchResults[0].displayName; 
 
-        groupMap["ascApps"][i].displayName = displayName || "<>";   
+        groupMap["ascApps"][i].displayName = displayName || "<>";  
 
         // Trim unneeded app info
         aiagallery.dbif.MApps._requestedFields(groupMap["ascApps"][i], requestedFields);
@@ -555,7 +556,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       groupMap["userApps"]
          = liberated.dbif.Entity.query("aiagallery.dbif.ObjAppData",
                                        criteria,
-                                        null);
+                                       null);
 
       // Only do work if the user owns some apps
       // Or if there are any apps associated with this group
@@ -570,7 +571,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
 
             for(i = 0; i < groupMap["ascApps"].length; i++)
             {
-              if(groupMap["ascApps"][i].displayName == this.getWhoAmI().displayName)
+              if(groupMap["ascApps"][i].uid == app.uid)
               {
                 groupMap["userAscApps"].push(ascAppsList[i]);
 
@@ -580,6 +581,19 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
             }
           }
         , this); 
+
+        // Clean all the apps we are returning of uneeded info
+        twoFields = {
+          uid         : "uid",
+          title       : "title"
+        }; 
+
+        groupMap["userApps"].forEach(
+          function(app)
+          {
+            aiagallery.dbif.MApps._requestedFields(app, twoFields);
+          }
+        );
           
       }
 
