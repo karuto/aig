@@ -80,6 +80,9 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Fsm",
           "flagGroup" : 
              "Transition_Idle_to_AwaitRpcResult_via_flagGroup",  
 
+          // User is associating apps they own to this group they are part of
+          "ascApp" : "Transition_Idle_to_AwaitRpcResult_via_ascApp",  
+
           // When we get an appear event, retrieve the category tags list. We
           // only want to do it the first time, though, so we use a predicate
           // to determine if it's necessary.
@@ -184,6 +187,48 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Fsm",
           // When we get the result, we'll need to know what type of request
           // we made.
           request.setUserData("requestType", "joinGroup");
+
+        }
+      });
+
+      state.addTransition(trans);
+
+      /*
+       * Transition: Idle to Idle
+       *
+       * Cause: User is associating an app they own, via 
+       *        the popup dialog, with this group
+       *
+       * Action:
+       *  Associate the app with this group
+       */
+
+      trans = new qx.util.fsm.Transition(
+        "Transition_Idle_to_AwaitRpcResult_via_ascApp",
+      {
+        "nextState" : "State_AwaitRpcResult",
+
+        "context" : this,
+
+        "ontransition" : function(fsm, event)
+        {
+          var     request; 
+          var     ascApps;
+ 
+          ascApps = event.getData();          
+ 
+          request =
+            this.callRpc(fsm,
+                         "aiagallery.features",
+                         "associateAppsWithGroup",
+                         [
+                           ascApps,
+                           module.getUserData("groupName")
+                         ]);
+
+          // When we get the result, we'll need to know what type of request
+          // we made.
+          request.setUserData("requestType", "ascApps");
 
         }
       });

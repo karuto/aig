@@ -1285,7 +1285,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       if(group.users.indexOf(whoami.id) == -1)
       {
         warnString = "User associating app with a group"
-		     + " they are not part of. ";
+                     + " they are not part of. ";
 
         error.setCode(2);
         error.setMessage(warnString);

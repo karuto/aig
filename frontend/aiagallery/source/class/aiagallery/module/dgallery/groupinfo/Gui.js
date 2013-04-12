@@ -77,7 +77,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
         function(e)
         {
           // Create popup
-          this._ascAppPopup(this.ownedAppList, this.ascAppList); 
+          this._ascAppPopup(this.ownedAppList, this.ascAppList, this.fsm); 
 
         }, this);
 
@@ -713,6 +713,10 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
 
         break; 
 
+      case "ascApps":
+        // Valid, but nothing to do here
+        break;
+
       default:
         throw new Error("Unexpected request type: " + requestType);
       }
@@ -742,8 +746,12 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
      * @param ascAppList {Array}
      *   An array of all the apps this particular user has
      *   associated with this group 
+     * 
+     * @param fsm {Fsm Context}
+     *   Fsm context of the group page so we can fire an event off
+     * 
      */
-    _ascAppPopup : function(ownedAppList, ascAppList)
+    _ascAppPopup : function(ownedAppList, ascAppList, fsm)
     {
 
       var     instrLabel; 
@@ -752,6 +760,11 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
       var     dataArray;
       var     selectionList = [];
       var     appChildren; 
+
+      var     command; 
+      var     okBtn;
+      var     cancelBtn;
+      var     hBox; 
       var     i;
 
       win = new qx.ui.window.Window(this.tr("Associate Apps with Group"));
@@ -774,7 +787,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
       appList.set(
         {
           width         : 300,
-          height        : 500, 
+          maxHeight        : 500, 
           selectionMode : "multi"
         }
       );
@@ -826,9 +839,84 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
       win.add(appList); 
 
       // Add ok button
+      // Create a horizontal box to hold the buttons
+      hBox = new qx.ui.container.Composite(new qx.ui.layout.HBox(10));
+
+      // Add the Ok button
+      okBtn = new qx.ui.form.Button(this.tr("Ok"));
+      okBtn.set(
+      {
+        width  : 100,
+        height : 30
+      });
+
+      hBox.add(okBtn);
+
+      // Allow 'Enter' to confirm entry
+      command = new qx.ui.core.Command("Enter");
+      okBtn.setCommand(command);
+
+      // add listener to ok
+      okBtn.addListener(
+        "execute", 
+        function(e)
+        {
+          var   cleanList = [];
+          var   children;
+         
+          children = appList.getSelection();
+
+          children.forEach(
+            function(listItem)
+            {
+              cleanList.push(listItem.getUserData("appId"));
+            }
+          );
+
+          // Fire event to to FSM
+          fsm.fireImmediateEvent("ascApp", fsm, cleanList);  
+        }
+      );      
 
       // Add cancel button
+      // Add the Cancel button
+      cancelBtn = new qx.ui.form.Button(this.tr("Cancel"));
+      cancelBtn.set(
+      {
+        width  : 100,
+        height : 30
+      });
 
+      hBox.add(cancelBtn);
+
+      // Allow 'Escape' to cancel
+      command = new qx.ui.core.Command("Esc");
+      cancelBtn.setCommand(command);
+
+      // Close the window if the cancel button is pressed
+      cancelBtn.addListener(
+      "execute",
+      function(e)
+      {
+        win.close();
+
+        // Reset to original selection
+        if (selectionList.length != 0)
+        {
+          appList.setSelection(selectionList); 
+        } 
+        else
+        {
+          // Originally was an empty list 
+          appList.setSelection([]);
+        }
+      },
+      this);
+
+      // Add button layout
+      win.add(hBox); 
+
+      // Open up popup
       win.open();
 
     }

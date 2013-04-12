@@ -14,6 +14,10 @@ qx.Mixin.define("aiagallery.dbif.MAppAsc",
     this.registerService("aiagallery.features.associateAppWithGroup",
                          this.associateAppWithGroup,
                          [ "appId", "groupName", "error" ]);
+
+    this.registerService("aiagallery.features.associateAppsWithGroup",
+                         this.associateAppsWithGroup,
+                         [ "appIdList", "groupName", "error" ]);
   },
 
   members :
@@ -70,7 +74,7 @@ qx.Mixin.define("aiagallery.dbif.MAppAsc",
       resultList = liberated.dbif.Entity.query("aiagallery.dbif.ObjGroup", 
                                                criteria);
 
-      if(resultList == 0)
+      if(resultList.length == 0)
       {
         // User is not part of this group
         var warnString = "You are not a member of this group";
@@ -108,7 +112,6 @@ qx.Mixin.define("aiagallery.dbif.MAppAsc",
       // Must create new association if the list is empty/invalid
       if (resultList.length === 0)
       {
-      
         // create a new AppAsc object for this association
         appAsc = new aiagallery.dbif.ObjAppAsc();
         appAscData = appAsc.getData(); 
@@ -121,6 +124,34 @@ qx.Mixin.define("aiagallery.dbif.MAppAsc",
       }
 
       return true;
+    },
+
+    /**
+     * Helper function that handles a list of appIds to
+     * associate with a group
+     * 
+     * @param appIdList {Array}
+     *   List of appIds
+     * 
+     * @param groupName {String}
+     *   Groupname to associate list with
+     * 
+     * @param error {Error}
+     *   The error object
+     */
+    associateAppsWithGroup : function(appIdList, groupName, error)
+    {
+      appIdList.forEach(
+        function(appId)
+        {
+          this.associateAppWithGroup(appId, groupName, error);
+        }
+      ,this);
+
+      // Clean up
+      this.__cleanOrphanedAppAscObjectsByGroup(appIdList, groupName, error);
+ 
+      return true; 
     },
 
     /**
@@ -174,6 +205,66 @@ qx.Mixin.define("aiagallery.dbif.MAppAsc",
           // This appAsc object references a groupName which
           // the app is no longer part of, delete this object
           if (groupNames.indexOf(appAsc.groupName) == -1)
+          {
+            // Get this AppAsc object
+            obj = new aiagallery.dbif.ObjAppAsc(appAsc.uid);
+              
+            // Assuming it exists (it had better!)...
+            if (! obj.getBrandNew())
+            {
+              // ... then remove this object
+              obj.removeSelf();
+            }
+
+          }
+        }
+      );
+
+    },
+
+    /**
+     * Clean up any orphaned AppAsc objects based on the list
+     * of current associations.
+     * 
+     * @param currentAscList {Array}
+     *   Array of group to app associations this app has
+     * 
+     * @param groupName {String}
+     *   Groupname of the associations to check  
+     * 
+     * @param error {Error}
+     *   The error object
+     */
+    __cleanOrphanedAppAscObjectsByGroup
+      : function(currentAscList, groupName, error)
+    {
+      var       criteria;
+      var       resultList;
+
+      // User is a member of this group
+      // See if this association already exists
+      criteria = 
+        {
+          type  : "element",
+          field : "groupName",
+          value : groupName
+        }; 
+
+      resultList = liberated.dbif.Entity.query("aiagallery.dbif.ObjAppAsc",
+                                               criteria,
+                                               null);
+
+      // For each appAsc object we find releated to this group
+      // check to make sure it is current with the list 
+      // of current app associations.
+      resultList.forEach(
+        function(appAsc)
+        {
+          var obj; 
+
+          // This appAsc object references a groupName which
+          // the app is no longer part of, delete this object
+          if (currentAscList.indexOf(appAsc.app) == -1)
           {
             // Get this AppAsc object
             obj = new aiagallery.dbif.ObjAppAsc(appAsc.uid);
