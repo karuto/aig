@@ -115,7 +115,10 @@ qx.Class.define("aiagallery.module.dgallery.groups.Fsm",
           "changeSelection":
           {
             "groupNameList" 
-              : "Transition_Idle_to_AwaitRpcResult_via_getGroup"     
+              : "Transition_Idle_to_AwaitRpcResult_via_getGroup",
+
+            "userJoinRadioButtonGroup"
+              : "Transition_Idle_to_AwaitRpcResult_via_save"
           }
         }
       });

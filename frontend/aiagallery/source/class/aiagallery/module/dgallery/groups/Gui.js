@@ -651,6 +651,9 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       // disable users from joining by themselves
       userJoinRadioButtonGroup = new qx.ui.form.RadioButtonGroup();
 
+      userJoinRadioButtonGroup.addListener("changeSelection", 
+          this.fsm.eventListener, this.fsm);
+
       translatedTxt = this.tr("Anyone may request to join");
       radioButton = new qx.ui.form.RadioButton(translatedTxt);
       radioButton
@@ -948,6 +951,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       var             userRequestList;
       var             userWaitList;
       var             warnString; 
+      var             joinType; 
 
       // Objects from the gui we will add/subtract from
       var             groupNameField = fsm.getObject("groupNameField");
@@ -1276,6 +1280,12 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
         {
           eduTypeRadioButtonGroup.setEnabled(false); 
         }
+
+        // Update the user join type
+        children = userJoinRadioButtonGroup.getChildren();
+        joinType = result.joinType;
+
+        userJoinRadioButtonGroup.setSelection([children[joinType]]);
 
         break;
 
