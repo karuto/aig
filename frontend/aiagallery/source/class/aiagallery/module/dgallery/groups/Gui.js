@@ -1124,17 +1124,6 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
         break; 
       
       // Manage Groups
-      case "getOwnedGroups":
-        // Populate list of groups owned by this user
-
-        // Select the top one
-
-        // Populate userList of that selected group
-
-        // Populate both textfields with info about this group
-
-        break;
-
       case "deleteGroup":
         result = response.data.result;
 

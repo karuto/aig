@@ -60,10 +60,6 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
     this.registerService("aiagallery.features.browseSearch",
                          this.browseSearch,
                          [ "type", "subType" ]);
-
-    this.registerService("aiagallery.features.associateApp",
-                         this.associateApp,
-                         [ "groupName", "appId" ]);
   },
 
   members :
@@ -477,125 +473,123 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
 
 
         groupMap["bFlag"] = flagsList.length != 0; 
-      }
 
-
-
-      // Get the apps associated with this group 
-      // Prep map array
-      groupMap["ascApps"] = []; 
-
-      criteria = 
-        {
-          type  : "element",
-          field : "groupName",
-          value : groupName
-        };
-
-      ascAppsList = liberated.dbif.Entity.query("aiagallery.dbif.ObjAppAsc",
-                                                criteria,
-                                                null);
-
-      // Get asc. appIds
-      ascAppsList.forEach(
-        function(appAsc)
-        {
-          var    app;
-          var    displayName;
-
-          // Search for and push app to map
-          app  = new aiagallery.dbif.ObjAppData(appAsc.app);
-          groupMap["ascApps"].push(app);
-          
-        }
-      );
-
-      // Clean up the app so we can use it on frontend
-      for (var i = 0; i < groupMap["ascApps"].length; i++)
-      {
-        var    displayName;
-        var    nameSearchResults;
-
-        groupMap["ascApps"][i] = groupMap["ascApps"][i].getData(); 
+        // Get the apps associated with this group 
+        // Prep map array
+        groupMap["ascApps"] = []; 
 
         criteria = 
           {
-            type  : "element", 
-            field : "id",
-            value : groupMap["ascApps"][i].owner
-          }; 
-         
-        nameSearchResults = 
-           liberated.dbif.Entity.query("aiagallery.dbif.ObjVisitors", 
-                                       criteria);
+            type  : "element",
+            field : "groupName",
+            value : groupName
+          };
 
-        displayName = nameSearchResults[0].displayName; 
+        ascAppsList = liberated.dbif.Entity.query("aiagallery.dbif.ObjAppAsc",
+                                                  criteria,
+                                                  null);
 
-        groupMap["ascApps"][i].displayName = displayName || "<>";  
-
-        // Trim unneeded app info
-        aiagallery.dbif.MApps._requestedFields(groupMap["ascApps"][i], requestedFields);
-
-      }
-
-      // Get the apps that are not associated with this group and
-      // that the user pulling this group info owns
-      // If the user is not logged in send up an empty arrary
-      groupMap["userApps"] = [];
-      groupMap["userAscApps"] = [];
-
-      // Get all the apps a user owns 
-      criteria = 
-        {
-          type  : "element",
-          field : "owner",
-          value : this.getWhoAmI().id
-        };
-
-
-      groupMap["userApps"]
-         = liberated.dbif.Entity.query("aiagallery.dbif.ObjAppData",
-                                       criteria,
-                                       null);
-
-      // Only do work if the user owns some apps
-      // Or if there are any apps associated with this group
-      if (groupMap["userApps"].length != 0 
-          && groupMap["ascApps"].length != 0)
-      {
-        // For every app on this list, see if this app is in 
-        // the ascAppsList, if it is add it to the userAscAppsList
-        groupMap["userApps"].forEach(
-          function(app)
+        // Get asc. appIds
+        ascAppsList.forEach(
+          function(appAsc)
           {
+            var    app;
+            var    displayName;
 
-            for(i = 0; i < groupMap["ascApps"].length; i++)
-            {
-              if(groupMap["ascApps"][i].uid == app.uid)
-              {
-                groupMap["userAscApps"].push(ascAppsList[i]);
-
-                // Found app, all done
-                break; 
-              }
-            }
-          }
-        , this); 
-
-        // Clean all the apps we are returning of uneeded info
-        twoFields = {
-          uid         : "uid",
-          title       : "title"
-        }; 
-
-        groupMap["userApps"].forEach(
-          function(app)
-          {
-            aiagallery.dbif.MApps._requestedFields(app, twoFields);
+            // Search for and push app to map
+            app  = new aiagallery.dbif.ObjAppData(appAsc.app);
+            groupMap["ascApps"].push(app);
+          
           }
         );
-          
+
+        // Clean up the app so we can use it on frontend
+        for (var i = 0; i < groupMap["ascApps"].length; i++)
+        {
+          var    displayName;
+          var    nameSearchResults;
+  
+          groupMap["ascApps"][i] = groupMap["ascApps"][i].getData(); 
+
+          criteria = 
+            {
+              type  : "element", 
+              field : "id",
+              value : groupMap["ascApps"][i].owner
+            }; 
+         
+          nameSearchResults = 
+             liberated.dbif.Entity.query("aiagallery.dbif.ObjVisitors", 
+                                         criteria);
+
+          displayName = nameSearchResults[0].displayName; 
+
+          groupMap["ascApps"][i].displayName = displayName || "<>";  
+
+          // Trim unneeded app info
+          aiagallery.dbif.MApps._requestedFields(groupMap["ascApps"][i], requestedFields);
+
+        }
+
+        // Get the apps that are not associated with this group and
+        // that the user pulling this group info owns
+        // If the user is not logged in send up an empty arrary
+        groupMap["userApps"] = [];
+        groupMap["userAscApps"] = [];
+
+        // Get all the apps a user owns 
+        criteria = 
+          {
+            type  : "element",
+            field : "owner",
+            value : this.getWhoAmI().id
+          };
+
+
+        groupMap["userApps"]
+           = liberated.dbif.Entity.query("aiagallery.dbif.ObjAppData",
+                                         criteria,
+                                         null);
+
+        // Only do work if the user owns some apps
+        // Or if there are any apps associated with this group
+        if (groupMap["userApps"].length != 0 
+            && groupMap["ascApps"].length != 0)
+        {
+          // For every app on this list, see if this app is in 
+          // the ascAppsList, if it is add it to the userAscAppsList
+          groupMap["userApps"].forEach(
+            function(app)
+            {
+              for(i = 0; i < groupMap["ascApps"].length; i++)
+              {
+                if(groupMap["ascApps"][i].uid == app.uid)
+                {
+                  groupMap["userAscApps"].push(ascAppsList[i]);
+
+                  // Found app, all done
+                  break; 
+                }
+              }
+            }
+          , this); 
+
+          // Clean all the apps we are returning of uneeded info
+          twoFields = {
+            uid         : "uid",
+            title       : "title"
+          }; 
+
+          groupMap["userApps"].forEach(
+            function(app)
+            {
+            aiagallery.dbif.MApps._requestedFields(app, twoFields);
+            }
+          );
+           
+        }
       }
+
 
       return groupMap;
     },
@@ -1230,72 +1224,6 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
 
       return returnArray;
 
-    },
-
-   /**
-    *  Associate an app a user owns with a group a user is part of 
-    * 
-    * @param groupName {String}
-    *   The name of the group
-    * 
-    * @param groupOwnerId {String}
-    *   The group owner id
-    * 
-    * @param appId {String}
-    *   The ip of the app to be associated
-    * 
-    * @param error {Error}
-    *   The error object
-    */
-    associateApp : function(groupName, groupOwnerId,  appId, error)
-    {
-      var     whoami;
-      var     app;
-      var     appData; 
-      var     warnString; 
-      var     group;
-      var     groupData; 
-
-      // Check that the user owns this app
-      // Get logged in user
-      whoami = this.getWhoAmI();
-
-      // Get app object
-      app = new aiagallery.dbif.ObjAppData(appId);
-
-      // Retrieve the data
-      appData = app.getData();
-
-      if(whoami.id != appData.owner)
-      {
-        warnString = "User associating app that they do not own.";
-
-        error.setCode(1);
-        error.setMessage(warnString);
-        return error;
-      }
-
-      // Check that the user is part of the group they
-      // Get group obj
-      group = new aiagallery.dbif.ObjGroup(groupName, whoami.id);
-      groupData = group.getData(); 
-      
-      // Are they trying to associate the app with a group 
-      // they are not part of
-      if(group.users.indexOf(whoami.id) == -1)
-      {
-        warnString = "User associating app with a group"
-                     + " they are not part of. ";
-
-        error.setCode(2);
-        error.setMessage(warnString);
-        return error;
-      } 
-
-      // Add appid to associate apps array
-      groupData.ascApps.push(appId); 
-
-      return true; 
     },
 
     /**
