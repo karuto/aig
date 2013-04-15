@@ -439,6 +439,7 @@ qx.Mixin.define("aiagallery.dbif.MDbifCommon",
       // MAppAsc
       //
       case "associateAppWithGroup":
+      case "associateAppsWithGroup":
         return ! bAnonymous; // Allowed if logged in
 
       default:

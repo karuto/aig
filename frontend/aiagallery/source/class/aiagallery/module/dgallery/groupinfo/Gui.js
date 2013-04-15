@@ -864,6 +864,9 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
           var   cleanList = [];
           var   children;
          
+          // Close dialog
+          win.close();
+
           children = appList.getSelection();
 
           children.forEach(
@@ -875,6 +878,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
 
           // Fire event to to FSM
           fsm.fireImmediateEvent("ascApp", fsm, cleanList);  
+
         }
       );      
 
