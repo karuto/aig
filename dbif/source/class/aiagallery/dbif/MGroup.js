@@ -60,6 +60,10 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
     this.registerService("aiagallery.features.browseSearch",
                          this.browseSearch,
                          [ "type", "subType" ]);
+
+    this.registerService("aiagallery.features.getGroupRibbon",
+                         this.getGroupRibbon,
+                         []);
   },
 
   members :
@@ -157,6 +161,9 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
         {
           groupData.subType = null; 
         }
+
+        // Update the update time
+        groupData.lastUpdated = aiagallery.dbif.MDbifCommon.currentTimestamp(); 
                 
       }
       else 
@@ -726,6 +733,10 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
 
            // Set join status 
            joinStatus = aiagallery.dbif.Constants.GroupStatus.Member;
+
+           // Group has been updated
+           groupData.lastUpdated 
+             = aiagallery.dbif.MDbifCommon.currentTimestamp();
  
            break;
          }
@@ -745,7 +756,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
        group.put();
 
        return joinStatus;
-       
+         
     },
 
     /**
@@ -1044,6 +1055,9 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       delete groupData.joiningUsers;
       groupData.joiningUsers = [];
 
+      // Update the update time
+      groupData.lastUpdated = aiagallery.dbif.MDbifCommon.currentTimestamp();
+
       // Push back to db
       group.put();
 
@@ -1224,6 +1238,73 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
 
       return returnArray;
 
+    },
+
+    /**
+     * Get the ribbon data (most active/newest) for
+     *   the group search page
+     * 
+     * @return {Map}
+     *   A map containg arrays of the most active/newest groups
+     */
+    getGroupRibbon : function()
+    {
+      var     groupMap;
+      var     requestedData;
+      var     searchResponseNewest;
+      var     searchResponseMostActive;
+
+      // Prep groupMap
+      groupMap =
+        {
+          newest     : null,
+          mostActive : null
+        };
+
+      //Create map to limit what the query returns
+      requestedData = 
+        [
+          {
+            type : "limit",
+            value : 2
+          },
+          {
+            type  : "sort",
+            field : "creationTime",
+            order : "asc" 
+          }
+        ]; 
+
+      searchResponseNewest = 
+        liberated.dbif.Entity.query("aiagallery.dbif.ObjGroup",
+                                    null,
+                                    requestedData);
+
+      group["newest"] = searchResponseNewest;
+
+      //Create map to limit what the query returns
+      requestedData = 
+        [
+          {
+            type : "limit",
+            value : 2
+          },
+          {
+            type  : "sort",
+            field : "lastUpdated",
+            order : "asc" 
+          }
+        ]; 
+
+      searchResponseMostActive = 
+        liberated.dbif.Entity.query("aiagallery.dbif.ObjGroup",
+                                    null,
+                                    requestedData);
+
+      group["mostActive"] = searchResponseMostActive;
+
+      return groupMap; 
+         
     },
 
     /**

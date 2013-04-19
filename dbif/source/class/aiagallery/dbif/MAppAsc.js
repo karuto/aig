@@ -43,6 +43,9 @@ qx.Mixin.define("aiagallery.dbif.MAppAsc",
       var        appAsc; 
       var        appAscData;
 
+      var        group;
+      var        groupData;
+
       // Check to see user is a memeber of the group they 
       // are trying to associate this app with 
       
@@ -121,6 +124,22 @@ qx.Mixin.define("aiagallery.dbif.MAppAsc",
 
         // Save object
         appAsc.put();
+
+        // FIXME : A bit inefficient when associateAppsWithGroup is called
+        // New app has been associated with a group
+        // need to update the group's lastUpdated field
+        group = new aiagallery.dbif.ObjGroup(groupName);
+        groupData = group.getData(); 
+
+        // Group better exist
+        if (!group.getBrandNew())
+        {
+          groupData.lastUpdated 
+            = aiagallery.dbif.MDbifCommon.currentTimestamp();
+
+          group.put(); 
+        }
+
       }
 
       return true;

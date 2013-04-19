@@ -424,6 +424,7 @@ qx.Mixin.define("aiagallery.dbif.MDbifCommon",
       case "removeGroupUsers":
       case "deleteGroup":
       case "requestUsers": 
+      case "getGroupRibbon":
         return ! bAnonymous; // Allowed if logged in
 
       case "mgmtDeleteGroup": 

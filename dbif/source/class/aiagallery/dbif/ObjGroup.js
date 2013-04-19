@@ -27,7 +27,9 @@ qx.Class.define("aiagallery.dbif.ObjGroup",
           "ascApps"         : [], 
           "type"            : null,
           "subType"         : null,
-          "joinType"        : aiagallery.dbif.Constants.JoinType.Public
+          "joinType"        : aiagallery.dbif.Constants.JoinType.Public,
+          "creationTime"    : aiagallery.dbif.MDbifCommon.currentTimestamp(),
+          "lastUpdated"     : aiagallery.dbif.MDbifCommon.currentTimestamp()
         });
     }
 
@@ -77,7 +79,13 @@ qx.Class.define("aiagallery.dbif.ObjGroup",
         "subType" : "String",
 
         /** How users will be allowed to join, correlates to JoinType enum */
-        "joinType" : "Integer"
+        "joinType" : "Integer",
+
+        /** Date the group was created */
+        "creationTime" : "Date",
+
+        /** Date the group was last updated (new member, new app asc, etc)*/
+        "lastUpdated" : "Date"
       };
 
     var canonicalize = 
