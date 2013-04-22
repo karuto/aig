@@ -316,15 +316,25 @@ qx.Mixin.define("aiagallery.dbif.MAppAsc",
      */
     _deleteAppAscGroup : function(groupName, error)
     {
+      var      resultArray;
+
 
       // Get all the AppAsc objects releated to this group
       // and remove them
-      liberated.dbif.Entity.query("aiagallery.dbif.ObjAppAsc", 
-                                  {
-                                    type  : "element",
-                                    field : "groupName",
-                                    value : groupName
-                                  }).forEach(
+      resultArray 
+        = liberated.dbif.Entity.query("aiagallery.dbif.ObjAppAsc", 
+                                      {
+                                        type  : "element",
+                                        field : "groupName",
+                                        value : groupName
+                                      });
+      if (resultArray.length == 0)
+      {
+        // Nothing to do here
+        return true; 
+      }
+
+      resultArray.forEach(
         function(result)
         {
           var             obj;

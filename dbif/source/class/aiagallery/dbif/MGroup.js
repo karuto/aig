@@ -1280,7 +1280,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
                                     null,
                                     requestedData);
 
-      group["newest"] = searchResponseNewest;
+      groupMap["newest"] = searchResponseNewest;
 
       //Create map to limit what the query returns
       requestedData = 
@@ -1301,7 +1301,7 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
                                     null,
                                     requestedData);
 
-      group["mostActive"] = searchResponseMostActive;
+      groupMap["mostActive"] = searchResponseMostActive;
 
       return groupMap; 
          
@@ -1359,9 +1359,9 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       liberated.dbif.Entity.asTransaction(
         function()
         {
-          this._deleteAppAscGroup(group.name);
+          this._deleteAppAscGroup(groupData.name);
           group.removeSelf();
-        }, this);
+        }, [], this);
 
       // Remove any flags this group may have had
       this.clearGroupFlags(groupData.name, error);

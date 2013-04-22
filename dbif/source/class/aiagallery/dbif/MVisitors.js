@@ -685,7 +685,7 @@ qx.Mixin.define("aiagallery.dbif.MVisitors",
             name))
       {
         // Name is not valid return error
-        error.setCode(2);
+        error.setCode(6);
         error.setMessage("The displayname you specified: \"" + name +
                        "\" is a restricted username."
                        + " Please select a different one."); 
