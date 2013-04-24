@@ -835,8 +835,8 @@ qx.Class.define("aiagallery.main.Gui",
           else if(numModules === 0 && moduleList[menuItem][moduleName].pageId ==
               aiagallery.main.Constant.PageName.GroupInfo)
           {
-            page.setUserData("groupName", 
-              moduleList[menuItem][moduleName].getUserData("groupName")); 
+            page.setUserData("studioName", 
+              moduleList[menuItem][moduleName].getUserData("studioName")); 
           }
 
           // We found a module.  Increment our counter
@@ -1171,10 +1171,10 @@ qx.Class.define("aiagallery.main.Gui",
               aiagallery.main.Constant.PageName.GroupInfo)
       {
         // This is a group info page
-        // add groupname to fragment
+        // add studioname to fragment
         fragment +=
-          "&groupname=" +
-          selectedPage.getUserData("groupName");   
+          "&studioname=" +
+          selectedPage.getUserData("studioName");   
       }
 
       // Change URL to add language independent constant to it
@@ -1253,9 +1253,9 @@ qx.Class.define("aiagallery.main.Gui",
             break;
 
 	  case aiagallery.main.Constant.PageName.GroupInfo:
-            if (! components.groupname)
+            if (! components.studioname)
             {
-              throw new Error("Got request for GroupInfo without name.");
+              throw new Error("Got request for StudioInfo without name.");
             }
 
             break;
@@ -1353,7 +1353,7 @@ qx.Class.define("aiagallery.main.Gui",
 	  case aiagallery.main.Constant.PageName.GroupInfo:
 
             aiagallery.module.dgallery.groupinfo.GroupInfo.addGroupView(
-               components.groupname, components.groupname); 
+               components.studioname, components.studioname); 
 
             break; 
             
@@ -1385,7 +1385,7 @@ qx.Class.define("aiagallery.main.Gui",
 
 	case aiagallery.main.Constant.PageName.GroupInfo:
 
-          tempRadioButton = new qx.ui.form.RadioButton(components.groupname); 
+          tempRadioButton = new qx.ui.form.RadioButton(components.studioname); 
 
           break; 
             

@@ -51,7 +51,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.GroupInfo",
               ]);
 
       // Transmit the group name of this module */
-      group.setUserData("groupName", name);
+      group.setUserData("studioName", name);
 
       // Make this module ephemeral
       label = "-" + label;

@@ -8,7 +8,7 @@
  */
 
 /**
- * The graphical user interface for a group info page.
+ * The graphical user interface for a studio info page.
  */
 qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
 {
@@ -168,7 +168,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
       // we will add this later     
 
       // Flag a user for having inappropriate content
-      this.flagItLabel = new qx.ui.basic.Label(this.tr("Flag this Group"));
+      this.flagItLabel = new qx.ui.basic.Label(this.tr("Flag this Studio"));
       font = qx.theme.manager.Font.getInstance().resolve("bold").clone();
       font.set(
         {
@@ -181,7 +181,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
           maxHeight   : 30,
           textColor   : null, 
           font        : font, 
-          toolTipText : this.tr("Flag this Group")
+          toolTipText : this.tr("Flag this Studio")
         });
 
       // Pop a flag window on click
@@ -247,15 +247,15 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
         {
         case 1:
         case 2:
-          warnString = this.tr("Group does not exist");  
+          warnString = this.tr("Studio does not exist");  
           break;
 
         case 3:
-          warnString = this.tr("You cannot flag your own group");
+          warnString = this.tr("You cannot flag your own studio.");
           break; 
 
         default:
-          warnString = this.tr("Unknown error relating to pulling group info"); 
+          warnString = this.tr("Unknown error relating to pulling studio info"); 
           break;
         }  
 
@@ -299,7 +299,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
 
           this.flagItLabel.set(
           {
-            value     : this.tr("Login to flag this group."),
+            value     : this.tr("Login to flag this studio."),
         
             font      : "default",
             textColor : "black"
@@ -322,13 +322,13 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
 
         // Save group name as user data so the flag it widget
         // can retrieve it later
-        this.setUserData("groupname", group.name);
+        this.setUserData("stuioname", group.name);
 
         this.groupLayout.add(label); 
         this.groupLayout.add(new qx.ui.core.Spacer(20)); 
 
         // Owner
-        label = new qx.ui.basic.Label(this.tr("Group Owner:"));
+        label = new qx.ui.basic.Label(this.tr("Studio Owner:"));
         label.setFont("bold");
  
         // Need to have two seperate labels here.
@@ -491,7 +491,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
         {
         case aiagallery.dbif.Constants.GroupStatus.Requested:
           // Pop message
-          stringMsg = this.tr("The admin of this group has requested you to join, to complete this proccess click the \"Request Membership\" button");
+          stringMsg = this.tr("The admin of this studio has requested you to join, to complete this proccess click the \"Request Membership\" button");
 
           label = new qx.ui.basic.Label(stringMsg); 
 
@@ -523,7 +523,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
 
           break;
         case aiagallery.dbif.Constants.GroupStatus.Owner:
-          this.joinGroupBtn.setLabel(this.tr("Group Owner")); 
+          this.joinGroupBtn.setLabel(this.tr("Studio Owner")); 
 
           // Disable join button
           this.joinGroupBtn.setEnabled(false);
@@ -542,7 +542,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
         {
            // Set header
            this.groupAscAppsHeader.
-               setValue(this.tr("This group has ") + group.ascApps.length
+               setValue(this.tr("This studio has ") + group.ascApps.length
                        + " associated apps"); 
 
            // On reloads ensure container is clean
@@ -579,13 +579,21 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
                });             
            }  
         }
+        // There are no apps associated with this studio so 
+        // do not show this scroller
+        else 
+        {
+           this.groupAscAppsHeader.exclude(); 
+           this.groupAscApps.exclude(); 
+           this.groupAscAppsContainer.exclude();
+	}
 
         // Update layout with apps made by members of this group
         if (group.groupApps.length > 0) 
         {
            // Set header
            this.groupAppsHeader.
-               setValue(this.tr("This group has ") + group.groupApps.length
+               setValue(this.tr("This studio has ") + group.groupApps.length
                        + " apps"); 
 
            // On reloads ensure container is clean
@@ -778,7 +786,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
       );
 
       // Add instructions
-      instrLabel = new qx.ui.basic.Label(this.tr("Associate an app with this group."));
+      instrLabel = new qx.ui.basic.Label(this.tr("Associate an app with this studio."));
 
       win.add(instrLabel);
 
@@ -787,7 +795,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
       appList.set(
         {
           width         : 300,
-          maxHeight        : 500, 
+          maxHeight     : 500, 
           selectionMode : "multi"
         }
       );

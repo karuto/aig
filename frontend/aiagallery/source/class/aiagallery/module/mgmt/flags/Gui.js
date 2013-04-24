@@ -420,7 +420,7 @@ qx.Class.define("aiagallery.module.mgmt.flags.Gui",
                 = new qx.ui.container.Composite(new qx.ui.layout.HBox(10)); 
 
               // Add App Data
-              label = new qx.ui.basic.Label("Group name: " + obj.groupName);
+              label = new qx.ui.basic.Label("Studio name: " + obj.groupName);
               hBoxData.add(label);
 
               label = new qx.ui.basic.Label("Reason: " + obj.explanation);
@@ -451,7 +451,7 @@ qx.Class.define("aiagallery.module.mgmt.flags.Gui",
                   var name = e.getTarget().getUserData("name"); 
 
                   dialog.Dialog.confirm(
-                    this.tr("Really Delete this Group?"),
+                    this.tr("Really Delete this Studio?"),
                     function(result)
                     {
                       if (result)
@@ -465,7 +465,7 @@ qx.Class.define("aiagallery.module.mgmt.flags.Gui",
 
               hBoxBtns.add(button); 
 
-              button = new qx.ui.form.Button(this.tr("Go To Group"));
+              button = new qx.ui.form.Button(this.tr("Go To Studio"));
               button.setUserData("name", obj.groupName);
 
               button.addListener(

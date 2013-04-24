@@ -144,7 +144,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Fsm",
                          "aiagallery.features",
                          "getGroup",
                          [
-                           module.getUserData("groupName"), true
+                           module.getUserData("studioName"), true
                          ]);
 
           // When we get the result, we'll need to know what type of request
@@ -181,7 +181,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Fsm",
                          "aiagallery.features",
                          "joinGroup",
                          [
-                           module.getUserData("groupName")
+                           module.getUserData("studioName")
                          ]);
 
           // When we get the result, we'll need to know what type of request
@@ -223,7 +223,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Fsm",
                          "associateAppsWithGroup",
                          [
                            ascApps,
-                           module.getUserData("groupName")
+                           module.getUserData("studioName")
                          ]);
 
           // When we get the result, we'll need to know what type of request

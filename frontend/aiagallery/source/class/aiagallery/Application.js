@@ -203,9 +203,9 @@ new aiagallery.main.Module(
   aiagallery.module.dgallery.contest.Contest);
 
 new aiagallery.main.Module(
-  "Groups",
+  "Studios",
   "aiagallery/module/emblem-favorite.png",
-  "Groups",
+  "Studios",
   aiagallery.main.Constant.PageName.Groups,
   aiagallery.module.dgallery.groups.Groups);
 
