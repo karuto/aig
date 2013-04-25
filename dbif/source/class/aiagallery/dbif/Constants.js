@@ -249,11 +249,13 @@ qx.Class.define("aiagallery.dbif.Constants",
       "groupSearch"      : "Look for a group",
       "browseSearch"     : "Return groups of a certain type/subtype",
       "requestUsers"     : "Request users to join a group",
+      "getGroupRibbon"   : "Get most active and most recent Studios",
 
       //
       // MAppAsc  
       //
-      "associateAppWithGroup"      : "Associate an app with a group"
+      "associateAppWithGroup"      : "Associate an app with a group",
+      "associateAppsWithGroup"     : "Associate many apps with a group"
 
     },
 
