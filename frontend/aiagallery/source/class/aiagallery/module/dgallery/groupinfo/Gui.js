@@ -294,6 +294,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
 
           // Disable button
           this.joinGroupBtn.setEnabled(false);
+          this.ascAppPopupBtn.setEnabled(false); 
 
           this._clearFlagListener(); 
 
