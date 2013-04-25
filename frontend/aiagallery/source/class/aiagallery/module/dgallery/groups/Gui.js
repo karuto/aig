@@ -66,7 +66,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       searchLayout = new qx.ui.container.Composite(layout);
 
       // Description label
-      label = new qx.ui.basic.Label(this.tr("Find a group"));
+      label = new qx.ui.basic.Label(this.tr("Find a studio"));
 
       // Text field to enter search query
       searchTextField = new qx.ui.form.TextField;
@@ -252,6 +252,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       {
       // Browse Groups
       case "appear":
+        result = response.data.result;
         break;
 
       case "groupSearch":

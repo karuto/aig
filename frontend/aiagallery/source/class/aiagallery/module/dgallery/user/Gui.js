@@ -1020,7 +1020,7 @@ qx.Class.define("aiagallery.module.dgallery.user.Gui",
       vBoxText = new qx.ui.container.Composite(layout);
 
       // Create a label for describing the textfields 
-      label = new qx.ui.basic.Label(this.tr("Group Name:"));
+      label = new qx.ui.basic.Label(this.tr("Studio Name:"));
       vBoxText.add(label);
 
       // Create textfield for entering in a group name
@@ -1128,7 +1128,7 @@ qx.Class.define("aiagallery.module.dgallery.user.Gui",
 
       // Create a set of finder-style multi-level browsing groups
       // This will show the groups a user owns and users in the group
-      ownedGroupBox = new qx.ui.groupbox.GroupBox("Group Management");
+      ownedGroupBox = new qx.ui.groupbox.GroupBox("Studio Management");
       ownedGroupBox.setLayout(new qx.ui.layout.HBox());
       ownedGroupBox.setContentPadding(5);
 
@@ -1148,7 +1148,7 @@ qx.Class.define("aiagallery.module.dgallery.user.Gui",
       // the layout goes into the groupbox
       listLayout = new qx.ui.container.Composite(new qx.ui.layout.VBox);
 
-      label = new qx.ui.basic.Label(this.tr("Group Name"));
+      label = new qx.ui.basic.Label(this.tr("Studio Name"));
       listLayout.add(label);
 
       groupNameList = new qx.ui.form.List();
