@@ -490,6 +490,13 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
         // modify the join group button
         switch (group.userStatus)
         {
+        case  aiagallery.dbif.Constants.GroupStatus.NonMember:
+          // Only Members can associate apps 
+          this.ascAppPopupBtn.setEnabled(false); 
+
+          this.joinGroupBtn.setEnabled(true);
+          break; 
+
         case aiagallery.dbif.Constants.GroupStatus.Requested:
           // Pop message
           stringMsg = this.tr("The admin of this studio has requested you to join, to complete this proccess click the \"Request Membership\" button");
@@ -679,18 +686,15 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
         // Based on the status change the join group / asc app button
         switch (result)
         {
-        case  aiagallery.dbif.Constants.GroupStatus.NonMember:
-          // Only Members can associate apps 
-          this.ascAppPopupBtn.setEnabled(false); 
-          break; 
-
         case aiagallery.dbif.Constants.GroupStatus.Member:
           this.joinGroupBtn.setLabel(this.tr("Joined")); 
 
           // Disable button
           this.joinGroupBtn.setEnabled(false);
 
-          // Add user's name to list of members
+          // FIXME:Add user's name to list of members
+
+          this.ascAppPopupBtn.setEnabled(true); 
 
           break;
 
