@@ -501,6 +501,10 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
           // Show the button if the owner has made the group's join 
           // type private. 
           bShowBtn = true;  
+
+          // Only Members can associate apps 
+          this.ascAppPopupBtn.setEnabled(false); 
+
           break;
 
         case aiagallery.dbif.Constants.GroupStatus.WaitList:
@@ -509,7 +513,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
           // Disable button
           this.joinGroupBtn.setEnabled(false);
 
-          // Enable asc. app popup
+          // Disable asc. app popup
           this.ascAppPopupBtn.setEnabled(false); 
 
           break;
@@ -672,9 +676,14 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
       case "joinGroup":
         result = response.data.result;  
 
-        // Based on the status change the join group button
+        // Based on the status change the join group / asc app button
         switch (result)
         {
+        case  aiagallery.dbif.Constants.GroupStatus.NonMember:
+          // Only Members can associate apps 
+          this.ascAppPopupBtn.setEnabled(false); 
+          break; 
+
         case aiagallery.dbif.Constants.GroupStatus.Member:
           this.joinGroupBtn.setLabel(this.tr("Joined")); 
 
