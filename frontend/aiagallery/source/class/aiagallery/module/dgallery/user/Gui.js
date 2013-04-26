@@ -39,8 +39,7 @@ qx.Class.define("aiagallery.module.dgallery.user.Gui",
       outerCanvas.add(scrollContainer, { flex : 1 });
 
       // Create a layout for this page
-      canvas = new qx.ui.container.Composite(new qx.ui.layout.VBox(30));
-      canvas.setLayout(new qx.ui.layout.VBox());   
+      canvas = new qx.ui.container.Composite(new qx.ui.layout.VBox(30)); 
 
       // Put layout in a scroller
       scrollContainer.add(canvas, {flex : 1});       
@@ -48,7 +47,7 @@ qx.Class.define("aiagallery.module.dgallery.user.Gui",
       // Create two seperate pages with in this one page
       // do so with the radioview widget
       this.__radioView = 
-        new aiagallery.widget.radioview.RadioView(this.tr("User: "));
+        new aiagallery.widget.radioview.RadioView();
 
       canvas.add(this.__radioView);
 

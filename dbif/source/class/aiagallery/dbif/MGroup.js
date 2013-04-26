@@ -1253,6 +1253,15 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
       var     requestedData;
       var     searchResponseNewest;
       var     searchResponseMostActive;
+      var     requestedFields; 
+      var     i; 
+
+      requestedFields = {
+        uid         : "uid",
+        image1      : "image1",
+        title       : "title",
+        displayName : "displayName"
+      }; 
 
       // Prep groupMap
       groupMap =
@@ -1282,7 +1291,74 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
 
       groupMap["newest"] = searchResponseNewest;
 
-      //Create map to limit what the query returns
+      // For each of the groups we need to get a selection of apps
+      groupMap["newest"].forEach(
+        function(group)
+        {
+          var     criteria;
+
+          criteria = 
+            {
+              type  : "element",
+              field : "groupName",
+              value : group.name
+            };
+
+          group.apps = liberated.dbif.Entity.query("aiagallery.dbif.ObjAppAsc",
+                                                   criteria);        
+
+          // For each app we need to replace the owner with the actual
+          // display name and resize the image
+          for (i = 0; i < group.apps.length; i++)
+          {
+            var     nameSearchResults;
+            var     displayName; 
+            var     url; 
+            var     app;
+
+            app = new aiagallery.dbif.ObjAppData(group.apps[i].app); 
+            app = app.getData(); 
+
+            criteria = 
+              {
+                type  : "element", 
+                field : "id",
+                value : app.owner
+              }; 
+          
+            nameSearchResults = 
+               liberated.dbif.Entity.query("aiagallery.dbif.ObjVisitors", 
+                                           criteria);
+
+            displayName = nameSearchResults[0].displayName; 
+
+            app.displayName = displayName || "<>";  
+
+            // Trim unneeded app info
+            aiagallery.dbif.MApps._requestedFields(
+              app, requestedFields);
+
+            // Resize the image
+            if (liberated.dbif.Entity.getCurrentDatabaseProvider() ==
+                "appengine")
+            {
+              // Scale images
+              // Is this image URL provided and is it real (not data:)?
+              url = app.image1;
+              if (url && url.substring(0, 4) == "http")
+              {
+                // Request App Engine to scale to 300px longest side
+                app.image1 -= "=s300";
+              }
+            }
+            // Set final app
+            group.apps[i] = app; 
+
+          }
+        }
+      );
+
+      // Create map to limit what the query returns
       requestedData = 
         [
           {
@@ -1303,6 +1379,71 @@ qx.Mixin.define("aiagallery.dbif.MGroup",
 
       groupMap["mostActive"] = searchResponseMostActive;
 
+      groupMap["mostActive"].forEach(
+        function(group)
+        {
+          var     criteria;
+
+          criteria = 
+            {
+              type  : "element",
+              field : "groupName",
+              value : group.name
+            };
+
+          group.apps = liberated.dbif.Entity.query("aiagallery.dbif.ObjAppAsc",
+                                                   criteria);        
+
+          // For each app we need to replace the owner with the actual
+          // display name and resize the image
+          for (i = 0; i < group.apps.length; i++)
+          {
+            var     nameSearchResults;
+            var     displayName; 
+            var     url; 
+            var     app;
+
+            app = new aiagallery.dbif.ObjAppData(group.apps[i].app); 
+            app = app.getData(); 
+
+            criteria = 
+              {
+                type  : "element", 
+                field : "id",
+                value : app.owner
+              }; 
+          
+            nameSearchResults = 
+               liberated.dbif.Entity.query("aiagallery.dbif.ObjVisitors", 
+                                           criteria);
+
+            displayName = nameSearchResults[0].displayName; 
+
+            app.displayName = displayName || "<>";  
+
+            // Trim unneeded app info
+            aiagallery.dbif.MApps._requestedFields(
+              app, requestedFields);
+
+            // Resize the image
+            if (liberated.dbif.Entity.getCurrentDatabaseProvider() ==
+                "appengine")
+            {
+              // Scale images
+              // Is this image URL provided and is it real (not data:)?
+              url = app.image1;
+              if (url && url.substring(0, 4) == "http")
+              {
+                // Request App Engine to scale to 300px longest side
+                app.image1 -= "=s300";
+              }
+            }
+            // Set final app
+            group.apps[i] = app; 
+
+          }
+        }
+      );
       return groupMap; 
          
     },

@@ -34,18 +34,18 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       var             label;       
 
       // Layouts
-      var      vBox; 
-      var      layout;
-      var      searchLayout; 
+      var             vBox; 
+      var             layout;
+      var             searchLayout; 
 
       // GUI Objects
-      var      searchTextField;
-      var      searchButton;
-      var      browseByButton;
-      var      typeSelectBox;
-      var      subTypeSelectBox;  
+      var             searchTextField;
+      var             searchButton;
+      var             browseByButton;
+      var             typeSelectBox;
+      var             subTypeSelectBox;  
 
-      var      command; 
+      var             command; 
 
       // Layouts
       var             btnLayout; 
@@ -175,6 +175,48 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       canvas.add(new qx.ui.core.Spacer(0, 20));      
       canvas.add(searchLayout); 
 
+      // Show most active/newest groups 
+      var newestStudiosLayout = new qx.ui.layout.VBox();
+      newestStudiosLayout.set(
+        {
+          alignX : "center"
+        });
+      var newestStudios = new qx.ui.container.Composite(newestStudiosLayout);
+      newestStudios.set(
+        {
+          decorator : "home-page-ribbon",
+          padding   : 20
+        });
+
+      // Newest Studio heading
+      var font = qx.theme.manager.Font.getInstance().resolve("bold").clone();
+      font.setSize(18);
+
+      var newestStudiosHeader = new qx.ui.basic.Label();
+      newestStudiosHeader.set(
+        {
+          value     : "Newest Studios",
+          font      : font,
+          decorator : "home-page-header"
+        });
+      newestStudios.add(newestStudiosHeader);
+      
+      // slide bar of Newest Apps
+      var scroller = new qx.ui.container.Scroll();
+      newestStudios.add(scroller);
+      
+      // Scroll container can hold only a single child. Create that child.
+      this.newestStudiosContainer =
+        new qx.ui.container.Composite(new qx.ui.layout.HBox(0));
+      this.newestStudiosContainer.set(
+          {
+            height : 210
+          });
+      scroller.add(this.newestStudiosContainer);
+      canvas.add(scroller); 
+ 
+
+      // Search Results
       // Create the container to hold all the group objects
       this.groupContainer = new qx.ui.form.List();
       this.groupContainer.set(
@@ -190,8 +232,6 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       canvas.add(new qx.ui.core.Spacer(0, 20)); 
 
       // Add the search results label
-      var font = qx.theme.manager.Font.getInstance().resolve("bold").clone();
-      font.setSize(18);
       label = new qx.ui.basic.Label(this.tr("Search Results"));
       label.set(
         {
@@ -232,6 +272,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       var             requestType = rpcRequest.getUserData("requestType");
       var             result;
       var             groupList; 
+      var             i; 
 
       // We can ignore aborted requests.
       if (response.type == "aborted")
@@ -253,6 +294,39 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       // Browse Groups
       case "appear":
         result = response.data.result;
+
+        // Populate the widge with the most recent/active studios
+        // Fill the newest studio ribbon with data
+        for (i = 0; i < result.newest[0].apps.length; i++)
+        {
+          // If this isn't the first one, ...
+          if (i > 0)
+          {
+            // ... then add a spacer between the previous one and this one
+            this.newestStudiosContainer.add(new qx.ui.core.Spacer(10));
+          }
+
+          // Add the thumbnail for this app
+          var appNewest = result.newest[0].apps[i];
+          var appThumbNewest = 
+            new aiagallery.widget.SearchResult("studio", appNewest);
+          this.newestStudiosContainer.add(appThumbNewest);
+
+          // Associate the app data with the UI widget so it can be passed
+          // in the click event callback
+          appThumbNewest.setUserData("App Data", appNewest);
+          
+          // Fire an event specific to this application, sans a friendly name.
+          appThumbNewest.addListener(
+            "click", 
+            function(e)
+            {
+              fsm.fireImmediateEvent(
+                "homeRibbonAppClick", 
+                this, 
+                e.getCurrentTarget().getUserData("App Data"));
+            });
+        }
         break;
 
       case "groupSearch":

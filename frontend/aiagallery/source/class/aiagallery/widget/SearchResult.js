@@ -68,12 +68,25 @@ qx.Class.define("aiagallery.widget.SearchResult",
       
     case "homeRibbon":
     case "featured":
+    case "studio":
       // Add grid layout characteristics
       grid.setColumnAlign(0, "center", "middle");
       grid.setRowFlex(1, 1);
 
-      size = format == "homeRibbon" ? 220 : 320;
-
+      //size = format == "homeRibbon" ? 220 : 320;
+      switch(format)
+      {
+        case "homeRibbon":
+          size = 220;
+          break;
+        case "featured":
+          size = 320;
+          break;
+        case "studio":
+          size = 100;
+          break;
+      }
+      
       // This one needs a background color to separate the slidebar items
       this.set(
         {
@@ -374,6 +387,10 @@ qx.Class.define("aiagallery.widget.SearchResult",
         case "appInfo":
           size = 200;
           break;
+
+        case "studio":
+          size = 100;
+          break;
         }
         control.set(
           {
@@ -407,6 +424,7 @@ qx.Class.define("aiagallery.widget.SearchResult",
         {
         case "homeRibbon":
         case "featured":
+        case "studio":
           textAlign = "center";
           size = 200;
           break;
@@ -446,6 +464,7 @@ qx.Class.define("aiagallery.widget.SearchResult",
 
         case "homeRibbon":
         case "featured":
+        case "studio":
           size = 0;
           break;
 
@@ -479,6 +498,7 @@ qx.Class.define("aiagallery.widget.SearchResult",
 
         case "homeRibbon":
         case "featured":
+        case "studio":
           size = 0;
           break;
 
@@ -512,6 +532,7 @@ qx.Class.define("aiagallery.widget.SearchResult",
 
         case "homeRibbon":
         case "featured":
+        case "studio":
           size = 0;
           break;
 
@@ -545,6 +566,7 @@ qx.Class.define("aiagallery.widget.SearchResult",
 
         case "homeRibbon":
         case "featured":
+        case "studio":
           size = 0;
           break;
 
@@ -612,6 +634,7 @@ qx.Class.define("aiagallery.widget.SearchResult",
         {
         case "homeRibbon":
         case "featured":
+        case "studio":
           size = 0;
           break;
 
