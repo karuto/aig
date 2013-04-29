@@ -175,6 +175,30 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       canvas.add(new qx.ui.core.Spacer(0, 20));      
       canvas.add(searchLayout); 
 
+      // Create a HBox to hold two vertical lists
+      // that will show most recent/most active studios
+      layout = new qx.ui.layout.HBox(10);     
+      this.studioListContainer = new qx.ui.container.Composite(layout);
+
+      layout = new qx.ui.layout.VBox(5);
+      this.newestContainer = new qx.ui.container.Composite(layout);  
+      label = new qx.ui.basic.Label(this.tr("Newest Created Studios")); 
+      this.newestContainer.add(label); 
+
+      layout = new qx.ui.layout.VBox(5);
+      this.mostActiveContainer = new qx.ui.container.Composite(layout); 
+      label = new qx.ui.basic.Label(this.tr("Latest Active Studios")); 
+      this.mostActiveContainer.add(label);  
+
+      this.studioListContainer.add(this.newestContainer);
+      this.studioListContainer.add(this.mostActiveContainer);
+
+      canvas.add(this.studioListContainer); 
+
+      var font = qx.theme.manager.Font.getInstance().resolve("bold").clone();
+      font.setSize(18);
+
+/* Simpler method for now
       // Show most active/newest groups 
       var newestStudiosLayout = new qx.ui.layout.VBox();
       newestStudiosLayout.set(
@@ -187,10 +211,6 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
           decorator : "home-page-ribbon",
           padding   : 20
         });
-
-      // Newest Studio heading
-      var font = qx.theme.manager.Font.getInstance().resolve("bold").clone();
-      font.setSize(18);
 
       var newestStudiosHeader = new qx.ui.basic.Label();
       newestStudiosHeader.set(
@@ -214,7 +234,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
           });
       scroller.add(this.newestStudiosContainer);
       canvas.add(scroller); 
- 
+*/
 
       // Search Results
       // Create the container to hold all the group objects
@@ -273,6 +293,8 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       var             result;
       var             groupList; 
       var             i; 
+      var             label;
+      var             count = 1; 
 
       // We can ignore aborted requests.
       if (response.type == "aborted")
@@ -295,6 +317,10 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       case "appear":
         result = response.data.result;
 
+        this._setupStudioRibbons(result.newest, this.newestContainer);
+        this._setupStudioRibbons(result.mostActive, this.mostActiveContainer);
+
+/* More simple method for now
         // Populate the widge with the most recent/active studios
         // Fill the newest studio ribbon with data
         for (i = 0; i < result.newest[0].apps.length; i++)
@@ -327,6 +353,8 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
                 e.getCurrentTarget().getUserData("App Data"));
             });
         }
+*/
+
         break;
 
       case "groupSearch":
@@ -447,6 +475,64 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       default:
         throw new Error("Unexpected request type: " + requestType);
       }
+    },
+
+    /**
+     * Helper function to create studio lists on appear
+     * 
+     * @param studioArray {Array}
+     *   An array containg studios and their data
+     * 
+     * @param container { qx.ui.container}
+     *   Container to add the labels to
+     */
+    _setupStudioRibbons : function(studioArray, container)
+    {
+      var         label;
+      var         count = 1; 
+
+      studioArray.forEach(
+        function(studio)
+        {
+          var   font;
+
+          font = qx.theme.manager.Font.getInstance().resolve("bold").clone();
+          font.set(
+            {
+              color      : "#75940c",     // android-green-dark
+              decoration : "underline",
+              size       : 12
+            });
+
+          label = new qx.ui.basic.Label(count + ". " + studio.name);
+          label.setUserData("name", studio.name); 
+          label.set(
+            {
+              textColor : null, // Prevent color override
+              font      : font, 
+              cursor    : "pointer"
+            });
+
+          label.addListener("click", 
+            function(e)
+            {
+              var groupName;
+
+              // Get selection
+              groupName = e.getTarget().getUserData("name"); 
+
+              // Pop page
+              aiagallery.module.dgallery
+                .groupinfo.GroupInfo.addGroupView(groupName, 
+                                                    groupName);
+            }
+          );
+
+          container.add(label); 
+          count++; 
+        }
+      , this);
     }
+
   }
 });
