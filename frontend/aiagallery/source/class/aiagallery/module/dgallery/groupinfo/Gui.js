@@ -315,7 +315,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
         label = new qx.ui.basic.Label(group.name);
         label.set(
           {
-            width  : 100,
+            width  : 500,
             height : 30,
             font   : font
           }
@@ -323,7 +323,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
 
         // Save group name as user data so the flag it widget
         // can retrieve it later
-        this.setUserData("stuioname", group.name);
+        this.setUserData("studioname", group.name);
 
         this.groupLayout.add(label); 
         this.groupLayout.add(new qx.ui.core.Spacer(20)); 
@@ -385,7 +385,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
         guiObject.set(
           {
             value      : group.description, 
-            //appearance : "widget",
+            appearance : "widget",
             readOnly   : true,
             wrap       : true,
             maxWidth      : 350,

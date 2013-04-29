@@ -404,7 +404,7 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
             listItem.setUserData("groupName", group.name); 
 
             // On each dblcick on a list item pop the groupInfo page
-            listItem.addListener("dblclick", 
+            listItem.addListener("click", 
               function(e)
               {
                 var groupName;
