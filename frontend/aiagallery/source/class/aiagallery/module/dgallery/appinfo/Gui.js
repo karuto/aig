@@ -93,6 +93,7 @@ qx.Class.define("aiagallery.module.dgallery.appinfo.Gui",
       grid.setColumnFlex(0, 1);
       grid.setRowFlex(1, 1);
       commentsGrid = new qx.ui.container.Composite(grid);
+      commentsGrid.setMargin(0, 10, 0, 10);
       canvas.add(commentsGrid, { row : 1, column : 0 });
 
 
@@ -187,16 +188,11 @@ qx.Class.define("aiagallery.module.dgallery.appinfo.Gui",
 
       commentsGrid.add(this.logInToCommentLabel, { row : 5, column : 0 });
 
-      // Initialize a tabview for both byAuthor and byTags
-      this.tagTabView = new qx.ui.tabview.TabView();
-      this.tagTabView.setWidth(350);
-      this.tagTabView.setHeight(500);
-      this.tagTabView.setMaxHeight(1000);
-      this.tagTabView.setContentPadding(0, 0, 0, 0);
       
 
       // Create the by-this-author area
       vbox = new qx.ui.container.Composite(new qx.ui.layout.VBox());
+      vbox.setMarginRight(10);
       canvas.add(vbox, { row : 0, column : 1, rowSpan : 2 });
       
       // A label for reminding users what to do
