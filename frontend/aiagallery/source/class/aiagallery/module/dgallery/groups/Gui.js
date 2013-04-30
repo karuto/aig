@@ -58,6 +58,10 @@ qx.Class.define("aiagallery.module.dgallery.groups.Gui",
       scrollContainer = new qx.ui.container.Scroll();
 
       canvas = new qx.ui.container.Composite(new qx.ui.layout.VBox); 
+      canvas.set(
+          {
+            padding      : 10
+          });
       scrollContainer.add(canvas); 
       outerCanvas.add(scrollContainer, {flex : 1});
 

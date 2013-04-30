@@ -60,6 +60,10 @@ qx.Class.define("aiagallery.module.dgallery.myapps.Gui",
       this.group.setAllowEmptySelection(true);
 
       canvas.setLayout(new qx.ui.layout.VBox());
+      canvas.set(
+      {
+        padding      : 10
+      });
  
       // Add an Add New Apps button, left-justified
       hBox = new qx.ui.container.Composite(new qx.ui.layout.HBox());
