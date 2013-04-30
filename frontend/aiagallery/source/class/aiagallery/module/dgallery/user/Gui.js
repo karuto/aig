@@ -39,7 +39,7 @@ qx.Class.define("aiagallery.module.dgallery.user.Gui",
       outerCanvas.add(scrollContainer, { flex : 1 });
 
       // Create a layout for this page
-      canvas = new qx.ui.container.Composite(new qx.ui.layout.VBox(30)); 
+      canvas = new qx.ui.container.Composite(new qx.ui.layout.VBox(0)); 
 
       // Put layout in a scroller
       scrollContainer.add(canvas, {flex : 1});       
@@ -82,7 +82,7 @@ qx.Class.define("aiagallery.module.dgallery.user.Gui",
           this[pageInfo.field].set(
           {
             layout       : new qx.ui.layout.VBox(),
-            padding      : 20
+            padding      : 10
           });
         
           // If there's a function for customizing this page, ...

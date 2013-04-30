@@ -52,7 +52,9 @@ qx.Class.define("aiagallery.module.dgallery.userinfo.Gui",
       this.fsm = fsm; 
 
       // Create a layout for this page
-      canvas.setLayout(new qx.ui.layout.VBox());   
+      var canvasVBox = new qx.ui.layout.VBox();
+      //canvasVBox.setMargin(0, 10, 0, 10);
+      canvas.setLayout(canvasVBox);   
 
       // Create a large bold font
       var font = qx.theme.manager.Font.getInstance().resolve("bold").clone();
@@ -66,6 +68,7 @@ qx.Class.define("aiagallery.module.dgallery.userinfo.Gui",
       // Create username label
       this.userNameField = new qx.ui.basic.Label("");
       this.userNameField.setFont(font); 
+      this.userNameField.setMargin(0, 0, 10, 10);
 
       canvas.add(this.userNameField); 
       // DOB layout 
@@ -189,7 +192,8 @@ qx.Class.define("aiagallery.module.dgallery.userinfo.Gui",
 
       // Add some space between last text element and authored apps
       vBoxText.add(new qx.ui.core.Spacer(10)); 
-
+      vBoxText.setMarginLeft(10);
+      
       // Add to hBox text field objects
       hBox.add(vBoxText);
 
@@ -213,7 +217,8 @@ qx.Class.define("aiagallery.module.dgallery.userinfo.Gui",
       authoredApps.set(
         {
           decorator : "home-page-ribbon",
-          padding   : 20
+          padding   : 20,
+          margin    : 10
         });
 
       this.authoredAppsHeader = new qx.ui.basic.Label();
