@@ -437,10 +437,6 @@ qx.Class.define("aiagallery.widget.mystuff.Detail",
     tempContainer.add(new qx.ui.core.Spacer(), { flex : 1 });
     form.addButton(tempContainer, { row : 3, column : 7, rowSpan : 1 });
 
-    // bind onClick event for the popup
-//    selectImageMessage = "The image you upload will appear on the app's page and all search screens. It will be scaled into a 180*230 image. Typically the image is a screenshot or an icon if you've created one.";
-//    this.selectImagePrompt.addListener("click", function(e){ alert(selectImageMessage); }, this);
-
     // define the popup we need
     var selectImagePopup = new qx.ui.popup.Popup(new qx.ui.layout.Canvas()).set({
         backgroundColor: "#FFFAD3",
