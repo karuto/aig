@@ -20,6 +20,7 @@ qx.Class.define("aiagallery.dbif.ObjFlags",
         "comment"     : null,
         "visitor"     : null,
         "profileId"   : null,
+        "groupName"   : null, 
         "timestamp"   : aiagallery.dbif.MDbifCommon.currentTimestamp(),
         "explanation" : null
       });
@@ -34,7 +35,7 @@ qx.Class.define("aiagallery.dbif.ObjFlags",
 
     var databaseProperties =
       {
-        /** Type of flag ("App" = application, "Comment" = comment) */
+        /** Type of flag based on enum */
         "type" : "Integer",
 
         /** UID of the AppData object which was flagged */
@@ -49,10 +50,13 @@ qx.Class.define("aiagallery.dbif.ObjFlags",
         /** Id of the user's profile who is being flagged */
         "profileId" : "String",
 
-        /** Time the like occurred */
+        /** The name of the group being flagged */
+        "groupName" : "String", 
+
+        /** Time the flag occurred */
         "timestamp" : "Date",
 
-        /** Explanation for why the application or comment was flagged */
+        /** Explanation for why the flag was made */
         "explanation" : "String"
       };
 

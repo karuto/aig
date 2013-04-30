@@ -75,6 +75,7 @@ qx.Class.define("aiagallery.dbif.Constants",
       Tags        : 20,
       Comment     : 480,
       Bio         : 480,
+      Group       : 480, 
       User        : 100 
     },
 
@@ -83,14 +84,24 @@ qx.Class.define("aiagallery.dbif.Constants",
     {
       App     : 0,
       Comment : 1,
-      Profile : 2
+      Profile : 2,
+      Group   : 3
+    },
+
+    /** Mapping of Group Join Type to value */
+    JoinType :
+    {
+      Public  : 0,
+      Private : 1 
     },
 
     /** Reverse mapping of FlagType values to names */
     FlagTypeToName :
     [
       "App", 
-      "Comment"
+      "Comment",
+      "Profile",
+      "Group"
     ],
 
     /** List of dissalowed usernames */
@@ -102,6 +113,16 @@ qx.Class.define("aiagallery.dbif.Constants",
       "superuser", 
       "root"
     ],
+
+    /** Status of a user in relation to a group */
+    GroupStatus :
+    {
+      NonMember : 0,
+      WaitList  : 1,
+      Requested : 2,
+      Member    : 3, 
+      Owner     : 4
+    },
 
     /** Mapping of permission names to descriptions */
     Permissions :
@@ -212,7 +233,41 @@ qx.Class.define("aiagallery.dbif.Constants",
       //
       "getMotd" : "Get the message of the day",
       "setMotd" : "Set the message of the day",
-      "sendEmail" : "Send email to a user"
+      "sendEmail" : "Send email to a user",
+
+      // 
+      // MGroup
+      //
+      "addOrEditGroup"   : "Create/Edit a group a user owns",
+      "getGroup"         : "Get information about a group",
+      "getUserGroups"    : "Get the groups a user owns",
+      "joinGroup"        : "Request to join a group", 
+      "approveUsers"     : "Approve a user for access to a group",
+      "approveAllUsers"  : "Approve all waiting users for group access",
+      "removeGroupUsers" : "Remove a user from group access",
+      "deleteGroup"      : "Delete a group a user owns", 
+      "mgmtDeleteGroup"  : "Delete any group (admin only)",
+      "groupSearch"      : "Look for a group",
+      "browseSearch"     : "Return groups of a certain type/subtype",
+      "requestUsers"     : "Request users to join a group",
+      "getGroupRibbon"   : "Get most active and most recent Studios",
+
+      //
+      // MAppAsc  
+      //
+      "associateAppWithGroup"      : "Associate an app with a group",
+      "associateAppsWithGroup"     : "Associate many apps with a group"
+
+    },
+
+    // Group types
+    GroupTypes :
+    {
+      General     : "General",
+      Educational : "Educational",
+      K8          : "K-8",               // Subtype
+      HS          : "High School",       // Subtype
+      College     : "College/University" // Subtype
     },
     
     // Log messages. Comments above each are required parameters

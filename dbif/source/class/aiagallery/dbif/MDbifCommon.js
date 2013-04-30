@@ -23,7 +23,9 @@ qx.Mixin.define("aiagallery.dbif.MDbifCommon",
     aiagallery.dbif.MFlags,
     aiagallery.dbif.MDbMgmt,
     aiagallery.dbif.MSystem,
-    aiagallery.dbif.MPermissionGroup
+    aiagallery.dbif.MPermissionGroup,
+    aiagallery.dbif.MGroup,
+    aiagallery.dbif.MAppAsc
   ],
 
   construct : function()
@@ -414,6 +416,36 @@ qx.Mixin.define("aiagallery.dbif.MDbifCommon",
 
       case "getPublicUserProfile":
         return true; 
+
+      //
+      // MGroup
+      //
+      case "addOrEditGroup":      
+      case "getUserGroups":
+      case "joinGroup": 
+      case "approveUsers":   
+      case "approveAllUsers":
+      case "removeGroupUsers":
+      case "deleteGroup":
+      case "requestUsers": 
+        return ! bAnonymous; // Allowed if logged in
+
+      case "mgmtDeleteGroup": 
+        // Allowed if has access 
+        return aiagallery.dbif.MDbifCommon._deepPermissionCheck(methodName);
+
+      case "groupSearch":
+      case "getGroup":
+      case "browseSearch": 
+      case "getGroupRibbon":
+        return true; // Allowed for all users 
+
+      //
+      // MAppAsc
+      //
+      case "associateAppWithGroup":
+      case "associateAppsWithGroup":
+        return ! bAnonymous; // Allowed if logged in
 
       default:
         // Do not allow access to unrecognized method names

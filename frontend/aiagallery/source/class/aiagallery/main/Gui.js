@@ -394,7 +394,7 @@ qx.Class.define("aiagallery.main.Gui",
 
               // We've instantiated a new module which needs to be added
               bAddModules = true;
-            }
+            } 
             
             // Determine whether they have access to the database
             // management page.
@@ -832,6 +832,12 @@ qx.Class.define("aiagallery.main.Gui",
             page.setUserData("user", 
               moduleList[menuItem][moduleName].getUserData("user")); 
           }
+          else if(numModules === 0 && moduleList[menuItem][moduleName].pageId ==
+              aiagallery.main.Constant.PageName.GroupInfo)
+          {
+            page.setUserData("studioName", 
+              moduleList[menuItem][moduleName].getUserData("studioName")); 
+          }
 
           // We found a module.  Increment our counter
           numModules++;
@@ -1164,6 +1170,16 @@ qx.Class.define("aiagallery.main.Gui",
           selectedPage.getUserData("user");   
       }
 
+      else if(selectedPage.getUserData("pageId") ==
+              aiagallery.main.Constant.PageName.GroupInfo)
+      {
+        // This is a group info page
+        // add studioname to fragment
+        fragment +=
+          "&studioname=" +
+          selectedPage.getUserData("studioName");   
+      }
+
       // Change URL to add language independent constant to it
       // fragment will be the string constant of the page the user is on.
       // Second arguement is the title for the page. 
@@ -1201,40 +1217,58 @@ qx.Class.define("aiagallery.main.Gui",
       var             bPageExists;
       var             pageLocation;
       var             mainTabsLocation; 
-      var             bAppOrUser = false;
+      var             specificHandleType; 
       
       // Is this a request for the App page or user profile?
       if (components.page == aiagallery.main.Constant.PageName.AppInfo ||
-          components.page == aiagallery.main.Constant.PageName.PublicUser)
+          components.page == aiagallery.main.Constant.PageName.PublicUser ||
+          components.page == aiagallery.main.Constant.PageName.GroupInfo)
       {
 
-        // Set boolean flags so we now which one to do
-        // false for app, true for profile
-        if(components.page == aiagallery.main.Constant.PageName.PublicUser)
-        {
-          bAppOrUser = true; 
-        }
+        // Remember what type we are dealing with
+        specificHandleType = components.page;
 
-        if(bAppOrUser)
+        // Ensure we have the right parts 
+        switch (components.page)
         {
-          // Need to have a username 
-          if (! components.username)
-          {
-            throw new Error("Got request for User Profile without username");
-          }     
-        } 
-        else 
-        {
-          // Yup. Ensure there's a uid and a label provided
-          if (! components.uid)
-          {
-            throw new Error("Got request for AppInfo without UID");
-          }
-          if (! components.label)
-          {
-            throw new Error("Got request for AppInfo without label");
-          }
-        }
+	  case aiagallery.main.Constant.PageName.AppInfo:
+
+            // Ensure there's a uid and a label provided
+            if (! components.uid)
+            {
+              throw new Error("Got request for AppInfo without UID.");
+            }
+            if (! components.label)
+            {
+              throw new Error("Got request for AppInfo without label.");
+            }
+
+            break;
+
+	  case aiagallery.main.Constant.PageName.PublicUser:
+
+            // Need to have a username 
+            if (! components.username)
+            {
+              throw new Error("Got request for User Profile without username.");
+            }   
+
+            break;
+
+	  case aiagallery.main.Constant.PageName.GroupInfo:
+            if (! components.studioname)
+            {
+              throw new Error("Got request for StudioInfo without name.");
+            }
+
+            break;
+
+          default:
+
+            throw new Error("Handling special bookmark request, but"
+			    + " got a bad type request.");
+            break;
+	}
 
         // Get the page selector bar
         pageSelectorBar =
@@ -1303,29 +1337,68 @@ qx.Class.define("aiagallery.main.Gui",
         // If this is false we need to open the page ourselves
         if (!bPageExists)
         {
-          if (bAppOrUser) 
+          switch (specificHandleType)
           {
-             aiagallery.module.dgallery.userinfo.UserInfo.addPublicUserView(
-               components.username); 
-          } 
-          else 
-          {              
+	  case aiagallery.main.Constant.PageName.AppInfo:
+
             aiagallery.module.dgallery.appinfo.AppInfo.addAppView(
               Number(components.uid), components.label);
+
+            break;
+
+	  case aiagallery.main.Constant.PageName.PublicUser:
+
+            aiagallery.module.dgallery.userinfo.UserInfo.addPublicUserView(
+               components.username); 
+
+            break;
+
+	  case aiagallery.main.Constant.PageName.GroupInfo:
+
+            aiagallery.module.dgallery.groupinfo.GroupInfo.addGroupView(
+               components.studioname, components.studioname); 
+
+            break; 
+            
+          default:
+
+            throw new Error("Handling special bookmark request, but"
+			    + " got a bad type request.");
+            break;
           }
         }
           
-          
-        // All ephemeral pages have been removed at this point via addAppView
+
+        // All ephemeral pages have been removed at this point via add[TYPE]View
         // Create new temporary app radio button page
-        if(bAppOrUser)
+
+        switch (specificHandleType)
         {
-          tempRadioButton = new qx.ui.form.RadioButton(components.username);  
+	case aiagallery.main.Constant.PageName.AppInfo:
+
+          tempRadioButton = new qx.ui.form.RadioButton(components.label); 
+
+          break;
+
+	case aiagallery.main.Constant.PageName.PublicUser:
+
+          tempRadioButton = new qx.ui.form.RadioButton(components.username); 
+
+          break;
+
+	case aiagallery.main.Constant.PageName.GroupInfo:
+
+          tempRadioButton = new qx.ui.form.RadioButton(components.studioname); 
+
+          break; 
+            
+        default:
+
+          throw new Error("Handling special bookmark request, but"
+			  + " got a bad type request.");
+          break;
         }
-        else
-        {
-          tempRadioButton = new qx.ui.form.RadioButton(components.label);
-        }       
+       
         tempRadioButton.set(
             {
               appearance : "pageselector",
@@ -1362,7 +1435,7 @@ qx.Class.define("aiagallery.main.Gui",
       mainTabs = qx.core.Init.getApplication().getUserData("mainTabs");
       tabArray = mainTabs.getChildren();
 
-      // It's not an AppInfo or user profile request. 
+      // It's not a special type request (app, user, group). 
       // Iterate through the tabs' labels to find the tab.
       for (i = 0; i < tabArray.length; i++)
       {

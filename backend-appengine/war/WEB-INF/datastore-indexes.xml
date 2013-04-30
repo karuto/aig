@@ -67,4 +67,12 @@
         <property name="timestamp" direction="desc"/>
     </datastore-index>
 
+    <datastore-index kind="group" ancestor="true" source="manual">
+        <property name="creationTime" direction="asc"/>
+    </datastore-index>
+
+    <datastore-index kind="group" ancestor="true" source="manual">
+        <property name="lastUpdated" direction="asc"/>
+    </datastore-index>
+
 </datastore-indexes>

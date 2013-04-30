@@ -435,7 +435,6 @@ qx.Class.define("aiagallery.module.dgallery.userinfo.Gui",
            });
         
          }
-/* Turn this on once anon users is integrated
 
          // Based on whether the user is logged in or not
          // Disable the add comment button
@@ -454,7 +453,7 @@ qx.Class.define("aiagallery.module.dgallery.userinfo.Gui",
            });
         
          }
-*/ 
+
         break;
 
       case "flagProfile":

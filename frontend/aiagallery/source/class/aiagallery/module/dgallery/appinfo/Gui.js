@@ -61,7 +61,7 @@ qx.Class.define("aiagallery.module.dgallery.appinfo.Gui",
       outerCanvas.setLayout(new qx.ui.layout.VBox());
       scrollContainer = new qx.ui.container.Scroll();
  
-      // Align to left of module
+      // Align scroller to right of module
       scrollContainer.setAlignX("right"); 
 
       outerCanvas.add(scrollContainer, { flex : 1 });
@@ -601,7 +601,7 @@ qx.Class.define("aiagallery.module.dgallery.appinfo.Gui",
         
         if(who.getIsAnonymous())
         {
-          // Remove the comment buttons and field
+          // Remove the comment buttons and field and counter
           this.butAddComment.destroy();
           this.butCancelComment.destroy(); 
           this.textNewComment.destroy(); 

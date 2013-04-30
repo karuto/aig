@@ -68,11 +68,49 @@ qx.Class.define("aiagallery.module.dgallery.user.Fsm",
           // On the clicking of a button, execute is fired
           "execute" :
           {
+            // Profile Management buttons
+            "saveBtn" : "Transition_Idle_to_AwaitRpcResult_via_saveBtn",
             
-            "saveBtn" : "Transition_Idle_to_AwaitRpcResult_via_saveBtn"
-            
+            // Studio Management buttons
+            // Management Buttons
+            "saveStudioBtn" : "Transition_Idle_to_AwaitRpcResult_via_save", 
+
+            "deleteBtn" : "Transition_Idle_to_AwaitRpcResult_via_delete",
+
+            "approveAllGroupUser" :
+              "Transition_Idle_to_AwaitRpcResult_via_approveAllGroupUser",
+
+            "approveGroupUser" :
+              "Transition_Idle_to_AwaitRpcResult_via_approveGroupUser",   
+
+            "removeGroupUsersMember" :
+              "Transition_Idle_to_AwaitRpcResult_via_removeGroupUsersMember", 
+
+            "removeGroupUsersWaitList" :
+              "Transition_Idle_to_AwaitRpcResult_via_removeGroupUsersWaitList", 
+
+            "removeGroupUsersInvite" :
+              "Transition_Idle_to_AwaitRpcResult_via_removeGroupUsersInvite", 
+
+            "requestBtn" :
+              "Transition_Idle_to_AwaitRpcResult_via_requestUsers"
+
           },
-          
+         
+          // Event when the studio management page first appears,
+          // much like an appear event on the old group page 
+          "initialStudioLoad" :
+            "Transition_Idle_to_AwaitRpcResult_via_initialStudioLoad",
+
+          "changeSelection":
+          {
+            "groupNameList"
+              : "Transition_Idle_to_AwaitRpcResult_via_getGroup",
+
+            "userJoinRadioButtonGroup"
+              : "Transition_Idle_to_AwaitRpcResult_via_save"
+          },
+
           // When we get an appear event, retrieve the category tags list. We
           // only want to do it the first time, though, so we use a predicate
           // to determine if it's necessary.
@@ -95,6 +133,7 @@ qx.Class.define("aiagallery.module.dgallery.user.Fsm",
       // Replace the initial Idle state with this one
       fsm.replaceState(state, true);
 
+      // PROFILE MANAGEMENT STATES
 
       // The following transitions have a predicate, so must be listed first
 
@@ -341,6 +380,602 @@ qx.Class.define("aiagallery.module.dgallery.user.Fsm",
 
       state.addTransition(trans);
 
+      // STUDIO MANAGEMENT STATES
+      /*
+       * Transition: Idle to AwaitRpcResult
+       *
+       * Cause: User switched to studio management page.
+       *  
+       * Action:
+       *  If this is the very first appear, retrieve 
+       *  all the groups a user owns. 
+       */
+      trans = new qx.util.fsm.Transition(
+        "Transition_Idle_to_AwaitRpcResult_via_initialStudioLoad",
+      {
+        "nextState" : "State_AwaitRpcResult",
+
+        "context" : this,
+
+        "ontransition" : function(fsm, event)
+        {
+          var    request;
+
+          // Get all the groups a user owns if any
+          // Issue the remote procedure call to execute the query
+          request =
+            this.callRpc(fsm,
+                         "aiagallery.features",
+                         "getUserGroups",
+                         []);
+
+          // When we get the result, we'll need to know what type of request
+          // we made.
+          request.setUserData("requestType", "initialStudioLoad");
+        }
+      });
+
+      state.addTransition(trans);
+        
+      /*
+       * Transition: Idle to  Awaiting RPC Result
+       *
+       * Cause: Save button clicked
+       *
+       * Action:
+       *  Save the group 
+       */
+      trans = new qx.util.fsm.Transition(
+        "Transition_Idle_to_AwaitRpcResult_via_save",
+      {
+        "nextState" : "State_AwaitRpcResult",
+
+        "context" : this,
+
+        "predicate" : function(fsm, event)
+        {
+          var      name;
+          var      warnString;
+ 
+          // User must specify group name
+          name = fsm.getObject("groupNameField").getValue().trim();
+          if (name == null || name == "")
+          {
+            // FIXME get this.tr working for this string
+            warnString = "You must specify a group name.";
+
+            dialog.Dialog.warning(warnString);
+
+            return null; 
+          }
+          
+          
+          // Accept this transition
+          return true;
+        },
+
+        "ontransition" : function(fsm, event)
+        {
+          var             request;
+          var             name;
+          var             description;
+          var             groupType; 
+          var             subGroupType;
+          var             joinType; 
+
+          // Get values from gui
+          name = fsm.getObject("groupNameField").getValue();
+
+          // User is updating existing group
+          if (name == "" || !name)
+          {
+            name = fsm.getObject("groupNameList").getSelection()[0].getLabel();
+          }
+
+          description = fsm.getObject("groupDescriptionField").getValue();
+ 
+          // Group Type
+          groupType = fsm.getObject("groupTypeBox")
+                        .getSelection()[0].getLabel().toString();
+
+          if (groupType == aiagallery.dbif.Constants.GroupTypes.Educational)
+          {
+            // Set the subgroup type
+            subGroupType = fsm.getObject("eduTypeRadioButtonGroup")
+                             .getSelection()[0].getLabel().toString(); 
+          } 
+          else 
+          {
+            subGroupType = null; 
+          }
+
+          // How users will be allowed to join
+          joinType = fsm.getObject("userJoinRadioButtonGroup")
+                       .getSelection()[0].getUserData("enum"); 
+
+
+          // Issue the remote procedure call to execute the query
+          request =
+            this.callRpc(fsm,
+                         "aiagallery.features",
+                         "addOrEditGroup",
+                         [ name, description, 
+                           groupType, subGroupType, joinType]
+                         );
+
+          // When we get the result, we'll need to know what type of request
+          // we made.
+          request.setUserData("requestType", "addOrEditGroup");
+
+        }
+      });
+
+      state.addTransition(trans);
+
+      /*
+       * Transition: Idle to AwaitRpcResult
+       *
+       * Cause: User is deleting a group
+       *
+       * Action:
+       *  Delete the currently selected group
+       */
+      trans = new qx.util.fsm.Transition(
+        "Transition_Idle_to_AwaitRpcResult_via_delete",
+      {
+        "nextState" : "State_AwaitRpcResult",
+
+        "context" : this,
+
+        "ontransition" : function(fsm, event)
+        {
+          var             request;
+          var             name;
+
+          // Get values from gui
+          name = fsm.getObject("groupNameList")
+                   .getSelection()[0].getLabel();
+ 
+          // Issue the remote procedure call to execute the query
+          request =
+            this.callRpc(fsm,
+                         "aiagallery.features",
+                         "deleteGroup",
+                         [ name ]
+                         );
+
+          // When we get the result, we'll need to know what type of request
+          // we made.
+          request.setUserData("requestType", "deleteGroup");
+
+        }
+      });
+
+      state.addTransition(trans);
+
+      /*
+       * Transition: Idle to AwaitRpcResult
+       *
+       * Cause: User clicked approve all button
+       *
+       * Action:
+       *  Approve all users currently on the waitlist
+       *    for a group 
+       */
+      trans = new qx.util.fsm.Transition(
+        "Transition_Idle_to_AwaitRpcResult_via_approveAllGroupUser",
+      {
+        "nextState" : "State_AwaitRpcResult",
+
+        "context" : this,
+
+        "ontransition" : function(fsm, event)
+        {
+          var             request;
+          var             name;
+
+          // Get values from gui
+          name = fsm.getObject("groupNameList")
+                   .getSelection()[0].getLabel();
+ 
+          // Issue the remote procedure call to execute the query
+          request =
+            this.callRpc(fsm,
+                         "aiagallery.features",
+                         "approveAllUsers",
+                         [ name ]
+                         );
+
+          // When we get the result, we'll need to know what type of request
+          // we made.
+          request.setUserData("requestType", "approveAllGroupUser");
+
+        }
+      });
+
+      state.addTransition(trans);
+
+      /*
+       * Transition: Idle to AwaitRpcResult
+       *
+       * Cause: User clicked approve user button
+       *
+       * Action:
+       *  Approve the selected waitlist members
+       *    for a group 
+       */
+      trans = new qx.util.fsm.Transition(
+        "Transition_Idle_to_AwaitRpcResult_via_approveGroupUser",
+      {
+        "nextState" : "State_AwaitRpcResult",
+
+        "context" : this,
+
+        "ontransition" : function(fsm, event)
+        {
+          var             request;
+          var             name;
+          var             selection;
+          var             usersToApprove = [];
+
+          // Get values from gui
+          name = fsm.getObject("groupNameList")
+                   .getSelection()[0].getLabel();
+ 
+          selection = fsm.getObject("groupWaitList").getSelection();
+
+          selection.forEach(
+            function(sel)
+            {
+              usersToApprove.push(sel.getLabel()); 
+            }
+          );
+
+          // Issue the remote procedure call to execute the query
+          request =
+            this.callRpc(fsm,
+                         "aiagallery.features",
+                         "approveUsers",
+                         [ name, usersToApprove ]
+                         );
+
+          // When we get the result, we'll need to know what type of request
+          // we made.
+          request.setUserData("requestType", "approveGroupUser");
+
+        }
+      });
+
+      state.addTransition(trans);
+
+      /*
+       * Transition: Idle to AwaitRpcResult
+       *
+       * Cause: User clicked approve user remove button for 
+       *        a member
+       *
+       * Action:
+       *  Remove a user from the group
+       */
+      trans = new qx.util.fsm.Transition(
+        "Transition_Idle_to_AwaitRpcResult_via_removeGroupUsersMember",
+      {
+        "nextState" : "State_AwaitRpcResult",
+
+        "context" : this,
+
+        "ontransition" : function(fsm, event)
+        {
+          var             request;
+          var             name;
+          var             selection;
+          var             usersToRemoveMap;
+
+          usersToRemoveMap = 
+            {
+              users     : [],
+              waitList  : [],
+              requested : []        
+            };
+
+          // Get values from gui
+          name = fsm.getObject("groupNameList")
+                   .getSelection()[0].getLabel();
+ 
+          selection = fsm.getObject("groupUsers").getSelection();
+
+          selection.forEach(
+            function(sel)
+            {
+              usersToRemoveMap.users.push(sel.getLabel()); 
+            }
+          );
+        
+          // Issue the remote procedure call to execute the query
+          request =
+            this.callRpc(fsm,
+                         "aiagallery.features",
+                         "removeGroupUsers",
+                         [ name, usersToRemoveMap ]
+                         );
+
+          // When we get the result, we'll need to know what type of request
+          // we made.
+          request.setUserData("requestType", "removeGroupUsers");
+
+        }
+      });
+
+      state.addTransition(trans);
+
+      /*
+       * Transition: Idle to AwaitRpcResult
+       *
+       * Cause: User clicked approve user remove button for a
+       *        wait list user
+       *
+       * Action:
+       *  Remove a user from the group
+       */
+      trans = new qx.util.fsm.Transition(
+        "Transition_Idle_to_AwaitRpcResult_via_removeGroupUsersWaitList",
+      {
+        "nextState" : "State_AwaitRpcResult",
+
+        "context" : this,
+
+        "ontransition" : function(fsm, event)
+        {
+          var             request;
+          var             name;
+          var             selection;
+          var             usersToRemoveMap;
+
+          usersToRemoveMap = 
+            {
+              users     : [],
+              waitList  : [],
+              requested : []        
+            };
+
+          // Get values from gui
+          name = fsm.getObject("groupNameList")
+                   .getSelection()[0].getLabel();
+
+          selection = fsm.getObject("groupWaitList").getSelection();
+
+          selection.forEach(
+            function(sel)
+            {
+              usersToRemoveMap.waitList.push(sel.getLabel()); 
+            }
+          );
+
+          // Issue the remote procedure call to execute the query
+          request =
+            this.callRpc(fsm,
+                         "aiagallery.features",
+                         "removeGroupUsers",
+                         [ name, usersToRemoveMap ]
+                         );
+
+          // When we get the result, we'll need to know what type of request
+          // we made.
+          request.setUserData("requestType", "removeGroupUsers");
+
+        }
+      });
+
+      state.addTransition(trans);
+
+      /*
+       * Transition: Idle to AwaitRpcResult
+       *
+       * Cause: User clicked approve user remove button for
+       *        an invited user
+       *
+       * Action:
+       *  Remove a user from the group
+       */
+      trans = new qx.util.fsm.Transition(
+        "Transition_Idle_to_AwaitRpcResult_via_removeGroupUsersInvite",
+      {
+        "nextState" : "State_AwaitRpcResult",
+
+        "context" : this,
+
+        "ontransition" : function(fsm, event)
+        {
+          var             request;
+          var             name;
+          var             selection;
+          var             usersToRemoveMap;
+
+          usersToRemoveMap = 
+            {
+              users     : [],
+              waitList  : [],
+              requested : []        
+            };
+
+          // Get values from gui
+          name = fsm.getObject("groupNameList")
+                   .getSelection()[0].getLabel();
+
+          selection = fsm.getObject("groupRequestList").getSelection();
+
+          selection.forEach(
+            function(sel)
+            {
+              usersToRemoveMap.requested.push(sel.getLabel()); 
+            }
+          );
+
+          // Issue the remote procedure call to execute the query
+          request =
+            this.callRpc(fsm,
+                         "aiagallery.features",
+                         "removeGroupUsers",
+                         [ name, usersToRemoveMap ]
+                         );
+
+          // When we get the result, we'll need to know what type of request
+          // we made.
+          request.setUserData("requestType", "removeGroupUsers");
+
+        }
+      });
+
+      state.addTransition(trans);
+
+      /*
+       * Transition: Idle to AwaitRpcResult
+       *
+       * Cause: User selected another group they own on the 
+       *   group name list. 
+       *
+       * Action:
+       *  Get a map of information about the selected group
+       */
+      trans = new qx.util.fsm.Transition(
+        "Transition_Idle_to_AwaitRpcResult_via_getGroup",
+      {
+        "nextState" : "State_AwaitRpcResult",
+
+        "context" : this,
+
+        "predicate" : function(fsm, event)
+        {
+          if(fsm.getObject("groupNameList")
+                   .getSelection().length != 0)
+          { 
+            // Accept
+            return true;
+          }
+          else 
+          {
+            // Ignore request
+            return null; 
+          }
+        },
+
+        "ontransition" : function(fsm, event)
+        {
+          var             request;
+          var             name;
+
+          // Get values from gui
+          // Only get a name if we can, if not ignore request
+          name = fsm.getObject("groupNameList")
+                   .getSelection()[0].getLabel();
+
+          // Issue the remote procedure call to execute the query
+          request =
+            this.callRpc(fsm,
+                         "aiagallery.features",
+                         "getGroup",
+                         [ name, false ]
+                         );
+
+          // When we get the result, we'll need to know what type of request
+          // we made.
+          request.setUserData("requestType", "getGroup");
+
+        }
+      });
+
+      state.addTransition(trans);
+
+      /*
+       * Transition: Idle to AwaitRpcResult
+       *
+       * Cause: User hit request users button
+       *
+       * Action:
+       *  Parse the names/emails of requested users 
+       */
+      trans = new qx.util.fsm.Transition(
+        "Transition_Idle_to_AwaitRpcResult_via_requestUsers",
+      {
+        "nextState" : "State_AwaitRpcResult",
+
+        "context" : this,
+
+        "predicate" : function(fsm, event)
+        {
+          var requestedUsers;
+          var name;
+          var warnString; 
+
+          requestedUsers = fsm.getObject("groupUsersField").getValue().trim(); 
+
+          if(requestedUsers == null || requestedUsers == "")
+          { 
+            // Bad request no users to work with
+            warnString = "You must enter in either some user names or user"
+                         + "gmail emails."; 
+
+            dialog.Dialog.warning(warnString); 
+
+            return null; 
+          }
+
+          name = fsm.getObject("groupNameList")
+                   .getSelection()[0].getLabel();
+
+          if(name == null || name == "")
+          { 
+            // Bad request no users to work with
+            warnString = "You must make a group first before"
+                         + " requesting users for it";
+
+            dialog.Dialog.warning(warnString); 
+
+            return null; 
+          }          
+
+          // Accept this transition
+          return true; 
+        },
+
+        "ontransition" : function(fsm, event)
+        {
+          var             request;
+          var             name;
+          var             requestedUsers;
+
+          // Get values from gui
+          name = fsm.getObject("groupNameList")
+                   .getSelection()[0].getLabel();
+
+          // Get requested users
+          requestedUsers = fsm.getObject("groupUsersField").getValue();
+
+          if(requestedUsers && requestedUsers.length != 0)
+          {
+            requestedUsers = requestedUsers.split(",");
+          }
+          else 
+          {
+            requestedUsers = null; 
+          }
+ 
+          // Issue the remote procedure call to execute the query
+          request =
+            this.callRpc(fsm,
+                         "aiagallery.features",
+                         "requestUsers",
+                         [ name, requestedUsers ]
+                         );
+
+          // When we get the result, we'll need to know what type of request
+          // we made.
+          request.setUserData("requestType", "requestUsers");
+
+        }
+      });
+
+      state.addTransition(trans);
 
       /*
        * Transition: Idle to Idle

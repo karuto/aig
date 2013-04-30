@@ -55,6 +55,15 @@ qx.Class.define("aiagallery.widget.FlagPopUp",
         case aiagallery.dbif.Constants.FlagType.Profile:
           typeStr = "profile"; 
           break; 
+
+       case aiagallery.dbif.Constants.FlagType.Group:
+          typeStr = "group"; 
+          break; 
+
+       default:
+         // Not possible
+         typeStr = "unknown"; 
+         break;
       }
 
       // Based on the type create a message
@@ -167,6 +176,23 @@ qx.Class.define("aiagallery.widget.FlagPopUp",
               // Fire flag event
               page.fsm.fireImmediateEvent(
                 "flagProfile", page, flagData);
+
+              break; 
+
+            case aiagallery.dbif.Constants.FlagType.Group:
+              // Package up data for fsm in a map
+              flagData = 
+              {
+                "groupname"   : page.getUserData("groupname"), 
+                "reason"     : _reasonField.getValue()
+              };
+
+              // Set as user data to get from fsm later
+              page.setUserData("flagData", flagData);
+
+              // Fire flag event
+              page.fsm.fireImmediateEvent(
+                "flagGroup", page, flagData);
 
               break; 
           }

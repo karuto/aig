@@ -94,7 +94,13 @@ qx.Class.define("aiagallery.widget.mystuff.App",
       check : "Array",
       apply : "_applyTags"
     },
-    
+
+    groupAsc :
+    {
+      check : "Array",
+      apply : "_applyGroupAsc"
+    },
+   
     sourceFileName :
     {
       check : "String",
@@ -201,6 +207,12 @@ qx.Class.define("aiagallery.widget.mystuff.App",
       this.getChildControl("container").setTags(value);
     },
     
+    // property apply
+    _applyGroupAsc : function(value, old)
+    {
+      this.getChildControl("container").setGroupAsc(value); 
+    },
+
     // property apply
     _applySourceFileName : function(value, old)
     {

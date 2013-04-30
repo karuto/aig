@@ -202,6 +202,13 @@ new aiagallery.main.Module(
   aiagallery.main.Constant.PageName.Contest,
   aiagallery.module.dgallery.contest.Contest);
 
+new aiagallery.main.Module(
+  "Studios",
+  "aiagallery/module/emblem-favorite.png",
+  "Studios",
+  aiagallery.main.Constant.PageName.Groups,
+  aiagallery.module.dgallery.groups.Groups);
+
 if (qx.core.Environment.get("qx.debug"))
 {
   new aiagallery.main.Module(

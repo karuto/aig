@@ -601,6 +601,19 @@ qx.Mixin.define("aiagallery.dbif.MApps",
                                    requestData.uid);
     },
 
+    /**
+     *  Create a new app in the database or edit 
+     *  an existing app.
+     * 
+     * @param uid {String}
+     *   The uid of the existing app object
+     * 
+     * @param attributes {Map}
+     *   A map of app attributes (title, tags, etc)
+     * 
+     * @param error {Error}
+     *   The error object  
+     */
 
     addOrEditApp : function(uid, attributes, error)
     {
@@ -645,7 +658,8 @@ qx.Mixin.define("aiagallery.dbif.MApps",
           "image1",
           "source",
           "sourceFileName",
-          "tags"
+          "tags",
+          "groupAsc"
         ];
       var             requiredFields =
         [
@@ -845,13 +859,35 @@ qx.Mixin.define("aiagallery.dbif.MApps",
                 }
                 break;
 
+              case "groupAsc":
+                // For each group asc specified
+                // create a new appAsc object
+                attributes.groupAsc.forEach(
+                  function(group)
+                  {
+                    var name;
+
+                    // Get group name
+                    name = group.split("by")[0].trim();                     
+
+                    this.associateAppWithGroup(uid, name, error);
+                  }
+
+                ,this);
+                
+
+                // Clean up possible orphaned appAsc Objects
+                this.__cleanOrphanedAppAscObjects(attributes.groupAsc, uid, error); 
+                
+                break;
+
               default:
                 // Replace what's in the db entry
                 appData[field] = attributes[field];
                 break;
               }
             }
-          });
+          }, this);
 
         // If tags were specified, did we find at least one category tag?
         if (attributes.tags && ! bHasCategory)
@@ -1624,6 +1660,9 @@ qx.Mixin.define("aiagallery.dbif.MApps",
               }
             });
       
+          // Remove all AppAsc objects
+          this._deleteAppAscApp(appObj.uid); 
+
           // Delete the app
           appObj.removeSelf();
 
@@ -1726,6 +1765,8 @@ qx.Mixin.define("aiagallery.dbif.MApps",
       var             owners;
       var             email;
       var             displayName;
+      var             groupList;
+      var             cleanGroupList = []; 
 
       // Get the current user
       whoami = this.getWhoAmI();
@@ -1821,6 +1862,18 @@ qx.Mixin.define("aiagallery.dbif.MApps",
               delete app["owner"];
             }
 
+            // Get a list of all the groups this app is associated with
+            // Add this list to the app map
+            criteria = 
+              {
+                type  : "element",
+                field : "app",
+                value : app["uid"]
+              };
+
+            app["groupAsc"] = liberated.dbif.Entity.query("aiagallery.dbif.ObjAppAsc",
+                                                          criteria);
+
             // Do special App Engine processing to scale images
             if (liberated.dbif.Entity.getCurrentDatabaseProvider() ==
                 "appengine")
@@ -1860,8 +1913,45 @@ qx.Mixin.define("aiagallery.dbif.MApps",
       // They want only the tag value to be returned
       categoryNames = categories.map(function() { return arguments[0].value; });
 
+      // Create the criteria for a search of groups the user is a part of
+      criteria =
+        {
+          type  : "element",
+          field : "users",
+          value : whoami.id 
+        };
+      
+      // Issue a query for groups the user is a member of 
+      groupList = liberated.dbif.Entity.query("aiagallery.dbif.ObjGroup", 
+                                               criteria);
+
+      // Only return the group name and the owner's name 
+      groupList.forEach(
+        function(group)
+        {
+          var    visitor;
+          var    visitorData;
+
+          // Get the display name of the owner of this group
+          visitor = new aiagallery.dbif.ObjVisitors(group.owner);
+          visitorData = visitor.getData();
+
+          cleanGroupList.push({
+                               name  : group.name,
+                               owner : visitorData.displayName,
+                               entry : group.name + "  by " + visitorData.displayName
+                               });
+
+        }
+      );
+      
+
       // We've built the whole list. Return it.
-      return { apps : appList, categories : categoryNames };
+      return {
+               apps       : appList, 
+               categories : categoryNames, 
+               groups     : cleanGroupList
+             };
     },
     
     /**

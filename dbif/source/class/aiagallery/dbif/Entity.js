@@ -16,6 +16,8 @@
 #use(aiagallery.dbif.ObjVisitors)
 #use(aiagallery.dbif.ObjSearch)
 #use(aiagallery.dbif.ObjPermissionGroup)
+#use(aiagallery.dbif.ObjGroup)
+#use(aiagallery.dbif.ObjAppAsc)
 
 
 #use(aiagallery.dbif.ObjTest)
