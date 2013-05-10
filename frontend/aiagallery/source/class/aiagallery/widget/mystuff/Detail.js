@@ -328,16 +328,6 @@ qx.Class.define("aiagallery.widget.mystuff.Detail",
       this);
     this.ffSource = o;
 
-
-    // ********* beta002 start *********
-    // Objective: add app upload instructions.
-
-//    form.add(o, "This is a reminder about file upload", null, "sourceprompt", null,
-//             { row : 1, column : 6, rowSpan : 1 });
-//    o = new qx.ui.basic.Label("This is a reminder about file upload");
-//    form.add(o, "This is a reminder about file upload", null, "sourceprompt", null,
-//             { row : 0, column : 6, rowSpan : 1 });
-
     // Create a temporary container for a spacer, a label, and a spacer
     tempContainer = new qx.ui.container.Composite(new qx.ui.layout.HBox());
 
@@ -356,10 +346,6 @@ qx.Class.define("aiagallery.widget.mystuff.Detail",
     // Add the right spacer
     tempContainer.add(new qx.ui.core.Spacer(), { flex : 1 });
     form.addButton(tempContainer, { row : 0, column : 7, rowSpan : 1 });
-
-    // bind onClick event for the popup
-//    sourceFileMessage = "Please upload the source code (.zip file) for an App Inventor app. To create this file in App Inventor, go to the My Projects page, select the project you want, then  choose "Other Actions" and select "Download Source". Do not open the downloaded zip file but upload it here directly.";
-//    this.sourceFilePrompt.addListener("click", function(e){ alert(sourceFileMessage); }, this);
 
     // define the popup we need
     var sourceFilePopup = new qx.ui.popup.Popup(new qx.ui.layout.Canvas()).set({
@@ -382,14 +368,6 @@ qx.Class.define("aiagallery.widget.mystuff.Detail",
         sourceFilePopup.placeToMouse(e);
         sourceFilePopup.show();
     }, this);
-        
-    // ********* beta002 end *********
-
-        
-
-    // ********* beta002 end *********
-
-
     
     // Image1
     o = new aiagallery.widget.mystuff.FormImage("Select Image", "image1");
@@ -412,11 +390,6 @@ qx.Class.define("aiagallery.widget.mystuff.Detail",
       },
       this);
     this.fiImage1 = o;
-
-
-
-    // ********* beta002 start *********
-    // Objective: add app upload instructions.
 
     // Create a temporary container for a spacer, a label, and a spacer
     tempContainer = new qx.ui.container.Composite(new qx.ui.layout.HBox());
@@ -458,10 +431,7 @@ qx.Class.define("aiagallery.widget.mystuff.Detail",
         selectImagePopup.placeToMouse(e);
         selectImagePopup.show();
     }, this);
-        
-    // ********* beta002 end *********
-
-
+    
 
     //
     // Add the buttons at the end

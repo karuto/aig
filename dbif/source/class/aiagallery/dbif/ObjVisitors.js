@@ -30,6 +30,7 @@ qx.Class.define("aiagallery.dbif.ObjVisitors",
           "location"       : "",
           "bio"            : "",
           "url"            : "",
+          "image1"         : null,
           "organization"   : "",
           "showEmail"      : 0,
           "birthYear"      : 0,
@@ -107,6 +108,12 @@ qx.Class.define("aiagallery.dbif.ObjVisitors",
 
         /** User's own website */
         "url" : "String", 
+
+        /** Image #1 (data: or real URL) */
+        "image1" : "LongString",
+
+        /** Image #1 blob id */
+        "image1blob" : "String",
 
         /** 1 to show email publicly or 0 to not */
         "showEmail" : "Integer",

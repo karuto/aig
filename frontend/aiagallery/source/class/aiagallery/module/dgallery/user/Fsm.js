@@ -293,7 +293,26 @@ qx.Class.define("aiagallery.module.dgallery.user.Fsm",
 
           field = fsm.getObject("commentAppCheck");
           newUserInfo["updateOnAppComment"] = field.getValue() ? 1 : 0; 
-
+          
+          console.log("Got in here! Next is profile image");
+            console.log(fsm.getObject("profileImageCheck"));
+          
+          // Ensure we have a data url
+          if (! qx.lang.Type.isString(fsm.getObject("profileImageCheck")) ||
+                fsm.getObject("profileImageCheck").substring(0, 5) != "data:") 
+          {
+            // The image is invalid. Let 'em know.
+            console.log("Invalid image data, sorry!");
+            console.log(fsm.getObject("profileImageCheck").substring(0, 5));
+            error.setCode(4);
+            error.setMessage("Invalid image data");
+            throw error;
+          } else {
+          
+            console.log("It's a string alright");
+            console.log(fsm.getObject("profileImageCheck").substring(0, 5));
+          }
+          
           field = fsm.getObject("commentAppUpdateFrequency");
           if(field.getSelection()[0].getLabel() != "Every...")
           {

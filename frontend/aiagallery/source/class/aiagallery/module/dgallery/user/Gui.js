@@ -841,14 +841,20 @@ qx.Class.define("aiagallery.module.dgallery.user.Gui",
       //vBoxOptionDownload.add(this.downloadAppUpdateFrequency);
       vBoxOptions.add(vBoxOptionDownload); 
 
-      var o = new aiagallery.widget.mystuff.FormImage("Select your profile image", "image1");
-      o.set(
+
+      // Profile image upload form
+      this.profileImage = new aiagallery.widget.mystuff.FormImage("Select your profile image", "image1");
+      this.profileImage.set(
       {
         tabIndex : 10,
         focusable : false,
         required : true
       });
-      vBoxOptions.add(o); 
+      vBoxOptions.add(this.profileImage);
+      
+      // Create friendly name to get this option from FSM
+      this._fsm.addObject("profileImageCheck", 
+         this.profileImage,"main.fsmUtils.disable_during_rpc"); 
 
       // Overall layout
       layout = new qx.ui.layout.HBox();
