@@ -448,7 +448,7 @@ qx.Mixin.define("aiagallery.dbif.MVisitors",
     editProfile : function(profileParams, error)
     {
       var             me;
-      var             meData;
+      var             myData;
       var             whoami;
       var             propertyTypes;
       var             fields;
@@ -480,11 +480,14 @@ qx.Mixin.define("aiagallery.dbif.MVisitors",
       me = new aiagallery.dbif.ObjVisitors(whoami.id);
       
       // Get my object data
-      meData = me.getData();
+      myData = me.getData();
 
       // Get the field names for this entity type
       propertyTypes = liberated.dbif.Entity.propertyTypes;
       fields = propertyTypes["visitors"].fields;
+      
+      this.debug("Testing print profile image data here");
+      this.debug(profileParams["image1"]);
       
       // For now the actual editing has been encased in a
       // transaction in order to ensure a username change does not
@@ -520,7 +523,7 @@ qx.Mixin.define("aiagallery.dbif.MVisitors",
                   this.__checkName(whoami.id, profileParams.displayName, error);
 
                   // Store back into me
-                  meData[fieldName] = profileParams.displayName; 
+                  myData[fieldName] = profileParams.displayName; 
 
                   // Update the cache with the new name
                   // Only do this if the name actually changes
@@ -563,7 +566,7 @@ qx.Mixin.define("aiagallery.dbif.MVisitors",
                 }
 
                 // Assign the new value.
-                meData[fieldName] = profileParams[fieldName];
+                myData[fieldName] = profileParams[fieldName];
               }, this);
           }
           catch(error)

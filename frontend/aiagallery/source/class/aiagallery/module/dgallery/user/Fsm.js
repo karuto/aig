@@ -212,6 +212,7 @@ qx.Class.define("aiagallery.module.dgallery.user.Fsm",
           var             fieldMonth;
           var             yearString;
           var             monthString; 
+          var             profileImageString;
           
           // Parse data from dialog into map
           // Ensure no added whitespace by using trim()
@@ -293,25 +294,28 @@ qx.Class.define("aiagallery.module.dgallery.user.Fsm",
 
           field = fsm.getObject("commentAppCheck");
           newUserInfo["updateOnAppComment"] = field.getValue() ? 1 : 0; 
-          
-          console.log("Got in here! Next is profile image");
-            console.log(fsm.getObject("profileImageCheck"));
-          
-          // Ensure we have a data url
-          if (! qx.lang.Type.isString(fsm.getObject("profileImageCheck")) ||
-                fsm.getObject("profileImageCheck").substring(0, 5) != "data:") 
+                    
+                    
+          profileImageString = fsm.getObject("profileImageCheck").getValue();
+          console.log(profileImageString);
+                              
+          // Ensure we have a data url captured from profile image upload form
+          if (! qx.lang.Type.isString(profileImageString) ||
+                profileImageString.substring(0, 5) != "data:") 
           {
             // The image is invalid. Let 'em know.
-            console.log("Invalid image data, sorry!");
-            console.log(fsm.getObject("profileImageCheck").substring(0, 5));
+            // TODO: ReferenceError: error is not defined
+            /*
             error.setCode(4);
             error.setMessage("Invalid image data");
             throw error;
+            */
           } else {
-          
-            console.log("It's a string alright");
-            console.log(fsm.getObject("profileImageCheck").substring(0, 5));
+            // The image is valid. Prepare to send it to backend for processing
+            console.log(profileImageString.substring(0, 5));
+            newUserInfo["image1"] = profileImageString;
           }
+          
           
           field = fsm.getObject("commentAppUpdateFrequency");
           if(field.getSelection()[0].getLabel() != "Every...")
@@ -348,10 +352,8 @@ qx.Class.define("aiagallery.module.dgallery.user.Fsm",
                          "aiagallery.features",
                          "editProfile",
                          [
-
                           newUserInfo 
-                           
-                        ]);
+                         ]);
 
           // When we get the result, we'll need to know what type of request
           // we made.
