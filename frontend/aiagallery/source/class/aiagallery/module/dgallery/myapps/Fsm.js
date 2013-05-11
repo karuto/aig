@@ -189,8 +189,8 @@ qx.Class.define("aiagallery.module.dgallery.myapps.Fsm",
           {
               // Prepare variables for memcache, just like in getAppInfo()
               var uid = model.uid;
-	      var memcacheServiceFactory;
-	      var syncCache;
+	          var memcacheServiceFactory;
+	          var syncCache;
 
               // Concat a bunch of strings with UID as keys in memcache
               var retapp = "retapp_";
@@ -207,10 +207,10 @@ qx.Class.define("aiagallery.module.dgallery.myapps.Fsm",
               var key_comments = retcomments.concat(uid);
               var key_commentsflag = retcommentsflag.concat(uid);
 
-	      // Setting up memcache references
-	      memcacheServiceFactory = 
-                Packages.com.google.appengine.api.memcache.MemcacheServiceFactory;
-	      syncCache = memcacheServiceFactory.getMemcacheService();	
+	          // Setting up memcache references
+	          memcacheServiceFactory = 
+                    Packages.com.google.appengine.api.memcache.MemcacheServiceFactory;
+	          syncCache = memcacheServiceFactory.getMemcacheService();	
 
               // Make sure to clear memcache for this app's data of all sorts
 /**              var testvar = false;
@@ -222,7 +222,7 @@ qx.Class.define("aiagallery.module.dgallery.myapps.Fsm",
                 alert(key_app);
               }
 **/
-              alert(syncCache.get(key_app));
+              // alert(syncCache.get(key_app));
               syncCache.delete(key_app);
               syncCache.delete(key_flag);
               syncCache.delete(key_likes);
@@ -230,7 +230,6 @@ qx.Class.define("aiagallery.module.dgallery.myapps.Fsm",
               syncCache.delete(key_comments);
               syncCache.delete(key_commentsflag);
           }
-
         }
       });
 
