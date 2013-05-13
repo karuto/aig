@@ -1,5 +1,6 @@
 /**
  * Copyright (c) 2011 Derrell Lipman
+ * Copyright (c) 2013 Vincent Yao Zhang
  * 
  * License:
  *   LGPL: http://www.gnu.org/licenses/lgpl.html 
@@ -75,15 +76,14 @@ qx.Class.define("aiagallery.main.Gui",
         application = new qx.ui.container.Composite(o);
         application.set(
           { 
-/*            left: "10%",
-            right: "10%",
-*/            backgroundColor: "white"
+            backgroundColor: "white"
           });
-        application.setWidth(800);
+        application.setWidth(1000);
 
         // create a composite for the whole document
         var globalComposite = new qx.ui.container.Composite();
-        this.getApplicationRoot().add(globalComposite, {left: 0, right: 0, top: 0, bottom: 0});
+        this.getApplicationRoot().add(globalComposite, 
+            {left: 0, right: 0, top: 0, bottom: 0});
         globalComposite.setLayout(new qx.ui.layout.HBox());
 
         globalComposite.add(new qx.ui.core.Spacer(), {flex: 1});
@@ -94,7 +94,10 @@ qx.Class.define("aiagallery.main.Gui",
         header = new qx.ui.container.Composite(new qx.ui.layout.HBox(6));
         header.set(
           {
-            height          : 40,
+            height          : 50,
+            marginTop       : 10,
+            marginLeft      : 10,
+            marginRight     : 10,
             backgroundColor : "#FFFFFF"
           });
 
@@ -102,9 +105,10 @@ qx.Class.define("aiagallery.main.Gui",
         o = new qx.ui.basic.Image("aiagallery/aicg.png");
         o.set(
           {
-            height : 57,
-            width  : 183,
-            cursor : "pointer"
+            height : 60,
+            width  : 60,
+            cursor : "pointer",
+            backgroundColor : "red"
           });
         o.addListener(
           "click",
@@ -120,24 +124,41 @@ qx.Class.define("aiagallery.main.Gui",
         header.add(o);
 
         // Create a small spacer after the logo
-        o = new qx.ui.core.Spacer(20);
+        o = new qx.ui.core.Spacer(5);
         header.add(o);
+/*
+        // The font configuration would normally be defined in application's
+        // font theme ($APPLICATION.theme.Font).
+        var fontsConfig = {
+        "webFontGoogle" :
+        {
+          size: 16,
+          family: ["sans-serif"],
+          sources:
+          [
+            {
+              family : "FinelinerScriptRegular",
+              source:
+              [
+                "demobrowser/demo/fonts/fineliner_script-webfont.eot",
+                "demobrowser/demo/fonts/fineliner_script-webfont.ttf",
+                "demobrowser/demo/fonts/fineliner_script-webfont.woff"
+              ]
+            }
+          ]
+        }
+        };*/
 
         // Add a label to the header
         o = new qx.ui.basic.Label(
-          "<div>" +
-          "<center>" +
-          "App Inventor" +
-          "<br />" +
-          "Community Gallery" +
-          "</center>" +
+          "<link href='http://fonts.googleapis.com/css?family=Roboto+Condensed:400italic,400' rel='stylesheet' type='text/css'>" +
+          "<div style='font-family: 'Roboto Condensed', sans-serif; font-weight: 400; font-size: 28px; font-style: italic;'>" +
+          "App Inventor Community Gallery" +
           "</div>");
-        font = qx.theme.manager.Font.getInstance().resolve("bold").clone();
-        font.setSize(22);
         o.set(
           {
-            rich : true,
-            font : font
+            backgroundColor : "teal",
+            rich : true
           });
         header.add(o);
 
