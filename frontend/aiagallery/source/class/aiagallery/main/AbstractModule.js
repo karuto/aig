@@ -6,6 +6,8 @@
  *   EPL : http://www.eclipse.org/org/documents/epl-v10.php
  */
 
+/** THIS IS A TEST **/ 
+
 /**
  * Abstract Module class.  All modules should extend this class.
  */

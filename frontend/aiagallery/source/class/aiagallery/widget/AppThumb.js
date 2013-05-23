@@ -6,6 +6,7 @@
  *   EPL : http://www.eclipse.org/org/documents/epl-v10.php
  */
 
+/** This is a test */ 
 qx.Class.define("aiagallery.widget.AppThumb",
 {
   extend : qx.ui.basic.Atom,
