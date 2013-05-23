@@ -50,13 +50,16 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
       scrollContainer = new qx.ui.container.Scroll();
       outerCanvas.add(scrollContainer, { flex : 1 });
 
-      canvas = new qx.ui.container.Composite(new qx.ui.layout.VBox(10)); 
+      canvas = new qx.ui.container.Composite(new qx.ui.layout.VBox()); 
+      canvas.set({ padding: 10 });
       scrollContainer.add(canvas, { flex : 1 });
 
       // Will hold the group info
       this.groupLayout 
         = new qx.ui.container.Composite(new qx.ui.layout.VBox(20));
-
+      this.groupLayout.setBackgroundColor('#C0C0FF');
+      //this.groupLayout.setPadding(10);
+      
       // Button to join group
       this.joinGroupBtn = new qx.ui.form.Button(this.tr("Request Membership")); 
 
@@ -164,7 +167,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
             height : 210
           });
       scroller.add(this.groupAscAppsContainer, {flex : 1});
-     
+      
       // we will add this later     
 
       // Flag a user for having inappropriate content
@@ -309,13 +312,12 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
 
         // Add all the detail of the group to the canvas
         font = qx.theme.manager.Font.getInstance().resolve("bold").clone();
-        font.setSize(26);
+        font.setSize(21);
 
         // Header on the page 
         label = new qx.ui.basic.Label(group.name);
         label.set(
           {
-            width  : 500,
             height : 30,
             font   : font
           }
@@ -324,10 +326,25 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
         // Save group name as user data so the flag it widget
         // can retrieve it later
         this.setUserData("studioname", group.name);
-
         this.groupLayout.add(label); 
-        this.groupLayout.add(new qx.ui.core.Spacer(20)); 
 
+        // Type info
+        layout = new qx.ui.container.Composite(new qx.ui.layout.HBox());
+        if (group.type === "Educational") {
+          if(group.subType) {
+            label = new qx.ui.basic.Label(group.subType);
+          } else {
+            label = new qx.ui.basic.Label(group.type);                       
+          }
+        } else {
+          label = new qx.ui.basic.Label(group.type);     
+        }
+        label.set({  });
+        layout.add(label);   
+
+        this.groupLayout.add(layout); 
+
+/*
         // Owner
         label = new qx.ui.basic.Label(this.tr("Studio Owner:"));
         label.setFont("bold");
@@ -375,49 +392,20 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
         layout.add(label); 
 
         this.groupLayout.add(layout); 
+*/
 
         // Description
-        label = new qx.ui.basic.Label(this.tr("Description: "));
-        label.setFont("bold");
-        this.groupLayout.add(label); 
-
         guiObject = new qx.ui.form.TextArea("");
         guiObject.set(
           {
             value      : group.description, 
-            appearance : "widget",
+            appearance : "widget", 
             readOnly   : true,
-            wrap       : true,
-            maxWidth      : 350,
-            height     : 100   
+            wrap       : true
           }
         );
 
         this.groupLayout.add(guiObject); 
-
-        // Type info
-        layout = new qx.ui.container.Composite(new qx.ui.layout.HBox());
-
-        label = new qx.ui.basic.Label(this.tr("Type: "));
-        label.setFont("bold");
-        layout.add(label);
-
-        label = new qx.ui.basic.Label(group.type);
-        layout.add(label);
-
-        if(group.subType)
-        {
-          layout.add(new qx.ui.core.Spacer(10)); 
-
-          label = new qx.ui.basic.Label(this.tr("Subtype: "));
-          label.setFont("bold");
-          layout.add(label);
-
-          label = new qx.ui.basic.Label(group.subType);
-          layout.add(label);
-        }
-
-        this.groupLayout.add(layout); 
 
         // Members
         label = new qx.ui.basic.Label(this.tr("Members: "));
@@ -426,7 +414,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
 
         // Create a layout to show 5 users across.
         // Each user should be clickable to their profile page.
-        layout = new qx.ui.container.Composite(new qx.ui.layout.HBox(7));
+        layout = new qx.ui.container.Composite(new qx.ui.layout.HBox());
 
          group.users.forEach(
            function(user)
@@ -438,7 +426,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
  
                // Add existing layout and reint
                this.groupLayout.add(layout);
-               layout = new qx.ui.container.Composite(new qx.ui.layout.HBox(7));
+               layout = new qx.ui.container.Composite(new qx.ui.layout.HBox());
              } 
 
              label = new qx.ui.basic.Label(user);
