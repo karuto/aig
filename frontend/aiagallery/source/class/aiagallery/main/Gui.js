@@ -388,9 +388,20 @@ qx.Class.define("aiagallery.main.Gui",
                 "Profile",
                 aiagallery.main.Constant.PageName.User,
                 aiagallery.module.dgallery.user.User);
+                
+              moduleList["Profile"] = {}; 	   	      
+              moduleList["Profile"]["Profile"] = module;   
+                
+              // ... create the studio management page as well
+              module = new aiagallery.main.Module(
+                "Studio Management",
+                "aiagallery/module/emblem-favorite.png",
+                "Studio Management",
+                aiagallery.main.Constant.PageName.StudioManagement,
+                aiagallery.module.dgallery.studiomanagement.StudioManagement);
 
-              moduleList["Profile"] = {}; 	      
-              moduleList["Profile"]["Profile"] = module;
+              moduleList["Studios Management"] = {}; 
+              moduleList["Studios Management"]["Studios Management"] = module;
 
               // We've instantiated a new module which needs to be added
               bAddModules = true;
