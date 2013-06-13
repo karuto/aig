@@ -57,8 +57,12 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
       // Will hold the group info
       this.groupLayout 
         = new qx.ui.container.Composite(new qx.ui.layout.VBox(20));
-      this.groupLayout.setBackgroundColor('#C0C0FF');
       //this.groupLayout.setPadding(10);
+      
+      // Will hold the basic group info, such as name, type, action buttons, etc
+      this.groupInfoLayout 
+        = new qx.ui.container.Composite(new qx.ui.layout.HBox()); 
+      this.groupInfoLayout.setBackgroundColor('#C0C0FF'); 
       
       // Button to join group
       this.joinGroupBtn = new qx.ui.form.Button(this.tr("Request Membership")); 
@@ -67,7 +71,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
       this.joinGroupBtn.set(
         {
           maxWidth : 160,
-          maxHeight : 60
+          maxHeight : 60 /* KM Original: 60 */
         }
       );
 
@@ -87,7 +91,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
       this.ascAppPopupBtn.set(
         {
           maxWidth : 160,
-          maxHeight : 60
+          maxHeight : 60 /* KM Original: 60 */
         }
       );
 
@@ -197,7 +201,9 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
 
            win.show();          
         },
-        this);
+        this);    
+        
+      this.groupLayout.add(this.groupInfoLayout);
 
       canvas.add(this.groupLayout); 
       this.canvas = canvas; 
@@ -228,6 +234,7 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
       var             guiObject; 
       var             count = 0; 
 
+      var             typeString;
       var             warnString; 
       var             stringMsg; 
       var             who;
@@ -318,31 +325,41 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
         label = new qx.ui.basic.Label(group.name);
         label.set(
           {
+            rich   : true,
             height : 30,
-            font   : font
+            font   : font,
+            width  : 200
           }
         );
 
         // Save group name as user data so the flag it widget
         // can retrieve it later
         this.setUserData("studioname", group.name);
-        this.groupLayout.add(label); 
+        this.groupInfoLayout.add(label); 
 
-        // Type info
-        layout = new qx.ui.container.Composite(new qx.ui.layout.HBox());
+        // Group type info, setup string
+        typeString = "<span style='display: inline;'>" 
+                    + group.type + "</span>";
+/*
         if (group.type === "Educational") {
           if(group.subType) {
-            label = new qx.ui.basic.Label(group.subType);
-          } else {
-            label = new qx.ui.basic.Label(group.type);                       
+            typeString = "<span style='display: inline;'>" 
+                        + group.subType + "</span>";
           }
-        } else {
-          label = new qx.ui.basic.Label(group.type);     
         }
-        label.set({  });
-        layout.add(label);   
+*/        
+        label = new qx.ui.basic.Label(typeString);
+        label.set(
+          {
+            rich   : true
+          }
+        );
 
-        this.groupLayout.add(layout); 
+        this.groupInfoLayout.add(label); 
+
+
+        // KM
+        this.groupLayout.add(this.groupInfoLayout);
 
 /*
         // Owner
@@ -408,14 +425,13 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
         this.groupLayout.add(guiObject); 
 
         // Members
-        label = new qx.ui.basic.Label(this.tr("Members: "));
+        layout = new qx.ui.container.Composite(new qx.ui.layout.HBox(5));
+        label = new qx.ui.basic.Label("Members: ");
         label.setFont("bold");
-        this.groupLayout.add(label); 
+        layout.add(label); 
 
         // Create a layout to show 5 users across.
         // Each user should be clickable to their profile page.
-        layout = new qx.ui.container.Composite(new qx.ui.layout.HBox());
-
          group.users.forEach(
            function(user)
            {
@@ -473,6 +489,8 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
 
         // Add remaining names 
         this.groupLayout.add(layout);
+        
+        
 
         // Based on the status of the user in relation to the group
         // modify the join group button
@@ -636,8 +654,8 @@ qx.Class.define("aiagallery.module.dgallery.groupinfo.Gui",
         if (group.joinType == aiagallery.dbif.Constants.JoinType.Public
             || bShowBtn)
         {
-          this.groupLayout.add(this.joinGroupBtn);
-          this.groupLayout.add(this.ascAppPopupBtn);
+          this.groupInfoLayout.add(this.joinGroupBtn); /* KM: Change layout to HBox */
+          this.groupInfoLayout.add(this.ascAppPopupBtn);
         }
 
         // Add associated apps scroller
