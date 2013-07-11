@@ -37,46 +37,102 @@ qx.Class.define("aiagallery.module.dgallery.studiomanagement.Gui",
       
       var             box;
       var             canvas; 
+      var             topCanvas;
+      var             columnCanvas;       
       var             label;
+      var             button;
       
       
       // Put whole page in a scroller 
       outerCanvas.setLayout(new qx.ui.layout.VBox());
       var scrollContainer = new qx.ui.container.Scroll();
       outerCanvas.add(scrollContainer, { flex : 1 });
+      // Create the major container that will be adding things into
+      canvas = new qx.ui.container.Composite(new qx.ui.layout.VBox(10));
 
-      // Create a layout for this page
-      // container width < layout min width
-      box = new qx.ui.layout.HBox();
+      // Page top container
+      topCanvas = new qx.ui.container.Composite(new qx.ui.layout.HBox(10));
+      
+      // Page top text label
+      label = new qx.ui.basic.Label("");
+      label.set(
+        {
+          value : "<div style='font-size:18px; font-weight:900;'>Studios Management</div>",
+          rich  : true
+        });
+      topCanvas.add(label);
+      
+      // Page top buttons
+      button = new qx.ui.form.ToggleButton("My studios");
+      topCanvas.add(button);
+      button = new qx.ui.form.ToggleButton("Create new studio");
+      button.focus();
+      topCanvas.add(button);
+      
+      canvas.add(topCanvas);
+
+
+      // Android-green line divider
+      o = new qx.ui.container.Composite();
+      o.set(
+        {
+          height    : 4,
+          backgroundColor : "#a5c43c"
+        });
+      canvas.add(o);
+
+      // Create a container for the 2 main columns
+      columnCanvas = new qx.ui.container.Composite(new qx.ui.layout.VBox(15));
+      
+      
+      box = new qx.ui.layout.VBox();
       box.setSpacing(5);
-      canvas = new qx.ui.container.Composite(box).set({
+      // Setup two horizontal panels for group list and detail
+      groupsColumn = new qx.ui.container.Composite(box).set({
+        minWidth : 300
+      });
+      detailColumn = new qx.ui.container.Composite(box).set({
         minWidth : 600
       });
-
-      // Setup two horizontal panels for group list and detail
-      groupsColumn = new qx.ui.container.Composite(new qx.ui.layout.VBox(0));
-      detailColumn = new qx.ui.container.Composite(new qx.ui.layout.VBox(0)); 
-
-/*
-      canvas.add(new qx.ui.core.Widget().set({decorator: "main", backgroundColor: "green", minWidth: 120}), { flex : 1 });
-      canvas.add(new qx.ui.core.Widget().set({decorator: "main", backgroundColor: "green", minWidth: 120}), { flex : 2 });
-      canvas.add(new qx.ui.core.Widget().set({decorator: "main", backgroundColor: "green", minWidth: 120}), { flex : 3 });
-*/
-
+      
       // Text label
       label = new qx.ui.basic.Label("");
       label.set(
         {
-          value : "<a href= http://gallery.appinventor.mit.edu/#page%3DApp%26uid%3D123034%26label%3DPong%20Cubed > Pong Cubed </a>",
-          rich  : true
+          value : "<div style='font-size:18px;'>My studios $raquo;</div>",
+          rich  : true,
+          width : 300
         });
 
       // Add everything up properly
       groupsColumn.add(label);    
-      canvas.add(groupsColumn);  
-      canvas.add(detailColumn);
-      scrollContainer.add(canvas, { flex: 1 });      
       
+      // Text label
+      label = new qx.ui.basic.Label("");
+      label.set(
+        {
+          value : "<div style='font-size:21px;'>Test group name goes here</div>",
+          rich  : true,
+          width : 600
+        });
+
+      detailColumn.add(label);    
+      
+      // Add everything up properly
+      columnCanvas.add(groupsColumn);  
+      /*
+      // Android-green line divider in between 2 columns
+      o = new qx.ui.container.Composite();
+      o.set(
+        {
+          width    : 2,
+          backgroundColor : "#a5c43c"
+        });
+      columnCanvas.add(o);
+      */
+      columnCanvas.add(detailColumn);
+      canvas.add(columnCanvas);
+      scrollContainer.add(canvas, { flex: 1 });     
       
     },
 
