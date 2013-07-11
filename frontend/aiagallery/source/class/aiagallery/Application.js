@@ -209,6 +209,13 @@ new aiagallery.main.Module(
   aiagallery.main.Constant.PageName.Groups,
   aiagallery.module.dgallery.groups.Groups);
 
+new aiagallery.main.Module(
+  "Studio Management",
+  "aiagallery/module/emblem-favorite.png",
+  "Studio Management",
+  aiagallery.main.Constant.PageName.StudioManagement,
+  aiagallery.module.dgallery.studiomanagement.StudioManagement);
+
 if (qx.core.Environment.get("qx.debug"))
 {
   new aiagallery.main.Module(

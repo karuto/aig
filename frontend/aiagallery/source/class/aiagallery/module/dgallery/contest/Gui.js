@@ -1290,8 +1290,6 @@ qx.Class.define("aiagallery.module.dgallery.contest.Gui",
           //e.preventDefault();
           //e.stop();
 
-          // Remove "by" from displayName
-          //displayName = e.getTarget().getValue().substring(8); 
           displayName = e.getTarget().getUserData("username"); 
 
           // Launch user page module

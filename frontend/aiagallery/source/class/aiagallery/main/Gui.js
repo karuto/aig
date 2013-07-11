@@ -132,9 +132,10 @@ qx.Class.define("aiagallery.main.Gui",
         // Add another label to header for release note + forum helper text
         o = new qx.ui.basic.Label(
           "<div><br/>" +
-          "Welcome to the gallery! See <a href=\"https://docs.google.com/document/d/1sZ3rRdjsuicLbiaarLzbdspsmdfkllxRhWzY-y62sZk/edit\" target=\"_blank\" >Release Notes</a><br/>" +
-          "and post feedback / bug reports to the " +
-          "<a href=\"http://groups.google.com/group/app-inventor-gallery/topics\" target=\"_blank\" >Forum</a>." + 
+          "See <a href=\"https://docs.google.com/document/d/1sZ3rRdjsuicLbiaarLzbdspsmdfkllxRhWzY-y62sZk/edit\" target=\"_blank\" >Release Notes</a>" +
+          " and post feedback to the " +
+          "<a href=\"http://groups.google.com/group/app-inventor-gallery/topics\" target=\"_blank\" >Forum</a>.<br>" + 
+          "Gallery is being developed by <a href=\"http://democratizecomputing.org/\" target=\"_blank\">USF, MIT and UMass-Lowell</a>." + 
           "</div>");
         font = qx.theme.manager.Font.getInstance().resolve("bold").clone();
         o.set(

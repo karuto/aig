@@ -65,22 +65,21 @@ qx.Class.define("aiagallery.module.dgallery.studiomanagement.Fsm",
 
         "events" :
         {
-          // Messages pushed by the server, e.g. app status changes
-          "serverPush" : "Transition_Idle_to_Idle_via_serverPush",
-
-          // On the clicking of a Save button in an app's Detail editing area
-          "saveApp" : "Transition_Idle_to_AwaitRpcResult_via_saveApp",
-          
-          // On the clicking of a Delete button in an app's Detail editing area
-          "deleteApp" : "Transition_Idle_to_AwaitRpcResult_via_deleteApp",
+          // On the clicking of a button, execute is fired
+          "execute" :
+          {
+            
+            "queryBtn" : "Transition_Idle_to_AwaitRpcResult_via_query"
+            
+          },
           
           // When we get an appear event, retrieve the category tags list. We
           // only want to do it the first time, though, so we use a predicate
           // to determine if it's necessary.
           "appear"    :
           {
-            "main.canvas" : 
-              qx.util.fsm.FiniteStateMachine.EventHandling.PREDICATE
+            //"main.canvas" : 
+            //  qx.util.fsm.FiniteStateMachine.EventHandling.PREDICATE
           },
 
           // When we get a disappear event
@@ -146,17 +145,17 @@ qx.Class.define("aiagallery.module.dgallery.studiomanagement.Fsm",
       state.addTransition(trans);
 
 
-      /*
+        /*
        * Transition: Idle to Awaiting RPC Result
        *
-       * Cause: Save button was pressed, and Detail form validates
+       * Cause: "Search" button pressed
        *
        * Action:
-       *  Initiate a request save the changed data
+       *  Initiate a request for the list of  matching applications.
        */
         
       trans = new qx.util.fsm.Transition(
-        "Transition_Idle_to_AwaitRpcResult_via_saveApp",
+        "Transition_Idle_to_AwaitRpcResult_via_query",
       {
         "nextState" : "State_AwaitRpcResult",
 
@@ -164,127 +163,33 @@ qx.Class.define("aiagallery.module.dgallery.studiomanagement.Fsm",
 
         "ontransition" : function(fsm, event)
         {
-          var             data = event.getData();
-          var             model = data.model;
+          var             criteria;
+          var             criterium;
           var             request;
+          var             selection;
+
+
 
           // Issue the remote procedure call to execute the query
           request =
             this.callRpc(fsm,
                          "aiagallery.features",
-                         "addOrEditApp",
+                         "mobileRequest",
                          [
-                           model.uid,
-                           model
-                         ]);
+
+                          fsm.getObject("queryField").getValue()
+                           
+                        ]);
 
           // When we get the result, we'll need to know what type of request
           // we made.
-          request.setUserData("requestType", "addOrEditApp");
-          
-          // Save the App object to which this request applies
-          request.setUserData("App", data.app);
-        }
-      });
-
-      state.addTransition(trans);
-
-      /*
-       * Transition: Idle to Awaiting RPC Result
-       *
-       * Cause: Delete button was pressed on a previously-saved app
-       *
-       * Action:
-       *  Initiate a request save the changed data
-       */
-        
-      trans = new qx.util.fsm.Transition(
-        "Transition_Idle_to_AwaitRpcResult_via_deleteApp",
-      {
-        "nextState" : "State_AwaitRpcResult",
-
-        "context" : this,
-
-        "ontransition" : function(fsm, event)
-        {
-          var             data = event.getData();
-          var             request;
-
-          // Issue the remote procedure call to execute the query
-          request =
-            this.callRpc(fsm,
-                         "aiagallery.features",
-                         "deleteApp",
-                         [
-                           data.uid
-                         ]);
-
-          // When we get the result, we'll need to know what type of request
-          // we made.
-          request.setUserData("requestType", "deleteApp");
-          
-          // Save the App object to which this request applies
-          request.setUserData("App", data.app);
-
-
+          request.setUserData("requestType", "mobileRequest");
 
         }
       });
 
       state.addTransition(trans);
 
-
-      /*
-       * Transition: Idle to Idle
-       *
-       * Cause: A server push message arrived, indicating, generally, a change
-       * of status of an app.
-       *
-       * Action:
-       *  Update the GUI
-       */
-
-      trans = new qx.util.fsm.Transition(
-        "Transition_Idle_to_Idle_via_serverPush",
-      {
-        "nextState" : "State_Idle",
-
-        "context" : this,
-
-        "ontransition" : function(fsm, event)
-        {
-          var data;
-          // Retrieve the serverPush event
-          data = event.getData();
-          
-          // The serverPush event contains the data we care about
-          data = data.getData();
-          
-          //
-          // Simulate that this is an RPC response
-          //
-          var rpcRequest = new qx.core.Object();
-          rpcRequest.setUserData("requestType", "serverPush");
-          rpcRequest.setUserData("rpc_response", 
-                                 {
-                                   type : "success",
-                                   data : data
-                                 });
-
-          // Call the standard result handler
-          var gui = aiagallery.module.dgallery.studiomanagement.Gui.getInstance();
-          gui.handleResponse(module, rpcRequest);
-
-          // Dispose of the request
-          if (rpcRequest.request)
-          {
-            rpcRequest.request.dispose();
-            rpcRequest.request = null;
-          }
-        }
-      });
-        
-      state.addTransition(trans);
 
 
       /*

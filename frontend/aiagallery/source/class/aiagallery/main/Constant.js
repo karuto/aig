@@ -44,7 +44,8 @@ qx.Class.define("aiagallery.main.Constant",
         PublicUser : "PublicUser",
         Contest    : "Contest",
         Groups     : "Studios", 
-        GroupInfo  : "StudioInfo"
+        GroupInfo  : "StudioInfo",
+        StudioManagement : "StudioManagement"
       }
   }
 });
