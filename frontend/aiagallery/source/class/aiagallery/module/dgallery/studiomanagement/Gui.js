@@ -52,6 +52,7 @@ qx.Class.define("aiagallery.module.dgallery.studiomanagement.Gui",
 
       // Page top container
       topCanvas = new qx.ui.container.Composite(new qx.ui.layout.HBox(10));
+
       
       // Page top text label
       label = new qx.ui.basic.Label("");
@@ -82,18 +83,20 @@ qx.Class.define("aiagallery.module.dgallery.studiomanagement.Gui",
       canvas.add(o);
 
       // Create a container for the 2 main columns
-      columnCanvas = new qx.ui.container.Composite(new qx.ui.layout.VBox(15));
+      columnCanvas = new qx.ui.container.Composite(new qx.ui.layout.VBox(10));
       
       
       box = new qx.ui.layout.VBox();
       box.setSpacing(5);
       // Setup two horizontal panels for group list and detail
-      groupsColumn = new qx.ui.container.Composite(box).set({
+      var groupsColumn = new qx.ui.container.Composite(box).set({
         minWidth : 300
       });
-      detailColumn = new qx.ui.container.Composite(box).set({
+      var detailColumn = new qx.ui.container.Composite(box).set({
         minWidth : 600
       });
+
+/*
       
       // Text label
       label = new qx.ui.basic.Label("");
@@ -117,19 +120,9 @@ qx.Class.define("aiagallery.module.dgallery.studiomanagement.Gui",
         });
 
       detailColumn.add(label);    
-      
+*/      
       // Add everything up properly
       columnCanvas.add(groupsColumn);  
-      /*
-      // Android-green line divider in between 2 columns
-      o = new qx.ui.container.Composite();
-      o.set(
-        {
-          width    : 2,
-          backgroundColor : "#a5c43c"
-        });
-      columnCanvas.add(o);
-      */
       columnCanvas.add(detailColumn);
       canvas.add(columnCanvas);
       scrollContainer.add(canvas, { flex: 1 });     
