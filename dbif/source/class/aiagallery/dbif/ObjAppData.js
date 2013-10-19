@@ -9,8 +9,6 @@
 qx.Class.define("aiagallery.dbif.ObjAppData",
 {
   extend : aiagallery.dbif.Entity,
-  //beta002: memcache requires an instance of a class to implement Serializable.
-  //implement: Serializable,
 
   construct : function(uid)
   {
@@ -28,9 +26,10 @@ qx.Class.define("aiagallery.dbif.ObjAppData",
         "numComments"     : 0,
         "status"          : aiagallery.dbif.Constants.Status.Active,
         "creationTime"    : aiagallery.dbif.MDbifCommon.currentTimestamp(),
-	"lastViewedTime"  : null,  
-	"numRootComments" : 0,
-        "numCurFlags"     : 0
+	    "lastViewedTime"  : null,  
+	    "numRootComments" : 0,
+        "numCurFlags"     : 0,
+		"appInventorVersion": 0
       });
 
     // Call the superclass constructor
@@ -111,6 +110,10 @@ qx.Class.define("aiagallery.dbif.ObjAppData",
 
         /** Total number of flags on this application */
         "numCurFlags" : "Integer"
+
+        /** The version of App Inventor this app was created in */
+		/* 1 means AI Classic, 2 means AI2 */
+        "appInventorVersion" : "Integer"
       };
 
     var canonicalize =
