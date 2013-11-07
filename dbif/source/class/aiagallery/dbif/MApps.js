@@ -463,8 +463,6 @@ qx.Mixin.define("aiagallery.dbif.MApps",
 
           // Retrieve the blob
           fileData = liberated.dbif.Entity.getBlob(sourceBlobId);
-		  console.log("######### Retrieve the blob ##########");
-		  // console.log(fileData);
 		  
           // Parse out the mimeType. This always starts at index 5 and ends
           // with a semicolon
@@ -472,10 +470,11 @@ qx.Mixin.define("aiagallery.dbif.MApps",
 		  // For AI2 projects (*.aia): mimeType = "";
           mimeType = fileData.substring(5, fileData.indexOf(";"));
 
+		  // console.log("######### Retrieve the data type ##########");
+		  // console.log(mimeType);
+		  
           // Parse out the actual url
           fileData = fileData.substring(fileData.indexOf(",") + 1);
-		  console.log("######### Retrieve the actual URL ##########");
-		  console.log(mimeType);
 		  
       
           // Decode the data
@@ -486,6 +485,13 @@ qx.Mixin.define("aiagallery.dbif.MApps",
           if (bValidSource)
           {
             // Yes.  It's a keeper.
+			// Since we now know it's valid, let's label its AI version number
+			if (mimeType == "application/zip") {
+				appData.aiVersion = 1;
+			} else {
+				appData.aiVersion = 2;
+			}
+			
             // Disregard the MIME type of the uploaded ZIP file and use one that
             // is known to be appropriate.
             mimeType = "application/zip";
