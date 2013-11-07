@@ -223,41 +223,78 @@ qx.Class.define("appengine.Application",
         }
         break;
 
-/*
-      case "ls":               // File listing
-        var             entities;
+    case "ls":               // File listing
+      var             entities;
+	  
+	  console.log("Hi got in here");
 
-        // Identify ourself (find out who's logged in)
-        dbif.identify();
+      // Identify ourself (find out who's logged in)
+      dbif.identify();
 
-        // Only an administrator can do this
-        if (! aiagallery.dbif.MDbifCommon.__whoami ||
-            ! aiagallery.dbif.MDbifCommon.__whoami.isAdmin)
+      // Only an administrator can do this
+      if (! aiagallery.dbif.MDbifCommon.__whoami ||
+          ! aiagallery.dbif.MDbifCommon.__whoami.isAdmin)
+      {
+        java.lang.System.out.println("not administrator");    
+        return;
+      }
+
+      // Gain easy access to our output writer
+      out = response.getWriter();
+
+      var target = querySplit[1] || ".";
+      var dir = new java.io.File(target);
+      var children = dir.list();
+      if (children == null)
+      {
+        out.println("Not found");
+        return;
+      }
+
+      out.println("Children of " + target + ":");
+      for (var i = 0; i < children.length; i++)
+      {
+        out.println("  " + i + ": " + children[i]);
+      }
+
+      break;
+
+    case "verifyVersion":               // File listing
+      var entities;
+	  
+	  console.log("Hi got in here");
+
+      // Identify ourself (find out who's logged in)
+      dbif.identify();
+
+      // Only an administrator can do this
+      if (! aiagallery.dbif.MDbifCommon.__whoami ||
+          ! aiagallery.dbif.MDbifCommon.__whoami.isAdmin)
+      {
+        java.lang.System.out.println("not administrator");    
+        return;
+      }
+
+      // Gain easy access to our output writer
+      out = response.getWriter();
+
+	  out.println("Listing all apps in gallery:");
+	  out.println("<br>");
+	  
+      entities = liberated.dbif.Entity.query("aiagallery.dbif.ObjAppData");
+      entities.forEach(
+        function(entity)
         {
-          java.lang.System.out.println("not administrator");    
-          return;
-        }
+          var obj =
+            new aiagallery.dbif.ObjAppData(entity.uid);
+			out.println(entity.title + " has an App Inventor Version of ");
+			out.println(entity.aiVersion);
+			out.println("<br>");
+        });
 
-        // Gain easy access to our output writer
-        out = response.getWriter();
+      break;
 
-        var target = querySplit[1] || ".";
-        var dir = new java.io.File(target);
-        var children = dir.list();
-        if (children == null)
-        {
-          out.println("Not found");
-          return;
-        }
 
-        out.println("Children of " + target + ":");
-        for (var i = 0; i < children.length; i++)
-        {
-          out.println("  " + i + ": " + children[i]);
-        }
-
-        break;
-*/
 /* Invasive admin functions that are no longer needed 
       case "flushDB":               // flush the entire database
         var             entities;
