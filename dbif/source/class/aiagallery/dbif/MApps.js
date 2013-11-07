@@ -463,13 +463,20 @@ qx.Mixin.define("aiagallery.dbif.MApps",
 
           // Retrieve the blob
           fileData = liberated.dbif.Entity.getBlob(sourceBlobId);
-          
+		  console.log("######### Retrieve the blob ##########");
+		  // console.log(fileData);
+		  
           // Parse out the mimeType. This always starts at index 5 and ends
           // with a semicolon
+		  // For AI1 projects (*.zip): mimeType = "application/zip";
+		  // For AI2 projects (*.aia): mimeType = "";
           mimeType = fileData.substring(5, fileData.indexOf(";"));
 
           // Parse out the actual url
           fileData = fileData.substring(fileData.indexOf(",") + 1);
+		  console.log("######### Retrieve the actual URL ##########");
+		  console.log(mimeType);
+		  
       
           // Decode the data
           fileData = aiagallery.dbif.Decoder64.decode(fileData);
