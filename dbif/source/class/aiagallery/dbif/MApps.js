@@ -3170,13 +3170,9 @@ qx.Mixin.define("aiagallery.dbif.MApps",
           delete app.owner;
         });
 
-//Tagging stuff starts
-
       // Store the tags' list into a separate variable for sidebar
       ret.appTags = ret.app.tags;
 
-
-//Tagging stuff ends
 
 
 
