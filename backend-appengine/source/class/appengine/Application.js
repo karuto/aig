@@ -33,7 +33,7 @@ qx.Class.define("appengine.Application",
      */
     doPost : function(request, response)
     {
-      var             dbif=  aiagallery.dbif.DbifAppEngine.getInstance();
+      var             dbif = aiagallery.dbif.DbifAppEngine.getInstance();
       var             rpcResult;
       var             out;
       var             reader;

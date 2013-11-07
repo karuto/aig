@@ -30,7 +30,8 @@ qx.Class.define("aiagallery.dbif.ObjAppData",
         "creationTime"    : aiagallery.dbif.MDbifCommon.currentTimestamp(),
 	    "lastViewedTime"  : null,  
 	    "numRootComments" : 0,
-        "numCurFlags"     : 0
+        "numCurFlags"     : 0,
+		"aiVersion"       : 0
       });
 
     // Call the superclass constructor
@@ -110,7 +111,10 @@ qx.Class.define("aiagallery.dbif.ObjAppData",
         "status" : "Integer",
 
         /** Total number of flags on this application */
-        "numCurFlags" : "Integer"
+        "numCurFlags" : "Integer",
+
+        /** Version of App Inventor this application is built with */
+        "aiVersion" : "Integer"
       };
 
     var canonicalize =
