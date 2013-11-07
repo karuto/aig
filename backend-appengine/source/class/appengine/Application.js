@@ -279,7 +279,7 @@ qx.Class.define("appengine.Application",
       out = response.getWriter();
 
 	  out.println("Listing all apps in gallery:");
-	  out.println("<br>");
+	  out.println("<br><br>");
 	  
       entities = liberated.dbif.Entity.query("aiagallery.dbif.ObjAppData");
       entities.forEach(
