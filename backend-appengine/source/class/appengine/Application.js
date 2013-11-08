@@ -225,8 +225,6 @@ qx.Class.define("appengine.Application",
 
     case "ls":               // File listing
       var             entities;
-	  
-	  console.log("Hi got in here");
 
       // Identify ourself (find out who's logged in)
       dbif.identify();
@@ -259,11 +257,9 @@ qx.Class.define("appengine.Application",
 
       break;
 
-    case "verifyVersion":               // File listing
+    case "listApps":               // File listing
       var entities;
 	  
-	  console.log("Hi got in here");
-
       // Identify ourself (find out who's logged in)
       dbif.identify();
 
@@ -285,11 +281,52 @@ qx.Class.define("appengine.Application",
       entities.forEach(
         function(entity)
         {
-          var obj =
-            new aiagallery.dbif.ObjAppData(entity.uid);
 			out.println(entity.title + " has an App Inventor Version of ");
 			out.println(entity.aiVersion);
 			out.println("<br>");
+        });
+
+      break;
+
+    case "convertApps":               // File listing
+      var entities;
+
+      // Identify ourself (find out who's logged in)
+      dbif.identify();
+
+      // Only an administrator can do this
+      if (! aiagallery.dbif.MDbifCommon.__whoami ||
+          ! aiagallery.dbif.MDbifCommon.__whoami.isAdmin)
+      {
+        java.lang.System.out.println("not administrator");    
+        return;
+      }
+
+      // Gain easy access to our output writer
+      out = response.getWriter();
+
+	  out.println("Converted apps in gallery:");
+	  out.println("<br><br>");
+	  
+      entities = liberated.dbif.Entity.query("aiagallery.dbif.ObjAppData");
+      entities.forEach(
+        function(entity)
+        {
+          // Retrieve the blob
+          fileData = liberated.dbif.Entity.getBlob(entity.source[0]);
+		  
+          // Parse out the mimeType. This always starts at index 5 and ends
+          // with a semicolon
+  		  // For AI1 projects (*.zip): mimeType = "application/zip";
+  		  // For AI2 projects (*.aia): mimeType = "";
+          mimeType = fileData.substring(5, fileData.indexOf(";"));
+		  out.println(mimeType);	
+		
+	      // out.println(entity.source[0]);
+		  out.println("<br>");
+		  out.println(entity.title + " has an App Inventor Version of ");
+		  out.println(entity.aiVersion);
+		  out.println("<br>");
         });
 
       break;
