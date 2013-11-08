@@ -274,7 +274,7 @@ qx.Class.define("appengine.Application",
       // Gain easy access to our output writer
       out = response.getWriter();
 
-	  out.println("Converted apps in gallery:");
+	  out.println("Listing all apps in gallery:");
 	  out.println("<br><br>");
 	  
       entities = liberated.dbif.Entity.query("aiagallery.dbif.ObjAppData");
@@ -300,8 +300,7 @@ qx.Class.define("appengine.Application",
 		  } else if (xs == ".aia") {
 			  out.println(" [aia]");
 		  }
-		
-	      // out.println(entity.source[0]);
+		  
 		  out.println("<br>");
 		  out.println(entity.title + " has an App Inventor Version of ");
 		  out.println(entity.aiVersion);
@@ -340,14 +339,15 @@ qx.Class.define("appengine.Application",
 		  var xs = x.substring(x.length-4, x.length);
 		  out.println("Source filename = " + x);
 		  if (xs == ".zip") {
-			  out.println(" [zip]");
+			  entity.aiVersion = 1;
 		  } else if (xs == ".aia") {
-			  out.println(" [aia]");
+			  entity.aiVersion = 2;
+		  } else {
+			  entity.aiVersion = 0;
 		  }
 		
-	      // out.println(entity.source[0]);
 		  out.println("<br>");
-		  out.println(entity.title + " has an App Inventor Version of ");
+		  out.println(entity.title + " now has an App Inventor Version of ");
 		  out.println(entity.aiVersion);
 		  out.println("<br>");
         });
