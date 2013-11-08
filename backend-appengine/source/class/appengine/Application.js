@@ -257,38 +257,7 @@ qx.Class.define("appengine.Application",
 
       break;
 
-    case "listApps":               // File listing
-      var entities;
-	  
-      // Identify ourself (find out who's logged in)
-      dbif.identify();
-
-      // Only an administrator can do this
-      if (! aiagallery.dbif.MDbifCommon.__whoami ||
-          ! aiagallery.dbif.MDbifCommon.__whoami.isAdmin)
-      {
-        java.lang.System.out.println("not administrator");    
-        return;
-      }
-
-      // Gain easy access to our output writer
-      out = response.getWriter();
-
-	  out.println("Listing all apps in gallery:");
-	  out.println("<br><br>");
-	  
-      entities = liberated.dbif.Entity.query("aiagallery.dbif.ObjAppData");
-      entities.forEach(
-        function(entity)
-        {
-			out.println(entity.title + " has an App Inventor Version of ");
-			out.println(entity.aiVersion);
-			out.println("<br>");
-        });
-
-      break;
-
-    case "convertApps":               // File listing
+    case "listApps":
       var entities;
 
       // Identify ourself (find out who's logged in)
@@ -312,6 +281,8 @@ qx.Class.define("appengine.Application",
       entities.forEach(
         function(entity)
         {
+		  /*
+		  // Deprecated method, use more convenient method below
           // Retrieve the blob
           fileData = liberated.dbif.Entity.getBlob(entity.source[0]);
 		  
@@ -320,7 +291,59 @@ qx.Class.define("appengine.Application",
   		  // For AI1 projects (*.zip): mimeType = "application/zip";
   		  // For AI2 projects (*.aia): mimeType = "";
           mimeType = fileData.substring(5, fileData.indexOf(";"));
-		  out.println(mimeType);	
+			*/
+		  var x = entity.sourceFileName;
+		  var xs = x.substring(x.length-4, x.length);
+		  out.println("Source filename = " + x);
+		  if (xs == ".zip") {
+			  out.println(" [zip]");
+		  } else if (xs == ".aia") {
+			  out.println(" [aia]");
+		  }
+		
+	      // out.println(entity.source[0]);
+		  out.println("<br>");
+		  out.println(entity.title + " has an App Inventor Version of ");
+		  out.println(entity.aiVersion);
+		  out.println("<br>");
+        });
+
+      break;
+
+    case "convertApps":
+      var entities;
+
+      // Identify ourself (find out who's logged in)
+      dbif.identify();
+
+      // Only an administrator can do this
+      if (! aiagallery.dbif.MDbifCommon.__whoami ||
+          ! aiagallery.dbif.MDbifCommon.__whoami.isAdmin)
+      {
+        java.lang.System.out.println("not administrator");    
+        return;
+      }
+
+      // Gain easy access to our output writer
+      out = response.getWriter();
+
+	  out.println("Converted apps in gallery:");
+	  out.println("<br><br>");
+	  
+      entities = liberated.dbif.Entity.query("aiagallery.dbif.ObjAppData");
+      entities.forEach(
+        function(entity)
+        {
+		  
+		  // Detect source type and convert aiVersion
+		  var x = entity.sourceFileName;
+		  var xs = x.substring(x.length-4, x.length);
+		  out.println("Source filename = " + x);
+		  if (xs == ".zip") {
+			  out.println(" [zip]");
+		  } else if (xs == ".aia") {
+			  out.println(" [aia]");
+		  }
 		
 	      // out.println(entity.source[0]);
 		  out.println("<br>");
