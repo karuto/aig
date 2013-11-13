@@ -2421,6 +2421,7 @@ qx.Mixin.define("aiagallery.dbif.MApps",
       var             searchResponseFeatured;
       var             searchResponseLiked;
       var             searchResponseNewest;
+      var             searchResponseAI2;
       var             requestedData; 
 
       // Before we search for apps to display check and see if
@@ -2660,6 +2661,71 @@ qx.Mixin.define("aiagallery.dbif.MApps",
           }
         });
 
+
+
+        //Create and execute query for AI2 apps.
+        criteria = 
+          {
+            type  : "element",
+            field : "status",
+            value : aiagallery.dbif.Constants.Status.Active
+          };
+
+        //Create map to specify specific return data from the upload time query
+        requestedData = 
+          [
+            {
+              type : "limit",
+              value : aiagallery.dbif.Constants.RIBBON_NUM_AI2
+            },
+            {
+              type  : "value",
+              field : "aiVersion",
+              order : "2" }
+          ]; 
+
+        searchResponseAI2 = 
+          liberated.dbif.Entity.query("aiagallery.dbif.ObjAppData",
+                                      criteria,
+                                      requestedData);
+
+        // Manipulate each App individually, before returning
+        searchResponseAI2.forEach(
+          function(app)
+          {
+            if (requestedFields.displayName)
+            {
+              // Add with the owner's display name
+              owners = liberated.dbif.Entity.query("aiagallery.dbif.ObjVisitors",
+                                                   app["owner"]);
+
+             // Add his display name
+              if (owners.length == 0)
+              { 
+                app["displayName"] = "DELETED";
+              } else {      
+                app["displayName"] = owners[0].displayName || "<>";
+              }
+            }
+
+            // Remove the owner field
+            delete app.owner;
+
+            // If there were requested fields specified...
+            if (requestedFields)
+            {
+              // If we added the owner, ...
+              if (bAddedOwner)
+              {
+                // ... then remove it now
+                delete requestedFields.owner;
+              }
+
+              // Send to the requestedFields function for removal and remapping
+              aiagallery.dbif.MApps._requestedFields(app, requestedFields);
+            }
+          });
+
         
       //Construct map of data
       // Grab the motd and put it into the map at the end
@@ -2668,6 +2734,7 @@ qx.Mixin.define("aiagallery.dbif.MApps",
           "Featured"     :    searchResponseFeatured,   
           "MostLiked"    :    searchResponseLiked,
           "Newest"       :    searchResponseNewest,
+          "AI2"          :    searchResponseAI2,
           "Motd"         :    this.getMotd()
         };
 
