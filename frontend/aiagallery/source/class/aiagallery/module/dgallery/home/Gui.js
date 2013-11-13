@@ -496,6 +496,44 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
       
       // add Liked Apps section to the page
       canvas.add(likedApps);
+
+      // AI2 Apps section
+      var AI2AppsLayout = new qx.ui.layout.VBox();
+      AI2AppsLayout.set(
+        {
+          alignX : "center"
+        });
+      var AI2Apps = new qx.ui.container.Composite(AI2AppsLayout);
+      AI2Apps.set(
+        {
+          decorator : "home-page-ribbon",
+          padding   : 20
+        });
+
+      // AI2 Apps heading
+      var AI2AppsHeader = new qx.ui.basic.Label(this.tr("Newest AI2 Apps"));
+      AI2AppsHeader.set(
+        {
+          font  : font,
+          decorator : "home-page-header"
+        });
+      AI2Apps.add(AI2AppsHeader);
+      
+      // slide bar of liked Apps
+      scroller = new qx.ui.container.Scroll();
+      AI2Apps.add(scroller);
+      
+      // Scroll container can hold only a single child. Create that child.
+      this.AI2AppsContainer =
+        new qx.ui.container.Composite(new qx.ui.layout.HBox());
+      this.AI2AppsContainer.set(
+          {
+            height : 210
+          });
+      scroller.add(this.AI2AppsContainer);
+      
+      // add Liked Apps section to the page
+      canvas.add(AI2Apps);
     },
 
 
@@ -531,6 +569,7 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
         var featuredAppsList = response.data.result.Featured;
         var newestAppsList = response.data.result.Newest;
         var likedAppsList = response.data.result.MostLiked;
+        var AI2AppsList = response.data.result.AI2;
 
 /*        
         // Grab the MOTD as well
@@ -544,6 +583,7 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
         this.featuredAppsContainer.removeAll();
         this.newestAppsContainer.removeAll();
         this.likedAppsContainer.removeAll();
+        this.AI2AppsContainer.removeAll();
 
         // Fill the featured apps ribbon with data
         for (i = 0; i < featuredAppsList.length; i++)
@@ -635,6 +675,38 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
           
           // Fire an event specific to this application, sans a friendly name.
           appThumbLiked.addListener(
+            "click", 
+            function(e)
+            {
+              fsm.fireImmediateEvent(
+                "homeRibbonAppClick", 
+                this, 
+                e.getCurrentTarget().getUserData("App Data"));
+            });
+        }
+
+        // Fill the AI2 apps ribbon with data
+        for (i = 0; i < AI2AppsList.length; i++)
+        {
+          // If this isn't the first one, ...
+          if (i > 0)
+          {
+            // ... then add a spacer between the previous one and this one
+            this.AI2AppsContainer.add(new qx.ui.core.Spacer(10));
+          }
+
+          // Add the thumbnail for this app
+          var appAI2 = AI2AppsList[i];
+          var appThumbAI2 = 
+            new aiagallery.widget.SearchResult("homeRibbon", appAI2);
+          this.AI2AppsContainer.add(appThumAI2);
+
+          // Associate the app data with the UI widget so it can be passed
+          // in the click event callback
+          appThumbAI2.setUserData("App Data", appAI2);
+          
+          // Fire an event specific to this application, sans a friendly name.
+          appThumbAI2.addListener(
             "click", 
             function(e)
             {
