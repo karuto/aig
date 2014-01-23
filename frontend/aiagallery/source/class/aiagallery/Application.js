@@ -189,11 +189,11 @@ new aiagallery.main.Module(
   aiagallery.module.dgallery.home.Home);
 
 new aiagallery.main.Module(
-  "News",
+  "About",
   "aiagallery/module/go-home.png",
-  "News",
-  aiagallery.main.Constant.PageName.News,      
-  aiagallery.module.dgallery.news.News);
+  "About",
+  aiagallery.main.Constant.PageName.About,      
+  aiagallery.module.dgallery.news.About);
 
 new aiagallery.main.Module(
   "Find Apps",
