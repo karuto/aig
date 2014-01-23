@@ -43,8 +43,8 @@ qx.Class.define("aiagallery.main.Constant",
         User       : "Profile",
         PublicUser : "PublicUser",
         Contest    : "Contest",
-		News       : "News",
-		Help       : "Help"
+	About       : "About",
+	Help       : "Help"
       }
   }
 });

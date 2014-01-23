@@ -519,7 +519,7 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
         });
       AI2Apps.add(AI2AppsHeader);
       
-      // slide bar of liked Apps
+      // slide bar of AI2 Apps
       scroller = new qx.ui.container.Scroll();
       AI2Apps.add(scroller);
       
@@ -570,7 +570,8 @@ qx.Class.define("aiagallery.module.dgallery.home.Gui",
         var newestAppsList = response.data.result.Newest;
         var likedAppsList = response.data.result.MostLiked;
         var AI2AppsList = response.data.result.AI2;
-
+		console.log("GOT IN");
+console.log(response.data.result.AI2);
 /*        
         // Grab the MOTD as well
         var motd = response.data.result.Motd; 

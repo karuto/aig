@@ -2679,20 +2679,25 @@ qx.Mixin.define("aiagallery.dbif.MApps",
               value : aiagallery.dbif.Constants.RIBBON_NUM_AI2
             },
             {
-              type  : "value",
-              field : "aiVersion",
-              order : "2" }
+            type  : "sort",
+            field : "uploadTime",
+            order : "desc" }              // 
+              // type  : "option",
+              // name  : "aiVersion",
+              // value : "2" }
           ]; 
 
         searchResponseAI2 = 
           liberated.dbif.Entity.query("aiagallery.dbif.ObjAppData",
                                       criteria,
                                       requestedData);
+			java.lang.System.out.println("************ APP DATA");
 
         // Manipulate each App individually, before returning
         searchResponseAI2.forEach(
           function(app)
           {
+			java.lang.System.out.println(app);
             if (requestedFields.displayName)
             {
               // Add with the owner's display name

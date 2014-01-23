@@ -25,7 +25,7 @@ qx.Class.define("aiagallery.dbif.Constants",
     RIBBON_NUM_MOST_LIKED : 20,
     
     /** Number of AI2 apps to return by the getHomeRibbonData() RPC */
-    RIBBON_NUM_AI2        : 20,
+    RIBBON_NUM_AI2        : 5,
     
     /** Name of the permission group used for the white list */
     WHITELIST             : "Whitelist",
